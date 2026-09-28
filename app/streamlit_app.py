@@ -428,6 +428,39 @@ with tab_x:
         t = tl[tl.firm_id == pick].copy()
         t["detail"] = t.detail + t.is_projected.map({True: " (projected, after as-of date)", False: ""})
         st.dataframe(t[["dt", "kind", "detail"]], width="stretch", hide_index=True)
+        chart_head(st, f"Opportunity stages over time: {info.firm_name}",
+                   "Each line is one of the firm's opportunities, stepping up as it moves through the pipeline. Dashed vertical lines mark "
+                   "events the firm attended; dotted segments are stages dated after the as-of date (projected).")
+        fo = opps[opps.firm_id == pick].sort_values("created_date")
+        if fo.empty:
+            st.caption("This firm has no opportunities.")
+        else:
+            stage_names = ["Declined", "Initial Conversation", "Follow-up / VDR", "Due Diligence", "IC / Documentation", "Committed"]
+            sh = D["mart_stage_history"]
+            palette = [BLUE, ORANGE, AQUA, "#7b5ea7", "#c2185b", "#5d7a2a"]
+            fig = go.Figure()
+            for i, o in enumerate(fo.itertuples()):
+                h = sh[sh.opportunity_id == o.opportunity_id].sort_values("stage_date")
+                color = palette[i % len(palette)]
+                actual, proj = h[~h.is_future], h[h.is_future]
+                name = f"{o.opportunity_id} · {o.fund_name} · {fm(o.amount_usd)}"
+                fig.add_scatter(x=actual.stage_date, y=actual.stage_rank, mode="lines+markers", name=name, legendgroup=name, line=dict(color=color, width=2.5, shape="hv"),
+                                marker=dict(size=[12 if r == 0 else 8 for r in actual.stage_rank], symbol=["x" if r == 0 else "circle" for r in actual.stage_rank]),
+                                customdata=[stage_names[r] for r in actual.stage_rank], hovertemplate="%{customdata} · %{x|%m-%d-%Y}<extra>" + o.opportunity_id + "</extra>")
+                if len(proj):
+                    bridge = pd.concat([actual.tail(1), proj])
+                    fig.add_scatter(x=bridge.stage_date, y=bridge.stage_rank, mode="lines+markers", name=name + " (projected)", legendgroup=name, showlegend=False,
+                                    line=dict(color=color, width=2, dash="dot", shape="hv"), marker=dict(size=7, color=color),
+                                    customdata=[stage_names[r] for r in bridge.stage_rank], hovertemplate="%{customdata} · %{x|%m-%d-%Y} (projected)<extra>" + o.opportunity_id + "</extra>")
+            for k, r in enumerate(fe[fe.firm_id == pick].itertuples()):
+                fig.add_vline(x=pd.Timestamp(r.event_date).value / 1e6, line=dict(color="#8a949c", dash="dash", width=1))
+                fig.add_annotation(x=r.event_date, y=1.02 + 0.07 * (k % 2), yref="paper", yanchor="bottom", showarrow=False,
+                                   text=EV_SHORT[r.event_id] + ("" if r.is_confirmed else " (tent.)"), font=dict(size=11, color="#5b6570"))
+            fig.update_yaxes(tickvals=list(range(6)), ticktext=stage_names, range=[-0.4, 5.4], gridcolor="#e6eaed", zeroline=False)
+            fig.update_xaxes(showgrid=False, tickformat="%b")
+            fig.update_layout(height=380, margin=dict(l=10, r=10, t=50, b=10), plot_bgcolor="rgba(0,0,0,0)", hovermode="closest",
+                              legend=dict(orientation="h", y=-0.15, x=0), font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"))
+            st.plotly_chart(fig, width="stretch")
 
 with tab_p:
     a, b = st.columns(2)
