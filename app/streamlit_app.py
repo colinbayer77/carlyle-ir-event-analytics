@@ -305,6 +305,41 @@ with tab_p:
     chart_head(b, "Funnel: count reaching each stage")
     b.plotly_chart(bar_fig(stages, [("Event-associated", [(ea.max_stage_rank >= i + 1).sum() for i in range(5)], BLUE),
                                     ("All other", [(other.max_stage_rank >= i + 1).sum() for i in range(5)], NEUTRAL)], horizontal=True), width="stretch")
+    chart_head(st, "Opportunity flow: source → furthest stage → status",
+               "All 107 opportunities, default rule (90 days, confirmed attendance). Band width is the number of opportunities; "
+               "hover for $ pipeline. Committed opportunities flow straight to Committed.")
+    def src_name(r):
+        if isinstance(r.assoc_event_id_90, str):
+            return EV_SHORT[r.assoc_event_id_90]
+        return "Attendee, outside 90d" if r.source_bucket == "Attendee, outside window" else "No confirmed attendance"
+    stg_name = lambda k: "Intro / VDR" if k <= 2 else "Due diligence" if k == 3 else "IC / documentation"
+    node_color = {"NY Summit": EV_COLOR["E001"], "London Dinner": EV_COLOR["E002"], "Berlin Forum": EV_COLOR["E003"],
+                  "Attendee, outside 90d": "#8a98a3", "No confirmed attendance": NEUTRAL,
+                  "Intro / VDR": "#9fb3c2", "Due diligence": "#6f8ea6", "IC / documentation": "#3f6784",
+                  "Committed": "#008300", "Open": "#b8c3cb", "Declined": "#c23b3a"}
+    names = list(node_color)
+    flows = {}
+    for r in opps.itertuples():
+        src = src_name(r)
+        hops = [(src, "Committed")] if r.outcome == "Committed" else [(src, stg_name(r.max_stage_rank)), (stg_name(r.max_stage_rank), r.outcome)]
+        for h in hops:
+            f = flows.setdefault(h, [0, 0.0]); f[0] += 1; f[1] += r.amount_usd
+    def rgba(hex_, a=0.45):
+        h = hex_.lstrip("#"); return f"rgba({int(h[0:2], 16)},{int(h[2:4], 16)},{int(h[4:6], 16)},{a})"
+    totals = {n: sum(v[0] for (x, y), v in flows.items() if y == n) or sum(v[0] for (x, y), v in flows.items() if x == n) for n in names}
+    col = {n: 0.001 for n in names[:5]} | {n: 0.5 for n in names[5:8]} | {n: 0.999 for n in names[8:]}
+    ypos = dict(zip(names[:5], [0.08, 0.26, 0.4, 0.6, 0.88])) | dict(zip(names[5:8], [0.15, 0.48, 0.8])) | dict(zip(names[8:], [0.08, 0.5, 0.97]))
+    fig = go.Figure(go.Sankey(
+        arrangement="fixed",
+        node=dict(label=[f"{n} ({totals[n]})" for n in names], color=[node_color[n] for n in names], pad=18, thickness=14, line=dict(width=0),
+                  x=[col[n] for n in names], y=[ypos[n] for n in names],
+                  hovertemplate="%{label}: %{value} opportunities<extra></extra>"),
+        link=dict(source=[names.index(a) for a, b in flows], target=[names.index(b) for a, b in flows],
+                  value=[v[0] for v in flows.values()], color=[rgba(node_color[a]) for a, b in flows],
+                  customdata=[fm(v[1]) for v in flows.values()],
+                  hovertemplate="%{source.label} → %{target.label}: %{value} opps, %{customdata}<extra></extra>")))
+    fig.update_layout(height=460, margin=dict(l=10, r=10, t=10, b=10), font=dict(family="Inter, system-ui, sans-serif", size=12, color="#1b1f24"))
+    st.plotly_chart(fig, width="stretch")
     chart_head(st, "How fast opportunities followed each event",
                "Cumulative associated opportunities by days after the event (180-day window, confirmed, most recent event gets credit). "
                "Lines stop at each event's age on the as-of date; no opportunities were created after 2026-08-12, so lines flatten after that.")

@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-sankey@0.12.1/dist/chartjs-chart-sankey.min.js"></script>
 <script src="data.js"></script>
 <style>
 :root {
@@ -218,6 +219,11 @@ tr.sel { background: var(--surface-2); }
         <p class="sub">Event-associated vs all other opportunities (count reaching each stage).</p>
         <div class="chart"><canvas id="cFunnel"></canvas></div>
       </div>
+    </div>
+    <div class="card">
+      <h2>Opportunity flow: source → furthest stage → status</h2>
+      <p class="sub">All 107 opportunities, default rule (90 days, confirmed attendance). Band width is the number of opportunities; hover for $ pipeline. Committed opportunities flow straight to Committed.</p>
+      <div class="chart" style="height:420px"><canvas id="cSankey"></canvas></div>
     </div>
     <div class="card">
       <h2>How fast opportunities followed each event</h2>
@@ -597,6 +603,30 @@ function renderOpps() {
       bar('Pipeline $M', buckets.map(b => agg(b).reduce((a, o) => a + o.amount_usd, 0) / 1e6), css('--s1'), {n: buckets.map(b => agg(b).length)}),
       bar('Committed $M', buckets.map(b => agg(b).filter(o => o.outcome === 'Committed').reduce((a, o) => a + o.amount_usd, 0) / 1e6), css('--s3'), {n: buckets.map(b => agg(b).filter(o => o.outcome === 'Committed').length)})]},
     options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label.replace(' $M', '')}: $${Math.round(c.raw)}M (${c.dataset.n[c.dataIndex]} opps)`}}}, scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, ticks: {callback: v => '$' + v + 'M'}}}}});
+  const srcName = o => o.assoc_event_id_90 ? evShort(o.assoc_event_id_90) : o.source_bucket === 'Attendee, outside window' ? 'Attendee, outside 90d' : 'No confirmed attendance';
+  const stgName = r => r <= 2 ? 'Intro / VDR' : r === 3 ? 'Due diligence' : 'IC / documentation';
+  const flows = {};
+  const addFlow = (a, b, o) => { const k = a + '|' + b; flows[k] = flows[k] || {from: a, to: b, flow: 0, usd: 0}; flows[k].flow++; flows[k].usd += o.amount_usd; };
+  O.forEach(o => {
+    const src = srcName(o);
+    if (o.outcome === 'Committed') { addFlow(src, 'Committed', o); return; }
+    const st = stgName(o.max_stage_rank); addFlow(src, st, o); addFlow(st, o.outcome, o);
+  });
+  const nodeColor = {'NY Summit': css('--s1'), 'London Dinner': css('--s2'), 'Berlin Forum': css('--s3'),
+    'Attendee, outside 90d': '#8a98a3', 'No confirmed attendance': css('--neutral'),
+    'Intro / VDR': '#9fb3c2', 'Due diligence': '#6f8ea6', 'IC / documentation': '#3f6784',
+    'Committed': css('--good'), 'Declined': css('--bad'), 'Open': '#b8c3cb'};
+  const nodeTotals = {};
+  Object.values(flows).forEach(f => { nodeTotals[f.to] = (nodeTotals[f.to] || 0) + f.flow; if (!['Intro / VDR', 'Due diligence', 'IC / documentation'].includes(f.from)) nodeTotals[f.from] = (nodeTotals[f.from] || 0) + f.flow; });
+  chart('cSankey', {type: 'sankey', data: {datasets: [{
+      data: Object.values(flows), colorFrom: c => nodeColor[c.dataset.data[c.dataIndex].from], colorTo: c => nodeColor[c.dataset.data[c.dataIndex].to],
+      colorMode: 'gradient', alpha: 0.55, borderWidth: 0, nodeWidth: 12, size: 'max', color: css('--text'), font: {size: 12, weight: 500},
+      labels: Object.fromEntries(Object.keys(nodeColor).map(n => [n, `${n} (${nodeTotals[n] || 0})`])),
+      priority: {'NY Summit': 1, 'London Dinner': 2, 'Berlin Forum': 3, 'Attendee, outside 90d': 4, 'No confirmed attendance': 5,
+                 'Intro / VDR': 1, 'Due diligence': 2, 'IC / documentation': 3, 'Committed': 1, 'Open': 2, 'Declined': 3},
+      column: {'Committed': 2, 'Open': 2, 'Declined': 2}}]},
+    options: {interaction: {mode: 'nearest', intersect: true}, scales: {}, plugins: {legend: {display: false},
+      tooltip: {callbacks: {label: c => { const f = c.raw; return `${f.from} → ${f.to}: ${f.flow} opps, ${fmtM(f.usd)}`; }}}}}});
   const days = Array.from({length: 19}, (_, i) => i * 10);
   const asOf = new Date(D.meta.as_of_date + 'T00:00');
   chart('cCurve', {type: 'line', data: {labels: days.map(d => d + 'd'), datasets: EVENTS.map(e => {
