@@ -429,9 +429,7 @@ with tab_x:
         t["detail"] = t.detail + t.is_projected.map({True: " (projected, after as-of date)", False: ""})
         st.dataframe(t[["dt", "kind", "detail"]], width="stretch", hide_index=True)
         hc = st.columns([3, 1])
-        chart_head(hc[0], f"Pipeline dollars by stage over time: {info.firm_name}",
-                   "Dollars of the firm's opportunities sitting in each stage on each date, stacked, so the top edge is the firm's total "
-                   "pipeline. Dashed vertical lines mark events the firm attended; the shaded band after the as-of date shows projected stages.")
+        chart_head(hc[0], f"Pipeline dollars by stage, by month: {info.firm_name}", "Month-end snapshot of the selected firm's pipeline dollars, stacked by the stage each opportunity was in. September is as of 09-23; later months (marked *) use projected stages. Event months are marked above the bars.")
         stage_names = {1: "Initial Conversation", 2: "Follow-up / VDR", 3: "Due Diligence", 4: "IC / Documentation", 5: "Committed", 0: "Declined"}
         pick_st = hc[1].multiselect("Stage", list(stage_names), format_func=stage_names.get, placeholder="All", key="fx_stage")
         fo = opps[opps.firm_id == pick]
@@ -439,40 +437,37 @@ with tab_x:
             st.caption("This firm has no opportunities.")
         else:
             sh = D["mart_stage_history"]
-            sh = sh[sh.opportunity_id.isin(fo.opportunity_id)].assign(stage_date=lambda x: pd.to_datetime(x.stage_date)).sort_values("stage_date")
-            times = sorted(sh.stage_date.unique())
-            as_of = pd.Timestamp("2026-09-23")
-            ev_rows = fe[fe.firm_id == pick]
-            hi = max([pd.Timestamp(x) for x in times] + [pd.Timestamp(d) for d in ev_rows.event_date] + [as_of]) + pd.Timedelta(days=10)
+            sh = sh[sh.opportunity_id.isin(fo.opportunity_id)].sort_values("stage_date")
+            as_of = "2026-09-23"
+            first, last = sh.stage_date.min()[:7], max(sh.stage_date.max(), as_of)[:7]
+            months = pd.period_range(first, last, freq="M")
             amt = fo.set_index("opportunity_id").amount_usd
-
-            def stage_at(oid, tt):
-                h = sh[(sh.opportunity_id == oid) & (sh.stage_date <= tt)]
-                return None if h.empty else int(h.iloc[-1].stage_rank)
-
+            rows = []
+            for m in months:
+                snap = as_of if str(m) == as_of[:7] else m.end_time.strftime("%Y-%m-%d")
+                cur = sh[sh.stage_date <= snap].groupby("opportunity_id").tail(1)
+                label = m.strftime("%b") + ("*" if snap >= as_of else "")
+                for r in cur.itertuples():
+                    rows.append((label, snap, int(r.stage_rank), r.opportunity_id, float(amt[r.opportunity_id]), snap > as_of))
+            mdf = pd.DataFrame(rows, columns=["month", "snap", "rank", "opp", "usd", "projected"])
+            labels_m = [m.strftime("%b") + ("*" if (as_of if str(m) == as_of[:7] else m.end_time.strftime("%Y-%m-%d")) >= as_of else "") for m in months]
             colors = {1: "#9fb3c2", 2: "#6f8ea6", 3: "#3f6784", 4: "#1f3f5a", 5: "#008300", 0: "#c23b3a"}
             fig = go.Figure()
             for r in [5, 4, 3, 2, 1, 0]:  # bottom to top: Committed at the base, Declined on top
                 if pick_st and r not in pick_st:
                     continue
-                ys, ids = [], []
-                for tt in times:
-                    inn = [o for o in fo.opportunity_id if stage_at(o, tt) == r]
-                    ys.append(float(amt[inn].sum())); ids.append(", ".join(inn))
-                if not any(ys):
+                g = mdf[mdf["rank"] == r].groupby("month").agg(usd=("usd", "sum"), ids=("opp", ", ".join)).reindex(labels_m)
+                if g.usd.fillna(0).sum() == 0:
                     continue
-                fig.add_scatter(x=list(times) + [hi], y=ys + [ys[-1]], mode="lines", name=stage_names[r], stackgroup="stages",
-                                line=dict(color=colors[r], width=1, shape="hv"), fillcolor=colors[r],
-                                customdata=ids + [ids[-1]], hovertemplate=stage_names[r] + ": %{y:$,.0f} · %{x|%m-%d-%Y}<br>%{customdata}<extra></extra>")
-            fig.add_vrect(x0=as_of, x1=hi, fillcolor="#0c374a", opacity=0.06, line_width=0,
-                          annotation_text="Projected", annotation_position="bottom right", annotation_font=dict(size=11, color="#5b6570"))
-            for k, r in enumerate(ev_rows.itertuples()):
-                fig.add_vline(x=pd.Timestamp(r.event_date).value / 1e6, line=dict(color="#8a949c", dash="dash", width=1))
-                fig.add_annotation(x=r.event_date, y=1.02 + 0.07 * (k % 2), yref="paper", yanchor="bottom", showarrow=False,
-                                   text=EV_SHORT[r.event_id] + ("" if r.is_confirmed else " (tent.)"), font=dict(size=11, color="#5b6570"))
+                fig.add_bar(x=labels_m, y=g.usd.fillna(0), name=stage_names[r], marker=dict(color=colors[r]),
+                            customdata=g.ids.fillna(""), hovertemplate=stage_names[r] + ": %{y:$,.0f}<br>%{customdata}<extra>%{x}</extra>")
+            for k, r in enumerate(fe[fe.firm_id == pick].itertuples()):
+                lbl = next((l for l, m in zip(labels_m, months) if str(m) == r.event_date[:7]), None)
+                if lbl:
+                    fig.add_annotation(x=lbl, y=1.02 + 0.07 * (k % 2), yref="paper", yanchor="bottom", showarrow=False,
+                                       text="▼ " + EV_SHORT[r.event_id] + ("" if r.is_confirmed else " (tent.)"), font=dict(size=11, color="#5b6570"))
             fig.update_yaxes(tickprefix="$", gridcolor="#e6eaed", zeroline=False, rangemode="tozero")
-            fig.update_xaxes(showgrid=False, tickformat="%b")
-            fig.update_layout(height=380, margin=dict(l=10, r=10, t=50, b=10), plot_bgcolor="rgba(0,0,0,0)", hovermode="x unified",
+            fig.update_layout(barmode="stack", height=380, margin=dict(l=10, r=10, t=50, b=10), plot_bgcolor="rgba(0,0,0,0)", hovermode="x unified",
                               legend=dict(orientation="h", y=-0.15, x=0, traceorder="reversed"), font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"))
             st.plotly_chart(fig, width="stretch")
 

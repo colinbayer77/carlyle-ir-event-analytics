@@ -257,7 +257,7 @@ tr.sel { background: var(--surface-2); }
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
         <div style="flex:1;min-width:260px">
           <h2 id="stageTitle">Pipeline dollars by stage over time</h2>
-          <p class="sub">Dollars of the selected firm's opportunities sitting in each stage on each date, stacked, so the top edge is the firm's total pipeline. Dashed vertical lines mark events the firm attended; the shaded band after the as-of date shows projected stages. Hover for details.</p>
+          <p class="sub">Month-end snapshot of the selected firm's pipeline dollars, stacked by the stage each opportunity was in. September is as of 09-23; later months (marked *) use projected stages. Event months are marked above the bars.</p>
         </div>
         <label class="sel ctl-inline" style="width:220px"><span class="lbl">Stage</span><details class="ms" id="stageFilter"><summary>All</summary><div class="ms-panel"><div class="ms-opts"><label><input type="checkbox" value="1"> Initial Conversation</label><label><input type="checkbox" value="2"> Follow-up / VDR</label><label><input type="checkbox" value="3"> Due Diligence</label><label><input type="checkbox" value="4"> IC / Documentation</label><label><input type="checkbox" value="5"> Committed</label><label><input type="checkbox" value="0"> Declined</label></div></div></details></label>
       </div>
@@ -756,60 +756,49 @@ function renderTimeline() {
 const STAGE_NAMES = ['Declined', 'Initial Conversation', 'Follow-up / VDR', 'Due Diligence', 'IC / Documentation', 'Committed'];
 const STAGE_ORDER = [1, 2, 3, 4, 5, 0];
 const STACK_ORDER = [5, 4, 3, 2, 1, 0];  // bottom to top: Committed at the base, Declined on top
-const projectedBand = {id: 'projectedBand', beforeDatasetsDraw(ch, a, o) {
-  if (!o || o.from == null) return;
-  const {ctx, chartArea: {top, bottom, right}, scales: {x}} = ch, px = Math.max(x.getPixelForValue(o.from), x.left);
-  if (px >= right) return;
-  ctx.save(); ctx.fillStyle = 'rgba(12,55,74,0.06)'; ctx.fillRect(px, top, right - px, bottom - top);
-  ctx.fillStyle = css('--text-2'); ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'right'; ctx.fillText('Projected', right - 4, bottom - 6); ctx.restore(); }};
 const STAGE_COLORS = () => ({1: '#9fb3c2', 2: '#6f8ea6', 3: '#3f6784', 4: '#1f3f5a', 5: css('--good'), 0: css('--bad')});
-const eventLines = {id: 'eventLines', afterDatasetsDraw(ch, a, o) {
-  if (!o || !o.marks) return;
-  const {ctx, chartArea: {top, bottom}, scales: {x}} = ch;
-  ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = css('--muted'); ctx.fillStyle = css('--text-2'); ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'center';
-  o.marks.forEach((m, k) => { const px = x.getPixelForValue(m.t); if (px < x.left || px > x.right) return; const ly = top + 8 + (k % 2) * 13;
-    ctx.beginPath(); ctx.moveTo(px, ly + 6); ctx.lineTo(px, bottom); ctx.stroke(); ctx.fillText(m.label, px, ly); });
-  ctx.restore(); }};
-function stageDollarSeries(firmId) {
-  const t = d => new Date(d + 'T00:00:00Z').getTime();
+function stageMonthly(firmId) {
+  // Month-end snapshots: each opportunity counted at the stage it held on the snapshot date.
+  const t = d => new Date(d + 'T00:00:00Z').getTime(), asOf = D.meta.as_of_date;
   const opps = D.mart_opportunity.filter(o => o.firm_id === firmId);
-  const hist = opps.map(o => ({o, h: D.mart_stage_history.filter(s => s.opportunity_id === o.opportunity_id)
-    .map(s => ({t: t(s.stage_date), rank: s.stage_rank, projected: s.is_future})).sort((a, b) => a.t - b.t)}));
-  const times = [...new Set(hist.flatMap(x => x.h.map(s => s.t)))].sort((a, b) => a - b);
-  const stageAt = (h, tt) => { let cur = null; h.forEach(s => { if (s.t <= tt) cur = s; }); return cur; };
-  const series = {};
-  STAGE_ORDER.forEach(r => (series[r] = times.map(tt => {
-    const inStage = hist.filter(x => { const c = stageAt(x.h, tt); return c && c.rank === r; });
-    return {x: tt, y: inStage.reduce((a, x) => a + x.o.amount_usd, 0), ids: inStage.map(x => x.o.opportunity_id)};
-  })));
-  return {times, series, n: opps.length};
+  const hist = opps.map(o => ({o, h: D.mart_stage_history.filter(s => s.opportunity_id === o.opportunity_id).sort((a, b) => a.stage_date.localeCompare(b.stage_date))}));
+  const dates = hist.flatMap(x => x.h.map(s => s.stage_date));
+  if (!dates.length) return {months: [], n: opps.length};
+  const first = dates.reduce((a, b) => (a < b ? a : b)).slice(0, 7), last = [...dates, asOf].reduce((a, b) => (a > b ? a : b)).slice(0, 7);
+  const months = [];
+  for (let d = new Date(first + '-01T00:00:00Z'); d.toISOString().slice(0, 7) <= last; d.setUTCMonth(d.getUTCMonth() + 1)) {
+    const ym = d.toISOString().slice(0, 7), end = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).toISOString().slice(0, 10);
+    const snap = ym === asOf.slice(0, 7) ? asOf : end, projected = snap > asOf;
+    const byStage = {};
+    STAGE_ORDER.forEach(r => (byStage[r] = {usd: 0, ids: []}));
+    hist.forEach(x => { const cur = x.h.filter(s => s.stage_date <= snap).pop(); if (cur) { byStage[cur.stage_rank].usd += x.o.amount_usd; byStage[cur.stage_rank].ids.push(x.o.opportunity_id); } });
+    months.push({ym, snap, projected, partial: snap === asOf, byStage,
+      label: new Date(d).toLocaleString('en-US', {month: 'short', timeZone: 'UTC'}) + (projected || snap === asOf ? '*' : '')});
+  }
+  return {months, n: opps.length};
 }
 function renderStageChart(f) {
-  $('#stageTitle').textContent = `Pipeline dollars by stage over time: ${f.firm_name}`;
-  const {times, series, n} = stageDollarSeries(f.firm_id);
+  $('#stageTitle').textContent = `Pipeline dollars by stage, by month: ${f.firm_name}`;
+  const {months, n} = stageMonthly(f.firm_id);
   $('#stageEmpty').style.display = n ? 'none' : '';
   $('#cStage').parentElement.style.display = n ? '' : 'none';
-  if (!n) { if (charts.cStage) charts.cStage.destroy(); delete charts.cStage; return; }
-  const t = d => new Date(d + 'T00:00:00Z').getTime(), asOf = t(D.meta.as_of_date);
-  const evs = D.mart_firm_event.filter(r => r.firm_id === f.firm_id).map(r => ({t: t(r.event_date), label: evShort(r.event_id) + (r.is_confirmed ? '' : ' (tent.)')}));
-  const lo = Math.min(...times, ...evs.map(e => e.t)) - 10 * 864e5, hi = Math.max(...times, ...evs.map(e => e.t), asOf) + 10 * 864e5;
+  if (!n || !months.length) { if (charts.cStage) charts.cStage.destroy(); delete charts.cStage; return; }
   const picked = [...document.querySelectorAll('#stageFilter input:checked')].map(x => +x.value);
-  const show = STACK_ORDER.filter(r => (!picked.length || picked.includes(r)) && series[r].some(p => p.y > 0));
+  const show = STACK_ORDER.filter(r => (!picked.length || picked.includes(r)) && months.some(m => m.byStage[r].usd > 0));
   const colors = STAGE_COLORS();
-  const datasets = show.map((r, k) => {
-    const pts = [...series[r], {...series[r][series[r].length - 1], x: hi}];  // carry the last value to the right edge
-    return {label: STAGE_NAMES[r], data: pts, stepped: 'before', fill: k === 0 ? 'origin' : '-1', borderColor: colors[r], backgroundColor: colors[r] + 'cc',
-      borderWidth: 1, pointRadius: 0, pointHoverRadius: 4};
-  });
-  chart('cStage', {type: 'line', plugins: [projectedBand, eventLines], data: {datasets},
-    options: {interaction: {mode: 'nearest', intersect: false, axis: 'x'}, layout: {padding: {top: 18}},
-      plugins: {legend: {position: 'bottom', align: 'start', reverse: true, labels: {boxWidth: 10, boxHeight: 10}}, eventLines: {marks: evs}, projectedBand: {from: asOf},
-        tooltip: {callbacks: {title: c => mdy(new Date(c[0].parsed.x).toISOString().slice(0, 10)) + (c[0].parsed.x > asOf ? ' (projected)' : ''),
-          label: c => `${c.dataset.label}: ${fmtM(c.raw.y)}${c.raw.ids.length ? ' (' + c.raw.ids.join(', ') + ')' : ''}`}}},
-      scales: {x: {type: 'linear', min: lo, max: hi, grid: {display: false},
-          afterBuildTicks: ax => { const out = [], d = new Date(ax.min); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() + 1);
-            for (; d.getTime() <= ax.max; d.setUTCMonth(d.getUTCMonth() + 1)) out.push({value: d.getTime()}); ax.ticks = out; },
-          ticks: {callback: v => new Date(v).toLocaleString('en-US', {month: 'short', timeZone: 'UTC'})}},
+  const datasets = show.map(r => ({label: STAGE_NAMES[r], data: months.map(m => m.byStage[r].usd), ids: months.map(m => m.byStage[r].ids),
+    backgroundColor: colors[r], borderColor: css('--surface'), borderWidth: 1, borderRadius: 2, maxBarThickness: 56, stack: 's'}));
+  const evMonths = {};
+  D.mart_firm_event.filter(r => r.firm_id === f.firm_id).forEach(r => { const i = months.findIndex(m => m.ym === r.event_date.slice(0, 7));
+    if (i >= 0) evMonths[i] = (evMonths[i] ? evMonths[i] + ' / ' : '') + evShort(r.event_id) + (r.is_confirmed ? '' : ' (tent.)'); });
+  chart('cStage', {type: 'bar', plugins: [eventMarkers], data: {labels: months.map(m => m.label), datasets},
+    options: {interaction: {mode: 'index', intersect: false}, layout: {padding: {top: 30}},
+      plugins: {legend: {position: 'bottom', align: 'start', reverse: true, labels: {boxWidth: 10, boxHeight: 10}},
+        eventMarkers: {marks: Object.entries(evMonths).map(([i, label]) => ({i: +i, label}))},
+        tooltip: {callbacks: {title: c => { const m = months[c[0].dataIndex]; return `${m.label.replace('*', '')} · as of ${mdy(m.snap)}${m.projected ? ' (projected)' : ''}`; },
+          label: c => (c.raw ? `${c.dataset.label}: ${fmtM(c.raw)} (${c.dataset.ids[c.dataIndex].join(', ')})` : null),
+          footer: c => `Total: ${fmtM(c.reduce((a, x) => a + x.raw, 0))}`}}},
+      scales: {x: {stacked: true, grid: {display: false}},
         y: {stacked: true, beginAtZero: true, grid: {color: css('--grid')}, border: {display: false}, ticks: {callback: v => fmtM(v)}}}}});
 }
 
