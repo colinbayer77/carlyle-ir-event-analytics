@@ -469,7 +469,7 @@ with tab_x:
                     "pipeline_usd", "assoc_pipeline_90_usd", "committed_usd", "has_unfollowed_event"]]
                  .sort_values("pipeline_usd", ascending=False), width="stretch", hide_index=True)
     if len(f):
-        pick = st.selectbox("Firm timeline", f.firm_id, format_func=lambda i: f"{i} · {firms.set_index('firm_id').loc[i, 'firm_name']}")
+        pick = st.selectbox("Firm timeline", f.sort_values("pipeline_usd", ascending=False).firm_id, format_func=lambda i: f"{i} · {firms.set_index('firm_id').loc[i, 'firm_name']}")
         info = firms.set_index("firm_id").loc[pick]
         st.markdown(f"**{info.firm_name}** · {info.tier} · {info.segment} · {info.region} · historical commitments {fm(info.historical_commitments_usd)}")
         t = tl[tl.firm_id == pick].copy()
