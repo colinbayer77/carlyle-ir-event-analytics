@@ -47,7 +47,6 @@ header[data-testid="stHeader"] {{ display: none; }}
 .brand-bar .div {{ width: 1px; height: 28px; background: rgba(255,255,255,.35); }}
 .brand-bar h1 {{ font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 26px; margin: 0; padding: 0; color: #fff; }}
 .brand-bar p {{ margin: 6px 0 0; color: #c9d7df; font-size: clamp(11px, 0.95vw, 13px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-.brand-bar p.disclaimer {{ margin-top: 4px; color: #9fb3c2; font-size: 11px; }}
 h2, h3, .stSubheader {{ font-family: 'EB Garamond', Georgia, serif !important; color: {NAVY} !important; font-weight: 600 !important; }}
 .chart-title {{ font-family: 'EB Garamond', Georgia, serif; font-size: 20px; font-weight: 600; color: {NAVY}; margin: 6px 0 0; }}
 .chart-sub {{ color: #5b6570; font-size: 13px; margin: 2px 0 4px; }}
@@ -89,8 +88,7 @@ div[data-testid="stAlert"] * {{ color: #1b1f24 !important; }}
 </style>
 <div class="brand-bar"><div class="row"><img src="data:image/png;base64,{logo}" alt="Carlyle"><span class="div"></span>
 <h1>Investor Relations · Event Outcomes</h1></div>
-<p>What happened after our 2026 investor events, what outcomes followed, and what to change next time. Association, not causation.</p>
-<p class="disclaimer">Candidate take-home submission, not an official Carlyle publication. Synthetic data.</p></div>
+<p>What happened after our 2026 investor events, what outcomes followed, and what to change next time. Association, not causation.</p></div>
 """,
         unsafe_allow_html=True,
     )
@@ -779,7 +777,7 @@ with tab_m:
     st.subheader("Data-quality log")
     st.dataframe(dq, width="stretch", hide_index=True)
 
-st.markdown('<div class="foot">Synthetic assessment data, as of 2026-09-23. Built by Colin Bayer for the Carlyle BI &amp; Analytics Lead take-home.</div>', unsafe_allow_html=True)
+st.markdown('<div class="foot">Candidate take-home submission, not an official Carlyle publication. Synthetic assessment data, as of 2026-09-23. Built by Colin Bayer for the Carlyle BI &amp; Analytics Lead take-home.</div>', unsafe_allow_html=True)
 
 
 for _ph in _hidden:
