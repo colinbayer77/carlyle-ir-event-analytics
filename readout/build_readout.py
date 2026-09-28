@@ -15,6 +15,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 M = {p.stem: pd.read_csv(p) for p in (ROOT / "data" / "marts").glob("*.csv")}
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+LOGO = "data:image/png;base64," + __import__("base64").b64encode((ROOT / "assets" / "carlyle_logo.png").read_bytes()).decode()
+AUTHOR = "Colin R. Bayer · colinbayer7@gmail.com · 313-617-8828"
 
 k = M["mart_event_kpis"].query("window_days == 90 and not include_tentative").set_index("event_id")
 fe = M["mart_firm_event"].query("is_confirmed")
@@ -85,13 +87,19 @@ h1 {{ font-family: Cambria, Georgia, serif; font-size: 32pt; line-height: 1.12; 
 h2 {{ font-size: 14pt; margin: 0 0 8px; }}
 .stats {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin: 10px 0 24px; }}
 .stat .n {{ font-family: Cambria, Georgia, serif; font-size: 40pt; font-weight: 700; line-height: 1; }}
-.stat .l {{ font-size: 11.5pt; color: #c7d3e3; margin-top: 6px; line-height: 1.3; }}
+.stat .n {{ color: #0c374a; }}
+.stat .l {{ font-size: 11.5pt; color: #3b4450; margin-top: 6px; line-height: 1.3; }}
 .msgs {{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; }}
-.msg {{ background: rgba(255,255,255,.07); border-radius: 10px; padding: 14px 16px; }}
+.msg {{ background: #f2f5f7; border-radius: 10px; padding: 14px 16px; }}
 .msg b {{ display: block; font-size: 13.5pt; margin-bottom: 5px; }}
-.msg span {{ font-size: 12.5pt; color: #d7e0ec; line-height: 1.4; }}
-.num {{ display: inline-flex; width: 26px; height: 26px; border-radius: 50%; background: #9ec5f4; color: #0f2340; font-weight: 700; align-items: center; justify-content: center; font-size: 12pt; margin-right: 8px; }}
-.foot {{ position: absolute; bottom: 0.25in; left: 0.65in; right: 0.65in; font-size: 9pt; color: #8a95a3; }}
+.msg span {{ font-size: 12.5pt; color: #3b4450; line-height: 1.4; }}
+.num {{ display: inline-flex; width: 26px; height: 26px; border-radius: 50%; background: #0c374a; color: #fff; font-weight: 700; align-items: center; justify-content: center; font-size: 12pt; margin-right: 8px; }}
+.foot {{ position: absolute; bottom: 0.25in; left: 0.65in; right: 0.65in; font-size: 9pt; color: #8a95a3; display: flex; justify-content: space-between; gap: 24px; align-items: flex-end; }}
+.msg span.num {{ color: #fff; font-size: 12pt; }}
+.foot .note {{ max-width: 8.2in; }}
+.foot .author {{ white-space: nowrap; color: #0c374a; font-weight: 600; }}
+.logo {{ position: absolute; top: 0.5in; right: 0.65in; height: 0.24in; }}
+h1 {{ color: #0c374a; padding-right: 2.2in; }}
 .grid {{ display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px; }}
 th {{ white-space: nowrap; }}
 table {{ width: 100%; border-collapse: collapse; font-size: 12.5pt; }}
@@ -110,15 +118,16 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
 .recs {{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px 26px; }}
 .rec {{ border: 1px solid #e3e6ea; border-radius: 10px; padding: 20px 22px; }}
 .rec b {{ font-size: 13.5pt; display: flex; align-items: center; margin-bottom: 6px; }}
-.rec b .num {{ background: #0f2340; color: #fff; }}
+.rec b .num {{ background: #0c374a; color: #fff; }}
 .rec p {{ margin: 0; font-size: 13pt; line-height: 1.4; color: #3b4450; }}
 .rec .who {{ margin-top: 6px; font-size: 10pt; color: #6b7785; }}
 .caveat {{ margin-top: 22px; font-size: 12pt; color: #3b4450; background: #f6f7f8; border-radius: 10px; padding: 10px 14px; }}
 </style></head><body>
 
-<section class="slide dark">
+<section class="slide">
+  <img class="logo" src="{LOGO}" alt="Carlyle">
   <div class="kicker">Investor events 2026 · readout for the Head of IR</div>
-  <h1>Events reach most of our priority firms. The gap is what happens after.</h1>
+  <h1>Events reach most of our priority firms, but the gap is what happens after.</h1>
   <div class="stats">
     <div class="stat"><div class="n">${N['spend'] / 1e6:.1f}M</div><div class="l">spent on 3 events<br>(NY, London, Berlin)</div></div>
     <div class="stat"><div class="n">{N['t1_reached']} of {N['t1_all']}</div><div class="l">Tier 1 firms attended at least one event ({N['firms']} of {N['firms_all']} firms overall)</div></div>
@@ -131,12 +140,13 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
     <div class="msg"><b><span class="num">3</span>The dinner was the most efficient format.</b><span>London ({fk(k.loc['E002','cost_usd'])}): {fk(k.loc['E002','cost_per_assoc_opp'])} per associated opportunity and the most post-event meetings, vs {fk(k.loc['E001','cost_per_assoc_opp'])} NY and {fk(k.loc['E003','cost_per_assoc_opp'])} Berlin.</span></div>
     <div class="msg"><b><span class="num">4</span>Berlin needs a case before renewal.</b><span>Our most expensive event ({fk(k.loc['E003','cost_usd'])}): meetings with attendees fell ({k.loc['E003','meetings_pre_60']:.0f} → {k.loc['E003','meetings_post_60']:.0f}) and nothing has committed yet. Recheck at 180 days.</span></div>
   </div>
-  <div class="foot">Data as of 2026-09-23 (synthetic assessment data). Association window: opportunity created 0-90 days after an event the firm confirmed for; most recent event gets credit. Details: dashboard and docs/METHOD.md.</div>
+  <div class="foot"><span class="note">Data as of 2026-09-23 (synthetic assessment data). Association window: opportunity created 0-90 days after an event the firm confirmed for; most recent event gets credit. Details: dashboard and docs/METHOD.md.</span><span class="author">{AUTHOR}</span></div>
 </section>
 
 <section class="slide">
+  <img class="logo" src="{LOGO}" alt="Carlyle">
   <div class="kicker">What happened after each event</div>
-  <h1 style="color:#0f2340">The $185K dinner produced opportunities at half the cost of NY and a sixth of Berlin</h1>
+  <h1 >The $185K dinner produced opportunities at half the cost of NY and a sixth of Berlin</h1>
   <div class="grid">
     <div>
       <table>
@@ -150,12 +160,13 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
       <div class="callout"><b>How to read this.</b> "Associated" means the opportunity opened within 90 days of an event the firm attended. That shows what followed each event, not what it caused: we invite firms already likely to invest, and new opportunities peaked for everyone in June and July. The diff-in-diff row compares against firms that did not attend over the same dates.</div>
     </div>
   </div>
-  <div class="foot">Committed counts only stages dated on or before 2026-09-23; later-dated stages are treated as projected. Berlin is the youngest event, so its commitments are least mature.</div>
+  <div class="foot"><span class="note">Committed counts only stages dated on or before 2026-09-23; later-dated stages are treated as projected. Berlin is the youngest event, so its commitments are least mature.</span><span class="author">{AUTHOR}</span></div>
 </section>
 
 <section class="slide">
+  <img class="logo" src="{LOGO}" alt="Carlyle">
   <div class="kicker">What to change for the next event cycle</div>
-  <h1 style="color:#0f2340">Four decisions for the 2027 calendar</h1>
+  <h1 >Four decisions for the 2027 calendar</h1>
   <div class="recs">
     <div class="rec"><b><span class="num">1</span>Put a 10-day follow-up standard on Tier 1 attendees</b><p>Every Tier 1 attendee gets a named owner and a meeting within 10 business days. Start this week with the {N['gap_n']} Tier 1 firms ({fm(N['gap_pipe'])} pipeline) that attended and have not been met since. Faster follow-up did not by itself raise conversion in 2026 data, so treat this as a standard plus a test.</p><div class="who">Owner: coverage leads · Tracked weekly on the dashboard gap list</div></div>
     <div class="rec"><b><span class="num">2</span>Shift budget toward targeted hospitality</b><p>Run a second dinner-format event in 2027 and fund it from the conference line. Hold the Berlin renewal until its 180-day review (mid-December 2026); renew only if associated commitments appear.</p><div class="who">Owner: IR events · Decision: December 2026</div></div>
@@ -163,6 +174,7 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
     <div class="rec"><b><span class="num">4</span>Design the next events to measure lift</b><p>Hold back invitations to a small matched group of firms (same tier, segment, region) and compare 90-day outcomes. One event is too small to prove lift; four to six events with the same design can.</p><div class="who">Owner: IR + BI · Pilot on the first 2027 event</div></div>
   </div>
   <div class="caveat"><b>What this analysis cannot say:</b> that events caused the pipeline that followed them. With 19 to 26 attending firms per event, differences under about 15 points are within noise. The $650M commitment of the year came from a firm that attended no event, a reminder that most pipeline is built outside the event calendar.</div>
+  <div class="foot"><span class="note"></span><span class="author">{AUTHOR}</span></div>
 </section>
 </body></html>"""
 
