@@ -2,7 +2,8 @@
 
 **Question from leadership:** What happened after our investor events, what business outcomes are associated with them, and what should we learn for future events?
 
-**Live dashboard:** https://colinbayer77.github.io/carlyle-ir-event-analytics/ (static, no install)
+**Live Streamlit app (includes the Next Event Planner):** https://carlyle-ir-event-analytics.streamlit.app/
+**Static dashboard on GitHub Pages (no server, loads instantly):** https://colinbayer77.github.io/carlyle-ir-event-analytics/
 **Executive readout (3 slides):** [readout/exec_readout.pdf](readout/exec_readout.pdf)
 **How AI was used and checked:** [AI_USAGE.md](AI_USAGE.md)
 **Method and data-quality decisions:** [docs/METHOD.md](docs/METHOD.md)
@@ -71,7 +72,7 @@ Static dashboard (no server needed; `docs/data.js` is bundled):
 open docs/index.html
 ```
 
-Streamlit version:
+Streamlit version (also hosted at https://carlyle-ir-event-analytics.streamlit.app/; a sleeping free-tier app takes about 30 seconds to wake):
 
 ```bash
 streamlit run app/streamlit_app.py
