@@ -46,7 +46,7 @@ header[data-testid="stHeader"] {{ display: none; }}
 .brand-bar img {{ height: 24px; }}
 .brand-bar .div {{ width: 1px; height: 28px; background: rgba(255,255,255,.35); }}
 .brand-bar h1 {{ font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 26px; margin: 0; padding: 0; color: #fff; }}
-.brand-bar p {{ margin: 6px 0 0; color: #c9d7df; font-size: 13px; }}
+.brand-bar p {{ margin: 6px 0 0; color: #c9d7df; font-size: clamp(11px, 0.95vw, 13px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
 h2, h3, .stSubheader {{ font-family: 'EB Garamond', Georgia, serif !important; color: {NAVY} !important; font-weight: 600 !important; }}
 .chart-title {{ font-family: 'EB Garamond', Georgia, serif; font-size: 20px; font-weight: 600; color: {NAVY}; margin: 6px 0 0; }}
 .chart-sub {{ color: #5b6570; font-size: 13px; margin: 2px 0 4px; }}
@@ -81,8 +81,7 @@ div[data-testid="stAlert"] * {{ color: #1b1f24 !important; }}
 </style>
 <div class="brand-bar"><div class="row"><img src="data:image/png;base64,{logo}" alt="Carlyle"><span class="div"></span>
 <h1>Investor Relations · Event Outcomes</h1></div>
-<p>What happened after our 2026 investor events, what outcomes are associated with them, and what to change next time.
-Association, not causation: see the Underlying Data Model and Data Quality tab.</p></div>
+<p>What happened after our 2026 investor events, what outcomes followed, and what to change next time. Association, not causation.</p></div>
 """,
         unsafe_allow_html=True,
     )

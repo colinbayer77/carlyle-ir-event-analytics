@@ -27,7 +27,7 @@ header { background: var(--brand); color: #fff; padding: 18px 24px 0; }
 .brandrow img { height: 22px; width: auto; display: block; }
 .brandrow .divider { width: 1px; height: 26px; background: rgba(255,255,255,.35); }
 header h1 { margin: 0; font: 600 24px/1.2 'EB Garamond', Georgia, serif; letter-spacing: .01em; }
-header p { margin: 8px 0 12px; color: #c9d7df; font-size: 13px; }
+header p { margin: 8px 0 12px; color: #c9d7df; font-size: clamp(11px, 0.95vw, 13px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 nav { display: flex; gap: 4px; overflow-x: auto; }
 nav button { background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 12px; font: inherit; color: #c9d7df; cursor: pointer; white-space: nowrap; }
 nav button:hover { color: #fff; }
@@ -112,7 +112,7 @@ tr.sel { background: var(--surface-2); }
 <body>
 <header>
   <div class="brandrow"><img src="assets/carlyle_logo_white.png" alt="Carlyle"><span class="divider"></span><h1>Investor Relations · Event Outcomes</h1></div>
-  <p id="subtitle">What happened after our 2026 investor events, what outcomes are associated with them, and what to change next time.</p>
+  <p id="subtitle" title="What happened after our 2026 investor events, what outcomes followed, and what to change next time. Association, not causation.">What happened after our 2026 investor events, what outcomes followed, and what to change next time. Association, not causation.</p>
   <nav id="nav">
     <button data-view="overview" class="active">Executive summary</button>
     <button data-view="scorecard">Event Scorecard</button>
