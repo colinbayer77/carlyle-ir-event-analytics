@@ -35,7 +35,7 @@ nav button.active { color: #fff; border-bottom-color: #fff; font-weight: 600; }
 .card h2, .insights h2 { font-family: 'EB Garamond', Georgia, serif; font-size: 19px; font-weight: 600; color: var(--text); }
 main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 .controls { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; }
-.ctl-selects { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 16px; }
+.ctl-selects { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px 16px; }
 .ctl-selects label.sel { flex-direction: column; align-items: stretch; gap: 4px; }
 .ctl-selects select { width: 100%; }
 .ms { position: relative; }
@@ -50,6 +50,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 .ctl-toggles { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
 #filterNote:not(:empty) { margin-top: 8px; }
 #asof { margin-top: 6px; }
+@media (max-width: 1000px) { .ctl-selects { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .ctl-selects { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .sig-note { margin: 12px 0 0; padding-top: 6px; border-top: 1px solid var(--border); font-size: 10px; line-height: 1.35; color: var(--muted); }
 td .info, .info { color: var(--muted); cursor: help; font-size: 12px; }
@@ -123,6 +124,7 @@ tr.sel { background: var(--surface-2); }
         <option value="90" selected>90 days</option><option value="180">180 days</option>
       </select>
     </label>
+    <label class="sel" title="Show only the selected events. Credit for each opportunity is still assigned across all three events (most recent attended event within the window), so nothing moves between events when you filter."><span class="lbl">Event <span class="info">ⓘ</span></span><details class="ms" id="gEv"><summary>All</summary><div class="ms-panel"></div></details></label>
     <label class="sel" title="Pick one or more investor segments. Keeps only firms in those segments: attendees, the non-attendee comparison group, and their opportunities."><span class="lbl">Investor segment <span class="info">ⓘ</span></span><details class="ms" id="gSeg"><summary>All</summary><div class="ms-panel"></div></details></label>
     <label class="sel" title="Pick one or more funds. Keeps only opportunities for those funds. Attendance, meetings and follow-up are not affected."><span class="lbl">Fund <span class="info">ⓘ</span></span><details class="ms" id="gFund"><summary>All</summary><div class="ms-panel"></div></details></label>
     <label class="sel" title="Count attendance only where a CIO or Managing Director was registered (or only where none was). Selecting both options is the same as All. Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees."><span class="lbl">Attendee seniority <span class="info">ⓘ</span></span>
@@ -425,21 +427,29 @@ document.querySelectorAll('#nav button').forEach(b => b.onclick = () => {
 const P = IRMetrics.prepare(D);
 (() => { const bad = IRMetrics.selfTest(P); bad.length ? console.error('metrics.js does not match mart_event_kpis', bad) : console.info('metrics.js self-test passed: matches mart_event_kpis for all 24 settings'); })();
 const msValues = id => [...document.querySelectorAll(`#${id} input:checked`)].map(x => x.value);
-const filters = () => ({window: +$('#win').value, tentative: $('#tent').checked, segment: msValues('gSeg'), fund: msValues('gFund'),
+const filters = () => ({window: +$('#win').value, tentative: $('#tent').checked, segment: msValues('gSeg'), fund: msValues('gFund'), events: msValues('gEv'),
   seniority: msValues('gSen'), excludeOutlier: $('#gOut').checked});
-const extraActive = f => !IRMetrics.isDefaultExtra(f);
+const extraActive = f => !IRMetrics.isDefaultExtra(f) || f.events.length > 0;
 function kpis() { return IRMetrics.eventKpis(P, filters()); }
 function ctx() {
-  const f = filters(), {att, base} = IRMetrics.attendance(P, f);
+  const f = filters(), {att: attAll, base} = IRMetrics.attendance(P, f);
+  const sel = e => !f.events.length || f.events.includes(e);
+  const att = attAll.filter(r => sel(r.event_id));  // attendance at the selected events
   const attFirms = new Set(att.map(r => r.firm_id));
-  const noneLabel = IRMetrics.senMode(f) !== 'All' ? 'No qualifying attendance' : f.tentative ? 'No attendance' : 'No confirmed attendance';
-  const opps = IRMetrics.associate(IRMetrics.filteredOpps(P, f), att, f.window).map(o => ({...o,
-    bucket: o.assoc_event_id ? `Event-associated (${f.window}d)` : attFirms.has(o.firm_id) ? 'Attendee, outside window' : noneLabel}));
+  const noneLabel = f.events.length ? 'Did not attend selected events' : IRMetrics.senMode(f) !== 'All' ? 'No qualifying attendance' : f.tentative ? 'No attendance' : 'No confirmed attendance';
+  // credit is assigned across all events, then kept only for the selected ones
+  const opps = IRMetrics.associate(IRMetrics.filteredOpps(P, f), attAll, f.window).map(o => {
+    const a = o.assoc_event_id && sel(o.assoc_event_id) ? o.assoc_event_id : null;
+    return {...o, assoc_event_id: a, days_after_event: a ? o.days_after_event : null,
+      bucket: a ? `Event-associated (${f.window}d)` : attFirms.has(o.firm_id) ? 'Attendee, outside window' : noneLabel};
+  });
   const firmsIn = !f.segment.length ? D.mart_firm : D.mart_firm.filter(r => f.segment.includes(r.segment));
-  return {f, att, base, opps, attFirms, firmsIn, noneLabel, buckets: [`Event-associated (${f.window}d)`, 'Attendee, outside window', noneLabel]};
+  const events = EVENTS.filter(e => sel(e.event_id));
+  return {f, att, attAll, base, opps, attFirms, firmsIn, noneLabel, events, buckets: [`Event-associated (${f.window}d)`, 'Attendee, outside window', noneLabel]};
 }
 function describeFilters(f) {
   const parts = [`${f.window}-day window`, f.tentative ? 'confirmed + tentative attendance' : 'confirmed attendance'];
+  if (f.events.length) parts.push(`events: ${f.events.map(evShort).join(', ')}`);
   if (f.segment.length) parts.push(`segment: ${f.segment.join(', ')}`);
   if (f.fund.length) parts.push(`fund: ${f.fund.join(', ')}`);
   if (IRMetrics.senMode(f) !== 'All') parts.push(IRMetrics.senMode(f) === 'senior' ? 'CIO/MD registered' : 'no CIO/MD');
@@ -520,7 +530,7 @@ function renderOverview() {
   const sum = f => K.reduce((a, r) => a + (r[f] || 0), 0);
   const C = ctx(), cost = sum('cost_usd'), firms = C.attFirms.size;
   const tiles = [
-    ['Event spend', fmtM(cost), '3 events, 2026'],
+    ['Event spend', cost < 1e6 ? fmtK(cost) : fmtM(cost), `${K.length} event${K.length === 1 ? '' : 's'}, 2026`],
     ['Firms reached', firms, `of ${C.firmsIn.length} covered firms${C.f.segment.length ? ' in selected segments' : ''}`],
     ['Associated opportunities', sum('assoc_opps'), `of ${C.opps.length} opened this year${extraActive(C.f) ? ' (filtered)' : ''}`],
     ['Associated pipeline', fmtM(sum('assoc_pipeline_usd')), `${fmtK(cost / Math.max(1, sum('assoc_opps')))} spend per opp`],
@@ -619,7 +629,7 @@ function renderOverview() {
       line('New opportunities', M.map(r => r.new_opps), css('--s1')),
       line('Meetings', M.map(r => r.meetings), css('--s2'))]},
     options: {layout: {padding: {top: 6}}, plugins: {legend: {position: 'top', align: 'start', labels: {boxWidth: 10, boxHeight: 10}, padding: {bottom: 14}},
-        eventMarkers: {marks: M.map((r, i) => r.events_in_month ? {i, label: r.events_in_month.split(',').map(evShort).join(' / ')} : null).filter(Boolean)}},
+        eventMarkers: {marks: M.map((r, i) => { const ev = (r.events_in_month || '').split(',').filter(e => e && C.events.some(x => x.event_id === e)); return ev.length ? {i, label: ev.map(evShort).join(' / ')} : null; }).filter(Boolean)}},
       scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, beginAtZero: true, suggestedMax: 30}}}});
   const srcV = C.buckets.map(b => C.opps.filter(o => o.bucket === b).reduce((a, o) => a + o.amount_usd, 0));
   donut('cSourceDonut', [`Opened within ${C.f.window}d of an attended event`, 'Attendee firm, outside window', C.noneLabel === 'No confirmed attendance' ? 'Firm with no confirmed attendance' : C.noneLabel], srcV,
@@ -636,7 +646,7 @@ function renderFollowup() {
   const C = ctx(), fe = C.att;
   const conv = new Set(C.opps.filter(o => o.assoc_event_id).map(o => o.firm_id + '|' + o.assoc_event_id));
   const tiers = ['Tier 1', 'Tier 2', 'Tier 3'];
-  chart('cFuTier', {type: 'bar', data: {labels: tiers, datasets: EVENTS.map(e => {
+  chart('cFuTier', {type: 'bar', data: {labels: tiers, datasets: C.events.map(e => {
       const data = tiers.map(t => { const g = fe.filter(r => r.event_id === e.event_id && r.tier === t); return g.length ? g.filter(r => r.followed_up_30).length / g.length * 100 : null; });
       const n = tiers.map(t => fe.filter(r => r.event_id === e.event_id && r.tier === t).length);
       return bar(evShort(e.event_id), data, css(EV_COLOR[e.event_id]), {n});
@@ -741,9 +751,9 @@ function renderOpps() {
       tooltip: {callbacks: {label: c => { const f = c.raw; return `${f.from} → ${f.to}: ${f.flow} opps, ${fmtM(f.usd)}`; }}}}}});
   const days = Array.from({length: 19}, (_, i) => i * 10);
   const asOf = new Date(D.meta.as_of_date + 'T00:00');
-  chart('cCurve', {type: 'line', data: {labels: days.map(d => d + 'd'), datasets: EVENTS.map(e => {
+  chart('cCurve', {type: 'line', data: {labels: days.map(d => d + 'd'), datasets: C.events.map(e => {
       const age = Math.round((asOf - new Date(e.event_date + 'T00:00')) / 864e5);
-      const pts = IRMetrics.associate(IRMetrics.filteredOpps(P, C.f), C.att, 180).filter(o => o.assoc_event_id === e.event_id).map(o => ({days_after_event: o.days_after_event, opps: 1}));
+      const pts = IRMetrics.associate(IRMetrics.filteredOpps(P, C.f), C.attAll, 180).filter(o => o.assoc_event_id === e.event_id).map(o => ({days_after_event: o.days_after_event, opps: 1}));
       return {label: evShort(e.event_id), borderColor: css(EV_COLOR[e.event_id]), backgroundColor: css(EV_COLOR[e.event_id]), borderWidth: 2, pointRadius: 3, tension: 0.2,
         data: days.map(d => d > age ? null : pts.filter(r => r.days_after_event <= d).reduce((a, r) => a + r.opps, 0))};
     })},
@@ -785,9 +795,11 @@ function renderAll() {
 $('#win').onchange = renderAll; $('#tent').onchange = renderAll;
 initFirmFilters();
 const msOptions = (id, vals) => $(`#${id} .ms-panel`).insertAdjacentHTML('afterbegin', vals.map(v => `<label><input type="checkbox" value="${esc(v)}"> ${esc(v)}</label>`).join(''));
+msOptions('gEv', EVENTS.map(e => e.event_id));
+document.querySelectorAll('#gEv .ms-panel label').forEach(l => { const v = l.querySelector('input').value; l.lastChild.textContent = ' ' + evShort(v); });
 msOptions('gSeg', [...new Set(D.mart_firm.map(r => r.segment))].sort());
 msOptions('gFund', [...new Set(D.mart_opportunity.map(r => r.fund_name))].sort());
-['gSeg', 'gFund', 'gSen'].forEach(id => {
+['gEv', 'gSeg', 'gFund', 'gSen'].forEach(id => {
   const el = document.getElementById(id), panel = el.querySelector('.ms-panel');
   panel.insertAdjacentHTML('beforeend', '<button type="button" class="ms-clear">Clear (All)</button>');
   const sync = () => { const v = [...el.querySelectorAll('input:checked')].map(x => x.parentElement.textContent.trim());

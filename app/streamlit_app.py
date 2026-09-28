@@ -176,14 +176,16 @@ def bar_fig(x, series, yfmt=None, horizontal=False, height=300):
 
 brand_css()
 
-row = st.columns(4)
+row = st.columns(5)
 window = row[0].selectbox("Association window (days)", [30, 60, 90, 180], index=2,
                           help="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker. At 180 days, London and Berlin have not yet had the full window.")
-segment = tuple(row[1].multiselect("Investor segment", sorted(firms.segment.unique()), placeholder="All",
+events = tuple(row[1].multiselect("Event", list(EV_SHORT), format_func=EV_SHORT.get, placeholder="All",
+                                  help="Show only the selected events. Credit for each opportunity is still assigned across all three events (most recent attended event within the window), so nothing moves between events when you filter."))
+segment = tuple(row[2].multiselect("Investor segment", sorted(firms.segment.unique()), placeholder="All",
                                    help="Pick one or more investor segments. Keeps only firms in those segments: attendees, the non-attendee comparison group, and their opportunities."))
-fund = tuple(row[2].multiselect("Fund", sorted(opps.fund_name.unique()), placeholder="All",
+fund = tuple(row[3].multiselect("Fund", sorted(opps.fund_name.unique()), placeholder="All",
                                 help="Pick one or more funds. Keeps only opportunities for those funds. Attendance, meetings and follow-up are not affected."))
-seniority = tuple(row[3].multiselect("Attendee seniority", ["senior", "non_senior"], placeholder="All",
+seniority = tuple(row[4].multiselect("Attendee seniority", ["senior", "non_senior"], placeholder="All",
                              format_func={"senior": "CIO or MD registered", "non_senior": "No CIO or MD"}.get,
                              help="Count attendance only where a CIO or Managing Director was registered (or only where none was). Selecting both options is the same as All. Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees."))
 row = st.columns([2.2, 1.3, 2.5])
@@ -191,24 +193,27 @@ tent = row[0].toggle("Include tentative firm registrations as attendance", value
                      help="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended.")
 excl = row[1].toggle("Exclude $650M outlier",
                      help="Removes O0017, a $650M commitment (next largest ticket is $150M). The firm attended no event, so event metrics do not change; totals, the pipeline donut and opportunity charts do.")
-F = Filters(window=window, tentative=tent, segment=segment, fund=fund, seniority=seniority, exclude_outlier=excl)
+F = Filters(window=window, tentative=tent, segment=segment, fund=fund, seniority=seniority, exclude_outlier=excl, events=events)
 P = prepare(D)
 
 
 @st.cache_data
-def kpis_for(window, tentative, segment, fund, seniority, exclude_outlier) -> pd.DataFrame:
-    return event_kpis(P, Filters(window, tentative, segment, fund, seniority, exclude_outlier))
+def kpis_for(window, tentative, segment, fund, seniority, exclude_outlier, events) -> pd.DataFrame:
+    return event_kpis(P, Filters(window, tentative, segment, fund, seniority, exclude_outlier, events))
 
 
-K = kpis_for(window, tent, segment, fund, seniority, excl).sort_values("event_id").reset_index(drop=True)
+K = kpis_for(window, tent, segment, fund, seniority, excl, events).sort_values("event_id").reset_index(drop=True)
 labels = [EV_SHORT[e] for e in K.event_id]
 
 # filtered detail shared by the charts
-ATT, _BASE = attendance(P, F)
+ATT_ALL, _BASE = attendance(P, F)
+SEL_EVENTS = list(events) or list(EV_SHORT)
+ATT = ATT_ALL[ATT_ALL.event_id.isin(SEL_EVENTS)]  # attendance at the selected events
 ATT_FIRMS = set(ATT.firm_id)
-NONE_LABEL = "No qualifying attendance" if F.seniority_mode != "All" else "No attendance" if tent else "No confirmed attendance"
+NONE_LABEL = "Did not attend selected events" if events else "No qualifying attendance" if F.seniority_mode != "All" else "No attendance" if tent else "No confirmed attendance"
 BUCKETS = [f"Event-associated ({window}d)", "Attendee, outside window", NONE_LABEL]
-FOPPS = associate(filtered_opps(P, F), ATT, window)
+FOPPS = associate(filtered_opps(P, F), ATT_ALL, window)  # credit across all events, then keep selected
+FOPPS.loc[~FOPPS.assoc_event_id.isin(SEL_EVENTS), ["assoc_event_id", "days_after_event"]] = [None, float("nan")]
 FOPPS["bucket"] = [BUCKETS[0] if isinstance(e, str) else BUCKETS[1] if fid in ATT_FIRMS else NONE_LABEL
                    for e, fid in zip(FOPPS.assoc_event_id, FOPPS.firm_id)]
 FIRMS_IN = firms if not segment else firms[firms.segment.isin(segment)]
@@ -216,6 +221,8 @@ FIRMS_IN = firms if not segment else firms[firms.segment.isin(segment)]
 
 def describe(f: Filters) -> str:
     parts = [f"{f.window}-day window", "confirmed + tentative attendance" if f.tentative else "confirmed attendance"]
+    if f.events:
+        parts.append("events: " + ", ".join(EV_SHORT[e] for e in f.events))
     if f.segment:
         parts.append("segment: " + ", ".join(f.segment))
     if f.fund:
@@ -231,7 +238,7 @@ def pct(v) -> str:
     return "-" if v is None or pd.isna(v) else f"{v:.0%}"
 
 
-if not F.is_default_extra:
+if not F.is_default_extra or events:
     footnote(f"<b>Filters on:</b> {describe(F)} · {len(ATT)} attending firm-events, {len(FOPPS)} opportunities. "
              "Event cost is not split by filter. Small groups: read rates as directional.")
 
@@ -240,7 +247,7 @@ tab_o, tab_s, tab_f, tab_x, tab_p, tab_m = st.tabs(["Executive summary", "Event 
 with tab_o:
     reached = len(ATT_FIRMS)
     cols = st.columns(3) + st.columns(3)
-    cols[0].metric("Event spend", fm(K.cost_usd.sum()), help="3 events, 2026")
+    cols[0].metric("Event spend", fk(K.cost_usd.sum()) if K.cost_usd.sum() < 1e6 else fm(K.cost_usd.sum()), help=f"{len(K)} event{'' if len(K) == 1 else 's'}, 2026")
     cols[1].metric("Firms reached", reached, help=f"of {len(FIRMS_IN)} covered firms" + (" in selected segments" if segment else ""))
     cols[2].metric("Associated opportunities", int(K.assoc_opps.sum()), help=f"of {len(FOPPS)} opened this year" + ("" if F.is_default_extra else " (filtered)"))
     cols[3].metric("Associated pipeline", fm(K.assoc_pipeline_usd.sum()))
@@ -474,8 +481,8 @@ with tab_p:
                "Cumulative associated opportunities by days after the event (180-day window, current attendance and opportunity filters, most recent event gets credit). "
                "Lines stop at each event's age on the as-of date; no opportunities were created after 2026-08-12, so lines flatten after that.")
     fig = go.Figure()
-    curve180 = associate(filtered_opps(P, F), ATT, 180)
-    for e, name in EV_SHORT.items():
+    curve180 = associate(filtered_opps(P, F), ATT_ALL, 180)
+    for e, name in ((e, EV_SHORT[e]) for e in SEL_EVENTS):
         age = int(kpi_all.loc[kpi_all.event_id == e, "days_since_event"].iloc[0])
         days = list(range(0, min(180, age) + 1, 5))
         pts = curve180[curve180.assoc_event_id == e]

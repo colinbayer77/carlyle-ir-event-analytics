@@ -48,6 +48,14 @@ def test_multiselect_semantics():
     assert (both.assoc_opps.values == event_kpis(P, Filters()).assoc_opps.values).all()
 
 
+def test_event_filter_is_a_row_subset():
+    full = event_kpis(P, Filters()).set_index("event_id")
+    one = event_kpis(P, Filters(events=("E002",))).set_index("event_id")
+    assert list(one.index) == ["E002"]
+    assert (one.loc["E002", COLS[:-1]].astype(float).values == full.loc["E002", COLS[:-1]].astype(float).values).all()
+
+
 if __name__ == "__main__":
+    test_event_filter_is_a_row_subset()
     test_multiselect_semantics()
     test_default_filters_match_sql_mart(); test_filters_only_shrink(); print("metrics tests passed")

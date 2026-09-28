@@ -24,10 +24,11 @@ To test for lift beyond the base rate, each event is compared with **firms that 
 
 ## Dashboard filters
 
-The window and tentative controls read precomputed SQL results. Four more filters recompute every card and chart from firm- and opportunity-level data (`app/metrics.py`, and `docs/metrics.js` for the static page):
+The window and tentative controls read precomputed SQL results. Five more filters recompute every card and chart from firm- and opportunity-level data (`app/metrics.py`, and `docs/metrics.js` for the static page):
 
 | Filter | What it does |
 |---|---|
+| Event (multi-select) | Shows only the selected events in cards, scorecard and charts. Credit for each opportunity is still assigned across all three events (most recent attended event within the window), so filtering never moves an opportunity to a different event |
 | Investor segment (multi-select) | Keeps only firms in the selected segments: attendees, the non-attendee comparison group, and their opportunities |
 | Fund (multi-select) | Keeps only opportunities for the selected funds. Attendance, meetings and follow-up do not change |
 | Attendee seniority (multi-select) | Counts attendance only where a CIO or Managing Director was registered, or only where none was; selecting both is the same as no filter. Firms dropped by this filter also leave the comparison group, rather than being counted as non-attendees |

@@ -123,7 +123,8 @@
       rows.forEach(r => { const m = P.kpis.find(k => k.event_id === r.event_id && k.window_days === f.window && k.include_tentative === f.tentative); r.p_value_did = m.p_value_did; });
     }
     rows.forEach(r => { r.did_significant = r.p_value_did != null && r.p_value_did < 0.05; r.n_permutations = 5000; });
-    return rows;
+    const ev = arr(f.events);
+    return ev.length ? rows.filter(r => ev.includes(r.event_id)) : rows;
   }
 
   function selfTest(P) {

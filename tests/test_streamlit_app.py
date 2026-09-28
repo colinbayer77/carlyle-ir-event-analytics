@@ -37,9 +37,10 @@ def test_filters():
              "senior": multi("Attendee seniority", ["senior"]), "outlier": tog("Exclude $650M outlier"),
              "both_senior": multi("Attendee seniority", ["senior", "non_senior"]),
              "two_segments": multi("Investor segment", ["Pension", "Insurance"]),
+             "london": multi("Event", ["E002"]),
              "window": sel("Association window (days)", 30), "tentative": tog("Include tentative firm registrations as attendance")}
     got = {k: metric(run(f), "Associated opportunities") for k, f in cases.items()}
-    assert got == {"segment": "6", "fund": "12", "senior": "12", "outlier": "37", "both_senior": "37", "two_segments": "12",
+    assert got == {"segment": "6", "fund": "12", "senior": "12", "outlier": "37", "both_senior": "37", "two_segments": "12", "london": "13",
                    "window": "20", "tentative": "40"}, got
     print("streamlit filter results:", got)
 

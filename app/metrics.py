@@ -12,7 +12,9 @@ Filter semantics
   seniority  "senior": count attendance only where a CIO or MD was registered
              "non_senior": only where none was; firms dropped by this filter are
              excluded from the comparison group rather than counted as non-attendees
-  Each of these three is multi-select: an empty selection (or "All") means no filter;
+  events     shows only the selected events. Credit is still assigned across all events
+             (last touch), so an opportunity never moves to a different event because of this filter.
+  Each of these is multi-select: an empty selection (or "All") means no filter;
   selecting both seniority options is the same as no seniority filter.
   exclude_outlier drops opportunities flagged is_amount_outlier (O0017, $650M)
 """
@@ -34,9 +36,10 @@ class Filters:
     fund: tuple = ()
     seniority: tuple = ()  # subset of ("senior", "non_senior")
     exclude_outlier: bool = False
+    events: tuple = ()
 
     def __post_init__(self):
-        for name in ("segment", "fund", "seniority"):
+        for name in ("segment", "fund", "seniority", "events"):
             v = getattr(self, name)
             v = () if v in (None, "All") else (v,) if isinstance(v, str) else tuple(sorted(x for x in v if x != "All"))
             object.__setattr__(self, name, v)
@@ -183,6 +186,8 @@ def event_kpis(P: dict, f: Filters) -> pd.DataFrame:
     if f.is_default_extra:  # use the build's p-values so every surface shows the same number
         m = P["kpis"][(P["kpis"].window_days == f.window) & (P["kpis"].include_tentative == f.tentative)].set_index("event_id")
         out["p_value_did"] = out.event_id.map(m.p_value_did)
+    if f.events:
+        out = out[out.event_id.isin(f.events)].reset_index(drop=True)
     out["did_significant"] = out.p_value_did < 0.05
     out["n_permutations"] = N_PERMUTATIONS
     return out
