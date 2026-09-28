@@ -525,8 +525,8 @@ function renderOverview() {
     const v = ctx.dataset.data[ctx.dataIndex], y = ctx.chart.scales.y;
     return v != null && y && (v / y.max) * ctx.chart.chartArea.height >= lines * 13 + 8;
   };
-  const lbl = (lines, extra = {}) => Object.assign({clamp: true, textAlign: 'center', anchor: 'end',
-    align: ctx => (fits(ctx, lines(ctx)) ? 'start' : 'end'), offset: ctx => (fits(ctx, lines(ctx)) ? 4 : 2),
+  const lbl = (lines, extra = {}) => Object.assign({clamp: true, textAlign: 'center', anchor: ctx => (fits(ctx, lines(ctx)) ? 'center' : 'end'),
+    align: ctx => (fits(ctx, lines(ctx)) ? 'center' : 'end'), offset: ctx => (fits(ctx, lines(ctx)) ? 0 : 2),
     color: ctx => (fits(ctx, lines(ctx)) ? '#ffffff' : css('--text')),
     font: ctx => ({size: ctx.chart.width < 420 ? 9 : 11, weight: 600})}, extra);
   const wide = {maxBarThickness: 96, categoryPercentage: 0.8, barPercentage: 0.92};

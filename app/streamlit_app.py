@@ -105,7 +105,7 @@ def sig_note(rows: pd.DataFrame, label: str) -> str:
 def inside_labels(values, axis_max, min_share):
     """White labels inside the bar; bars shorter than min_share of the axis get dark labels just above."""
     inside = [(v is not None and not pd.isna(v) and v / axis_max >= min_share) for v in values]
-    return dict(textposition=["inside" if i else "outside" for i in inside], insidetextanchor="end", textangle=0,
+    return dict(textposition=["inside" if i else "outside" for i in inside], insidetextanchor="middle", textangle=0,
                 textfont=dict(color=["#ffffff" if i else "#1b1f24" for i in inside], size=10))
 
 
