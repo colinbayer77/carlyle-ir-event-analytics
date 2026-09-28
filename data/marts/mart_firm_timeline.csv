@@ -81,8 +81,8 @@ F007,2026-08-09,Opportunity,O0093 Fund Gamma: Due Diligence ($1.5M),false
 F007,2026-08-31,Opportunity,O0093 Fund Gamma: IC / Documentation ($1.5M),false
 F008,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 3 contacts)",false
 F008,2026-06-21,Meeting,Relationship | In Person | Coverage A,false
-F008,2026-06-28,Opportunity,O9998 Fund Beta: Committed ($25.0M),false
 F008,2026-06-28,Opportunity,O9999 Fund Beta: Committed ($25.0M),false
+F008,2026-06-28,Opportunity,O9998 Fund Beta: Committed ($25.0M),false
 F009,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
 F010,2026-04-03,Opportunity,O0007 Fund Alpha: Initial Conversation ($10.0M),false
 F010,2026-04-12,Meeting,Relationship | Video | Coverage B,false
@@ -327,8 +327,8 @@ F033,2026-06-24,Opportunity,O0059 Credit Strategy: Initial Conversation ($15.0M)
 F033,2026-07-18,Opportunity,O0059 Credit Strategy: Follow-up / VDR ($15.0M),false
 F034,2026-03-07,Opportunity,O0070 Credit Strategy: Initial Conversation ($40.0M),false
 F034,2026-03-13,Opportunity,O0046 Fund Alpha: Initial Conversation ($15.0M),false
-F034,2026-03-21,Opportunity,O0046 Fund Alpha: Follow-up / VDR ($15.0M),false
 F034,2026-03-21,Opportunity,O0021 Secondaries Strategy: Initial Conversation ($15.0M),false
+F034,2026-03-21,Opportunity,O0046 Fund Alpha: Follow-up / VDR ($15.0M),false
 F034,2026-04-05,Opportunity,O0070 Credit Strategy: Follow-up / VDR ($40.0M),false
 F034,2026-04-18,Opportunity,O0021 Secondaries Strategy: Follow-up / VDR ($15.0M),false
 F034,2026-04-23,Opportunity,O0021 Secondaries Strategy: Due Diligence ($15.0M),false
@@ -408,8 +408,8 @@ F043,2026-06-18,Meeting,Relationship | Video | Coverage B,false
 F043,2026-07-29,Opportunity,O0061 Fund Beta: Initial Conversation ($150.0M),false
 F043,2026-08-06,Opportunity,O0061 Fund Beta: Follow-up / VDR ($150.0M),false
 F043,2026-08-19,Meeting,Relationship | Video | Coverage B,false
-F043,2026-08-25,Opportunity,O0061 Fund Beta: Due Diligence ($150.0M),false
 F043,2026-08-25,Opportunity,O0036 Credit Strategy: Initial Conversation ($100.0M),false
+F043,2026-08-25,Opportunity,O0061 Fund Beta: Due Diligence ($150.0M),false
 F043,2026-09-12,Opportunity,O0061 Fund Beta: IC / Documentation ($150.0M),false
 F043,2026-09-21,Opportunity,O0036 Credit Strategy: Follow-up / VDR ($100.0M),false
 F043,2026-09-26,Opportunity,O0036 Credit Strategy: Due Diligence ($100.0M),true

@@ -34,6 +34,8 @@ nav button.active { color: #fff; border-bottom-color: #fff; font-weight: 600; }
 .card h2, .insights h2 { font-family: 'EB Garamond', Georgia, serif; font-size: 19px; font-weight: 600; color: var(--text); }
 main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; }
+.sig-note { margin: 8px 0 0; }
+td .info, .info { color: var(--muted); cursor: help; font-size: 12px; }
 .controls .info { color: var(--muted); cursor: help; font-size: 13px; }
 .controls label { display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 13px; }
 select, input[type=search] { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; }
@@ -112,11 +114,13 @@ tr.sel { background: var(--surface-2); }
     <div class="insights">
       <h2>What leadership should take away</h2>
       <ol id="insights"></ol>
+      <p class="note sig-note" id="sigNoteIns"></p>
     </div>
     <div class="card">
       <h2>Event scorecard</h2>
       <p class="sub">All metrics respond to the window and tentative controls. "Associated" means the opportunity was created within the window after an event the firm attended (most recent event gets credit).</p>
       <div class="scroll" style="max-height:none"><table id="scorecard"></table></div>
+      <p class="note sig-note" id="sigNoteScore"></p>
     </div>
     <div class="grid2">
       <div class="card">
@@ -454,12 +458,15 @@ function renderOverview() {
   const leakT1 = D.mart_firm.filter(r => r.has_unfollowed_event && r.tier === 'Tier 1').length;
   $('#insights').innerHTML = [
     `<b>Events touch most of the book, but most pipeline did not follow an event.</b> ${allAssoc} of ${D.mart_opportunity.length} opportunities (${fmtM(d.reduce((a,r)=>a+r.assoc_pipeline_usd,0))} of ${fmtM(D.mart_opportunity.reduce((a,r)=>a+r.amount_usd,0))}) were opened within 90 days of an attended event. The largest commitment of the year (${fmtM(650e6)}, O0017) came from a firm that attended nothing.`,
-    `<b>No consistent lift versus non-attendees.</b> After adjusting for each group's prior rate, only the NY Summit shows attendees opening new opportunities faster (+${Math.round(by.E001.diff_in_diff_opp_rate*100)} pts); London (${Math.round(by.E002.diff_in_diff_opp_rate*100)} pts) and Berlin (${Math.round(by.E003.diff_in_diff_opp_rate*100)} pts) do not. This is association on small numbers, not proof either way.`,
+    `<b>No consistent lift versus non-attendees.</b> After adjusting for each group's prior rate, only the NY Summit shows attendees opening new opportunities faster (+${Math.round(by.E001.diff_in_diff_opp_rate*100)} pts); London (${Math.round(by.E002.diff_in_diff_opp_rate*100)} pts) and Berlin (${Math.round(by.E003.diff_in_diff_opp_rate*100)} pts) do not. None of the three gaps is statistically significant<sup>*</sup>: this is association on small numbers, not proof either way.`,
     `<b>Follow-up is the biggest controllable gap, worst at Tier 1.</b> Only ${pct(d.reduce((a,r)=>a+r.firms_followup_30,0)/d.reduce((a,r)=>a+r.firms_attended,0))} of attending firms got a meeting within 30 days; Tier 1 was ${t1fu} of ${t1.length}. ${leakT1} Tier 1 firms have an event with no meeting in the following 60 days.`,
     `<b>The $185K London dinner was the most efficient event.</b> ${fmtK(by.E002.cost_per_assoc_opp)} per associated opportunity and the highest 30-day follow-up (${pct(by.E002.followup_rate_30)}), versus ${fmtK(by.E001.cost_per_assoc_opp)} for NY and ${fmtK(by.E003.cost_per_assoc_opp)} for Berlin.`,
     `<b>Berlin ($610K) needs a case before it is renewed.</b> Meetings with attendees fell after the event (${by.E003.meetings_pre_60} in the 60 days before, ${by.E003.meetings_post_60} after), ${by.E003.assoc_opps} associated opportunities, no commitments yet. It is the youngest event (${by.E003.days_since_event} days), so recheck at 180 days.`,
   ].map(s => `<li>${s}</li>`).join('');
 
+  const sigText = (rows, label) => `<sup>*</sup> Statistical significance: two-sided permutation test. Which firms attended each event was randomly reshuffled ${rows[0].n_permutations.toLocaleString()} times to see how often a difference-in-differences this large appears by chance; a gap counts as significant only if p &lt; 0.05. ${label}: p = ${rows.map(r => r.p_value_did.toFixed(2) + ' (' + evShort(r.event_id) + ')').join(', ')}.`;
+  $('#sigNoteIns').innerHTML = sigText(d, 'Default rule (90 days, confirmed)');
+  $('#sigNoteScore').innerHTML = sigText(K, `Current settings (${$('#win').value} days${$('#tent').checked ? ', incl. tentative' : ''})`);
   // scorecard
   const rows = [
     ['Date / type', r => `${r.event_date} · ${r.event_type}`],
@@ -478,6 +485,7 @@ function renderOverview() {
     ['New-opp rate: attendees before → after', r => `${pct(r.attendee_prior_opp_rate)} → ${pct(r.attendee_new_opp_rate)}`],
     ['New-opp rate: non-attendees before → after', r => `${pct(r.non_attendee_prior_opp_rate)} → ${pct(r.non_attendee_new_opp_rate)}`],
     ['Difference-in-differences', r => (r.diff_in_diff_opp_rate >= 0 ? '+' : '') + Math.round(r.diff_in_diff_opp_rate * 100) + ' pts'],
+    ['p-value, permutation test <span class="info" title="Share of 5,000 random reshuffles of which firms attended that produce a gap at least this large. Significant only if below 0.05.">ⓘ</span><sup>*</sup>', r => r.p_value_did.toFixed(2) + (r.did_significant ? ' (significant)' : ' (not significant)')],
     ['Open opps advancing a stage (attendees vs not)', r => `${pct(r.open_opps_attendees_advanced / r.open_opps_attendees)} vs ${pct(r.open_opps_non_attendees_advanced / r.open_opps_non_attendees)}`],
     ['Days since event (as-of)', r => r.days_since_event],
   ];

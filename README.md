@@ -12,7 +12,9 @@
 ## The answer in five points
 
 1. **Events reach most priority firms (13 of 17 Tier 1, 47 of 60 overall) for $1.2M.** 38 of 107 opportunities ($1.57B, 31% of 2026 pipeline, $278M committed) opened within 90 days of an event the firm attended.
-2. **That is association, not demonstrated lift.** Against firms that did not attend, over the same dates, attendees did not open opportunities faster (difference-in-differences: NY +12 pts, London -14, Berlin -3; a permutation test puts all three within noise).
+2. **That is association, not demonstrated lift.** Against firms that did not attend, over the same dates, attendees did not open opportunities faster (difference-in-differences: NY +12 pts, London -14, Berlin -3). None is statistically significant\*.
+
+   \* Two-sided permutation test, 5,000 random reshuffles of which firms attended; significant only if p < 0.05. p = 0.61 (NY), 0.44 (London), 1.00 (Berlin).
 3. **Follow-up is the biggest controllable gap, worst at Tier 1.** 39% of attending firms had a meeting within 30 days; Tier 1 was 6 of 21. Ten Tier 1 firms with $808M of pipeline attended and were not met in the following 60 days.
 4. **The $185K London dinner was the most efficient event:** $13K per associated opportunity vs $26K for NY and $76K for Berlin, and the largest rise in post-event meetings.
 5. **Berlin ($610K) needs a case before renewal:** meetings with attendees fell after the event (19 to 11), no commitments yet. Recheck at 180 days.

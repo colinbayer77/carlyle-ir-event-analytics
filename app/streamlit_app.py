@@ -85,6 +85,13 @@ def line_layout(fig, height=320, top=40):
     return fig
 
 
+def sig_note(rows: pd.DataFrame, label: str) -> str:
+    ps = ", ".join(f"{r.p_value_did:.2f} ({EV_SHORT[r.event_id]})" for r in rows.itertuples())
+    return (f"Statistical significance: two-sided permutation test. Which firms attended each event was randomly reshuffled "
+            f"{int(rows.n_permutations.iloc[0]):,} times to see how often a difference-in-differences this large appears by chance; "
+            f"a gap counts as significant only if p < 0.05. {label}: p = {ps}.")
+
+
 def chart_head(col, title: str, sub: str = "") -> None:
     col.markdown(f'<div class="chart-title">{title}</div>' + (f'<div class="chart-sub">{sub}</div>' if sub else ""), unsafe_allow_html=True)
 
@@ -160,10 +167,12 @@ with tab_o:
         f"""**What leadership should take away** (default rule: 90 days, confirmed)
 
 1. **Most pipeline did not follow an event.** {int(d.assoc_opps.sum())} of {len(opps)} opportunities ({fm(d.assoc_pipeline_usd.sum())} of {fm(opps.amount_usd.sum())}) opened within 90 days of an attended event. The largest commitment ($650M) came from a firm that attended nothing.
-2. **No consistent lift versus non-attendees.** Difference-in-differences in new-opportunity rate: NY {d.loc['E001','diff_in_diff_opp_rate']*100:+.0f} pts, London {d.loc['E002','diff_in_diff_opp_rate']*100:+.0f} pts, Berlin {d.loc['E003','diff_in_diff_opp_rate']*100:+.0f} pts.
+2. **No consistent lift versus non-attendees.** Difference-in-differences in new-opportunity rate: NY {d.loc['E001','diff_in_diff_opp_rate']*100:+.0f} pts, London {d.loc['E002','diff_in_diff_opp_rate']*100:+.0f} pts, Berlin {d.loc['E003','diff_in_diff_opp_rate']*100:+.0f} pts; none statistically significant\\*.
 3. **Follow-up is the controllable gap.** {d.firms_followup_30.sum() / d.firms_attended.sum():.0%} of attending firms met within 30 days; Tier 1 only {int(t1.followed_up_30.sum())} of {len(t1)}.
 4. **London dinner ($185K) was most efficient:** {fk(d.loc['E002','cost_per_assoc_opp'])} per associated opp vs {fk(d.loc['E001','cost_per_assoc_opp'])} NY and {fk(d.loc['E003','cost_per_assoc_opp'])} Berlin.
-5. **Berlin ($610K) needs a case before renewal:** attendee meetings fell {int(d.loc['E003','meetings_pre_60'])} → {int(d.loc['E003','meetings_post_60'])}, no commitments yet (recheck at 180 days)."""
+5. **Berlin ($610K) needs a case before renewal:** attendee meetings fell {int(d.loc['E003','meetings_pre_60'])} → {int(d.loc['E003','meetings_post_60'])}, no commitments yet (recheck at 180 days).
+
+\\* {sig_note(d.reset_index(), "Default rule (90 days, confirmed)")}"""
         .replace("$", "\\$")  # stop Streamlit markdown reading $...$ as LaTeX
     )
 
@@ -182,11 +191,13 @@ with tab_o:
         "New-opp rate attendees before → after": K.attendee_prior_opp_rate.map("{:.0%}".format) + " → " + K.attendee_new_opp_rate.map("{:.0%}".format),
         "New-opp rate non-attendees before → after": K.non_attendee_prior_opp_rate.map("{:.0%}".format) + " → " + K.non_attendee_new_opp_rate.map("{:.0%}".format),
         "Difference-in-differences": (K.diff_in_diff_opp_rate * 100).map("{:+.0f} pts".format),
+        "p-value, permutation test*": K.p_value_did.map("{:.2f}".format) + K.did_significant.map({True: " (significant)", False: " (not significant)"}),
         "Days since event (as-of)": K.days_since_event.astype(str),
     }
     score = pd.DataFrame({k: list(v) for k, v in rows.items()}, index=[f"{n} ({l})" for n, l in zip(K.event_name, K.location)]).T
     st.subheader("Event scorecard")
     st.dataframe(score, width="stretch")
+    st.caption("\\* " + sig_note(K, f"Current settings ({window} days{', incl. tentative' if tent else ''})"))
 
     a, b = st.columns(2)
     chart_head(a, "New opportunities and meetings by month, 2026",

@@ -97,7 +97,7 @@ for eid, g in fw.groupby('event_id'):
     null = [did(g.assign(attended=rng.permutation(g.attended.values))) for _ in range(5000)]
     rows.append((eid, round(obs * 100, 1), round(np.mean(np.abs(null) >= abs(obs)), 3)))
 pd.DataFrame(rows, columns=['event', 'diff_in_diff_pts', 'p_value (two-sided)'])"""),
-    md("""None of the three differences is statistically distinguishable from zero with 19 to 26 attending firms per event. The honest conclusion is **"no detectable lift in new-opportunity creation"**, not "events do not work". The readout says exactly that, and recommends a design that could detect lift (see section 5)."""),
+    md("""None of the three differences is statistically significant: every p-value is well above the 0.05 threshold, with 19 to 26 attending firms per event. The build computes the same test for every window and attendance setting (`p_value_did` in `mart_event_kpis`). The honest conclusion is **"no detectable lift in new-opportunity creation"**, not "events do not work". The readout says exactly that, and recommends a design that could detect lift (see section 5)."""),
     md("### Tier and follow-up cuts"),
     code("""fe = marts['mart_firm_event'].query('is_confirmed')
 display(fe.groupby('tier').agg(firm_events=('firm_id', 'count'), followup_30=('followed_up_30', 'mean'),

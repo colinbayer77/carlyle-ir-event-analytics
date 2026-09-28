@@ -60,6 +60,9 @@ def bars(metric, fmt, title, higher_better=False):
     return f'<div class="bars"><div class="bh">{title}</div>{rows}</div>'
 
 
+SIG = (f"Statistical significance: two-sided permutation test ({int(k.n_permutations.iloc[0]):,} random reshuffles of which firms attended); "
+       f"significant only if p < 0.05. p = {k.loc['E001', 'p_value_did']:.2f} (NY), {k.loc['E002', 'p_value_did']:.2f} (London), "
+       f"{k.loc['E003', 'p_value_did']:.2f} (Berlin).")
 score_rows = [
     ("Cost", lambda e: fk(k.loc[e, "cost_usd"])),
     ("Firms attended (Tier 1)", lambda e: f"{k.loc[e, 'firms_attended']} ({k.loc[e, 'tier1_firms']})"),
@@ -70,6 +73,7 @@ score_rows = [
     ("Committed to date", lambda e: fm(k.loc[e, "assoc_committed_usd"])),
     ("Cost per associated opportunity", lambda e: fk(k.loc[e, "cost_per_assoc_opp"])),
     ("Lift vs non-attendees (diff-in-diff)", lambda e: f"{k.loc[e, 'diff_in_diff_opp_rate'] * 100:+.0f} pts"),
+    ("p-value, permutation test*", lambda e: f"{k.loc[e, 'p_value_did']:.2f}"),
     ("Days since event", lambda e: f"{k.loc[e, 'days_since_event']}"),
 ]
 score = "".join(f"<tr><td>{l}</td>" + "".join(f"<td>{f(e)}</td>" for e, *_ in EV) + "</tr>" for l, f in score_rows)
@@ -135,12 +139,12 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
     <div class="stat"><div class="n">{N['fu']:.0%}</div><div class="l">of attending firms had a meeting within 30 days (Tier 1: {N['t1_fu']} of {N['t1_n']} attendances)</div></div>
   </div>
   <div class="msgs">
-    <div class="msg"><b><span class="num">1</span>Associated, not proven.</b><span>About a third of pipeline followed an event, but attendees did not open opportunities faster than comparable non-attendees (NY {k.loc['E001','diff_in_diff_opp_rate']*100:+.0f} pts, London {k.loc['E002','diff_in_diff_opp_rate']*100:+.0f}, Berlin {k.loc['E003','diff_in_diff_opp_rate']*100:+.0f}; none statistically significant).</span></div>
+    <div class="msg"><b><span class="num">1</span>Associated, not proven.</b><span>About a third of pipeline followed an event, but attendees did not open opportunities faster than comparable non-attendees (NY {k.loc['E001','diff_in_diff_opp_rate']*100:+.0f} pts, London {k.loc['E002','diff_in_diff_opp_rate']*100:+.0f}, Berlin {k.loc['E003','diff_in_diff_opp_rate']*100:+.0f}; none statistically significant*).</span></div>
     <div class="msg"><b><span class="num">2</span>Follow-up is the controllable gap, worst at Tier 1.</b><span>{N['t1_nomtg']} of {N['t1_n']} Tier 1 attendances had no meeting in the next 60 days. {N['gap_n']} Tier 1 firms with {fm(N['gap_pipe'])} of pipeline are on that list.</span></div>
     <div class="msg"><b><span class="num">3</span>The dinner was the most efficient format.</b><span>London ({fk(k.loc['E002','cost_usd'])}): {fk(k.loc['E002','cost_per_assoc_opp'])} per associated opportunity and the most post-event meetings, vs {fk(k.loc['E001','cost_per_assoc_opp'])} NY and {fk(k.loc['E003','cost_per_assoc_opp'])} Berlin.</span></div>
     <div class="msg"><b><span class="num">4</span>Berlin needs a case before renewal.</b><span>Our most expensive event ({fk(k.loc['E003','cost_usd'])}): meetings with attendees fell ({k.loc['E003','meetings_pre_60']:.0f} → {k.loc['E003','meetings_post_60']:.0f}) and nothing has committed yet. Recheck at 180 days.</span></div>
   </div>
-  <div class="foot"><span class="note">Data as of 2026-09-23 (synthetic assessment data). Association window: opportunity created 0-90 days after an event the firm confirmed for; most recent event gets credit. Details: dashboard and docs/METHOD.md.</span><span class="author">{AUTHOR}</span></div>
+  <div class="foot"><span class="note">* {SIG}<br>Data as of 2026-09-23 (synthetic assessment data). Association window: opportunity created 0-90 days after an event the firm confirmed for; most recent event gets credit.</span><span class="author">{AUTHOR}</span></div>
 </section>
 
 <section class="slide">
@@ -160,7 +164,7 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
       <div class="callout"><b>How to read this.</b> "Associated" means the opportunity opened within 90 days of an event the firm attended. That shows what followed each event, not what it caused: we invite firms already likely to invest, and new opportunities peaked for everyone in June and July. The diff-in-diff row compares against firms that did not attend over the same dates.</div>
     </div>
   </div>
-  <div class="foot"><span class="note">Committed counts only stages dated on or before 2026-09-23; later-dated stages are treated as projected. Berlin is the youngest event, so its commitments are least mature.</span><span class="author">{AUTHOR}</span></div>
+  <div class="foot"><span class="note">* {SIG}<br>Committed counts only stages dated on or before 2026-09-23; later-dated stages are treated as projected.</span><span class="author">{AUTHOR}</span></div>
 </section>
 
 <section class="slide">
@@ -173,8 +177,8 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
     <div class="rec"><b><span class="num">3</span>Capture the data that would prove impact</b><p>Tag opportunities with a source event at creation, record check-in (not registration), and require firm mapping for every registrant. Today one registrant has no firm and nine firms are only "tentative".</p><div class="who">Owner: CRM / BI · Before the next event</div></div>
     <div class="rec"><b><span class="num">4</span>Design the next events to measure lift</b><p>Hold back invitations to a small matched group of firms (same tier, segment, region) and compare 90-day outcomes. One event is too small to prove lift; four to six events with the same design can.</p><div class="who">Owner: IR + BI · Pilot on the first 2027 event</div></div>
   </div>
-  <div class="caveat"><b>What this analysis cannot say:</b> that events caused the pipeline that followed them. With 19 to 26 attending firms per event, differences under about 15 points are within noise. The $650M commitment of the year came from a firm that attended no event, a reminder that most pipeline is built outside the event calendar.</div>
-  <div class="foot"><span class="note"></span><span class="author">{AUTHOR}</span></div>
+  <div class="caveat"><b>What this analysis cannot say:</b> that events caused the pipeline that followed them. With 19 to 26 attending firms per event, none of the three gaps is statistically significant*. The $650M commitment of the year came from a firm that attended no event, a reminder that most pipeline is built outside the event calendar.</div>
+  <div class="foot"><span class="note">* {SIG}</span><span class="author">{AUTHOR}</span></div>
 </section>
 </body></html>"""
 

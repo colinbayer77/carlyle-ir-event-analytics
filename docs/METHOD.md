@@ -18,7 +18,9 @@ That rule shows what followed events. It does not show events caused it, because
 - **Timing and seasonality.** New opportunities peaked in June and July for everyone, attendees or not.
 - **No source field.** Opportunities carry no campaign or source tag, so timing is the only link.
 
-To test for lift beyond the base rate, each event is compared with **firms that did not attend that event** over the same calendar window, before and after the event date (difference-in-differences). That controls for seasonality and for stable differences between the groups. It still does not remove selection on things that change over time, and with 19 to 26 attending firms per event, a gap of under about 15 points is within noise.
+To test for lift beyond the base rate, each event is compared with **firms that did not attend that event** over the same calendar window, before and after the event date (difference-in-differences). That controls for seasonality and for stable differences between the groups. It still does not remove selection on things that change over time.
+
+**Statistical significance.** Each gap is tested with a two-sided permutation test: which firms attended the event is randomly reshuffled 5,000 times, and the p-value is the share of reshuffles that produce a gap at least as large as the observed one. A gap counts as significant only if p < 0.05. At the default rule, p = 0.61 (NY), 0.44 (London), 1.00 (Berlin); across all 24 window and attendance settings the smallest is 0.07 (NY, 30 days). With 19 to 26 attending firms per event, only very large gaps could reach significance.
 
 ## Metric definitions
 
@@ -35,6 +37,7 @@ To test for lift beyond the base rate, each event is compared with **firms that 
 | Cost per associated opportunity | Event cost / associated opportunities |
 | New-opportunity rate | Firms opening at least one opportunity in the window / firms in the group |
 | Difference-in-differences | (attendee after - attendee before) - (non-attendee after - non-attendee before), in points |
+| p-value (permutation test) | Share of 5,000 random reshuffles of attendance that produce a gap at least as large; significant if below 0.05 |
 | Open opps advancing | Opportunities open on the event date that moved up at least one stage within the window, attendees vs non-attendees |
 
 ## Data-quality decisions
