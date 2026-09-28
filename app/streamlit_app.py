@@ -737,6 +737,7 @@ def md_doc(name: str) -> str:
     import re
 
     text = (ROOT / "docs" / name).read_text().replace("$", "\\$")
+    text = re.sub(r"\]\((?!https?://)([A-Za-z_]+\.md)\)", r"](https://github.com/colinbayer77/carlyle-ir-event-analytics/blob/main/docs/\1)", text)
     return re.sub(r"^(#{1,3}) ", lambda m: "#" * (len(m.group(1)) + 2) + " ", text, flags=re.M)
 
 
@@ -770,7 +771,7 @@ with tab_m:
     st.markdown(md_doc("METHOD.md"))
     st.divider()
     st.subheader("Data dictionary")
-    st.caption("Every metric on the dashboard: definition, source column, and how the page filters affect it. Also in the repo as docs/DATA_DICTIONARY.md.")
+    st.caption("Every metric on the dashboard: definition, source column, and how the page filters affect it. Also in the repo as [docs/DATA_DICTIONARY.md](https://github.com/colinbayer77/carlyle-ir-event-analytics/blob/main/docs/DATA_DICTIONARY.md).")
     st.markdown(md_doc("DATA_DICTIONARY.md"))
     st.subheader("Data-quality log")
     st.dataframe(dq, width="stretch", hide_index=True)
