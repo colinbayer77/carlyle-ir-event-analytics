@@ -42,6 +42,8 @@ The planner applies 2026 outcomes to a planned event: format, budget and attendi
 
 ## Metric definitions
 
+The short list below covers the headline metrics. Every metric on the dashboard, with its source column and how each filter affects it, is in [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
+
 | Metric | Definition |
 |---|---|
 | Attended firm | Firm with at least one **Confirmed** contact. Tentative-only firms are added only with the "include tentative" toggle. Confirmed is registration status; there is no check-in data. |

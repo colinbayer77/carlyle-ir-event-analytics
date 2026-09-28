@@ -98,6 +98,14 @@ tr.sel { background: var(--surface-2); }
 .view { display: none; } .view.active { display: block; }
 .note { color: var(--text-2); font-size: 12px; }
 .method h3 { font-size: 14px; margin: 16px 0 4px; }
+.dict h3 { font-size: 15px; margin: 18px 0 6px; color: var(--text); }
+.dict table { font-size: 12.5px; margin-bottom: 6px; }
+.dict th { position: static; }
+.dict td { line-height: 1.4; }
+.dict td:first-child, .dict th:first-child { min-width: 140px; }
+.dict table { table-layout: fixed; width: 100%; }
+.dict td, .dict th { overflow-wrap: anywhere; }
+.dict code { font-size: 11.5px; background: var(--surface-2); padding: 1px 4px; border-radius: 3px; }
 .method p, .method li { color: var(--text-2); }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--text-2); margin-bottom: 6px; }
 @media (max-width: 640px) {
@@ -397,16 +405,7 @@ tr.sel { background: var(--surface-2); }
       <h2>How to read this</h2>
       <h3>Association, not causation</h3>
       <p>Opportunities are linked to an event when the firm attended and the opportunity was created within the window after the event. That tells us what followed events; it does not prove the event caused it. The comparison group (firms that did not attend that event, measured over the same calendar window) and the before/after view are there to test whether attendance is linked to any lift beyond the base rate. Firms self-select into events (and we select them), so even a positive gap would still be association.</p>
-      <h3>Metric definitions</h3>
-      <ul>
-        <li><b>Attended firm</b>: at least one Confirmed contact. Tentative-only firms enter only with the toggle on. "Confirmed" is registration status; the data has no check-in.</li>
-        <li><b>Associated opportunity</b>: created 0 to W days after an attended event; if several qualify, the most recent event gets credit (last touch). Default W = 90.</li>
-        <li><b>Associated pipeline</b>: sum of opportunity amounts for associated opportunities, any stage.</li>
-        <li><b>Committed</b>: opportunity reached Committed on or before the as-of date.</li>
-        <li><b>Follow-up rate (30d)</b>: attending firms with a meeting 1-30 days after the event / attending firms.</li>
-        <li><b>New-opportunity rate</b>: firms that opened at least one opportunity in the window / firms in the group. Difference-in-differences = (attendee after - before) - (non-attendee after - before).</li>
-        <li><b>Cost per associated opportunity</b>: event cost / associated opportunities.</li>
-      </ul>
+      <p class="note">Full metric definitions are in the data dictionary below.</p>
       <h3>Known limits</h3>
       <ul>
         <li>Three events and 60 firms: every rate here is directional. A one-firm swing moves a tier rate by 5 to 15 points.</li>
@@ -415,6 +414,554 @@ tr.sel { background: var(--surface-2); }
         <li>At the 180-day window, London's and Berlin's post-event windows run past the as-of date (only 125 and 99 days have elapsed), while the before-window is a full 180 days, so 180-day comparisons for those two events are lopsided. The 30, 60 and 90 day windows are complete for all three events.</li>
         <li>Opportunities created on the event date count as event-associated (one case), even though some may have been opened before the event contact.</li>
       </ul>
+    </div>
+    <div class="card">
+      <h2>Data dictionary</h2>
+      <p class="sub">Every metric on the dashboard: definition, source column, and how the page filters affect it. Also in the repo as docs/DATA_DICTIONARY.md.</p>
+      <div class="dict"><p>Every metric shown on the dashboards, with its exact definition, the table and column it comes from, and how the page filters affect it. "Default rule" means the 90-day association window with confirmed attendance only, and no other filters.</p>
+<h3>Conventions used throughout</h3>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>As-of date</td>
+<td>2026-09-23, the date the data extract was delivered. A parameter in <code>src/build.py</code>. Stage entries dated later are "projected" and never count as achieved.</td>
+</tr>
+<tr>
+<td>Attended / attending firm</td>
+<td>A firm with at least one <strong>Confirmed</strong> registrant at the event. With the "Include tentative firm registrations as attendance" toggle on, any registrant counts. Registration is not check-in; the data has no check-in field.</td>
+</tr>
+<tr>
+<td>Firm-event</td>
+<td>One firm's attendance at one event. A firm at two events is two firm-events. 70 confirmed firm-events in 2026 (79 including tentative-only).</td>
+</tr>
+<tr>
+<td>Association window (W)</td>
+<td>Days after an event during which a newly created opportunity can be linked to it: 30, 60, 90 (default) or 180.</td>
+</tr>
+<tr>
+<td>Event-associated opportunity</td>
+<td>An opportunity whose firm attended an event and whose <code>created_date</code> falls 0 to W days after that event's date (both ends inclusive). If more than one attended event qualifies, the <strong>most recent</strong> one gets credit, so an opportunity is never counted twice.</td>
+</tr>
+<tr>
+<td>Comparison group (non-attendees)</td>
+<td>For each event, every firm in scope that did <strong>not</strong> attend that event. Firms removed by the seniority filter are dropped from both groups rather than treated as non-attendees.</td>
+</tr>
+<tr>
+<td>Window before / after</td>
+<td>For rates that compare before and after an event: "after" is [event date, event date + W]; "before" is [event date - W, event date).</td>
+</tr>
+<tr>
+<td>Stage rank</td>
+<td>Initial Conversation 1, Follow-up / VDR 2, Due Diligence 3, IC / Documentation 4, Committed 5. Declined is terminal and ranked 0.</td>
+</tr>
+<tr>
+<td>Actual vs projected stage</td>
+<td>Actual: <code>stage_date</code> on or before the as-of date. Projected: after it. Only actual stages set an opportunity's current stage, outcome and highest stage reached.</td>
+</tr>
+<tr>
+<td>Outcome</td>
+<td>Committed if an actual Committed stage exists; Declined if an actual Declined stage exists; otherwise Open.</td>
+</tr>
+<tr>
+<td>Pipeline ($)</td>
+<td>Sum of <code>opportunity_amount_usd</code>, at any stage, unless the text says committed. Each opportunity has one amount that never changes.</td>
+</tr>
+<tr>
+<td>Tier</td>
+<td>The firm's <code>priority</code> field: Tier 1, 2 or 3.</td>
+</tr>
+</tbody>
+</table>
+<h3>Executive summary cards</h3>
+<p>Source: <code>mart_event_kpis</code> summed across the selected events, except where noted. All respond to every page filter.</p>
+<table>
+<thead>
+<tr>
+<th>Card</th>
+<th>Definition</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Event spend</td>
+<td>Sum of <code>cost_usd</code> for the selected events. Not split by any other filter.</td>
+<td><code>dim_event.cost_usd</code></td>
+</tr>
+<tr>
+<td>Firms reached</td>
+<td>Distinct firms that attended at least one selected event. Sub-label: number of covered firms (60, or those in the selected segments).</td>
+<td><code>fct_firm_event</code></td>
+</tr>
+<tr>
+<td>Associated opportunities</td>
+<td>Count of event-associated opportunities across the selected events. Sub-label: total opportunities in scope (106 after removing one duplicate; fewer under the fund, segment or outlier filters).</td>
+<td><code>bridge_opp_event</code> → <code>fct_opportunity</code></td>
+</tr>
+<tr>
+<td>Associated pipeline</td>
+<td>Sum of amounts of the associated opportunities. Sub-label: event spend / associated opportunities.</td>
+<td><code>fct_opportunity.amount_usd</code></td>
+</tr>
+<tr>
+<td>Associated commitments</td>
+<td>Sum of amounts of associated opportunities whose outcome is Committed. Sub-label: their count.</td>
+<td><code>fct_opportunity</code></td>
+</tr>
+<tr>
+<td>Follow-up within 30 days</td>
+<td>Firm-events with at least one meeting 1 to 30 days after the event / attending firm-events. Sub-label: the two counts.</td>
+<td><code>fct_firm_event</code>, <code>fct_meeting</code></td>
+</tr>
+</tbody>
+</table>
+<p>The "What leadership should take away" box is fixed at the default rule and does not respond to filters; its numbers are generated from the marts at load time.</p>
+<h3>Event scorecard (one column per event)</h3>
+<p>Source: <code>mart_event_kpis</code>, one row per event per window per attendance rule.</p>
+<table>
+<thead>
+<tr>
+<th>Row</th>
+<th>Definition</th>
+<th>Column</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Date / type</td>
+<td>Event date (mm-dd-yyyy) and event type (Conference or Hospitality).</td>
+<td><code>event_date</code>, <code>event_type</code></td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>Event cost.</td>
+<td><code>cost_usd</code></td>
+</tr>
+<tr>
+<td>Firms attended (Tier 1)</td>
+<td>Attending firms, with the Tier 1 count in brackets.</td>
+<td><code>firms_attended</code>, <code>tier1_firms</code></td>
+</tr>
+<tr>
+<td>Cost per firm</td>
+<td>Cost / firms attended.</td>
+<td><code>cost_per_firm</code></td>
+</tr>
+<tr>
+<td>Follow-up within 30d</td>
+<td>Attending firms with a meeting 1 to 30 days after the event / attending firms.</td>
+<td><code>followup_rate_30</code></td>
+</tr>
+<tr>
+<td>Median days to first follow-up</td>
+<td>Median, over attending firms that had any later meeting, of days from the event to that firm's first meeting after it. Firms with no later meeting are excluded.</td>
+<td><code>median_days_to_followup</code></td>
+</tr>
+<tr>
+<td>Meetings 60d before → after</td>
+<td>Meetings with attending firms in the 60 days before the event (excluding the event day) → in the 60 days after (excluding the event day). Counts meetings, not firms.</td>
+<td><code>meetings_pre_60</code>, <code>meetings_post_60</code></td>
+</tr>
+<tr>
+<td>Associated opportunities</td>
+<td>Event-associated opportunities credited to this event.</td>
+<td><code>assoc_opps</code></td>
+</tr>
+<tr>
+<td>Firms converting</td>
+<td>Attending firms with at least one associated opportunity / attending firms.</td>
+<td><code>firm_conversion_rate</code></td>
+</tr>
+<tr>
+<td>Associated pipeline</td>
+<td>Sum of amounts of this event's associated opportunities.</td>
+<td><code>assoc_pipeline_usd</code></td>
+</tr>
+<tr>
+<td>Reached due diligence+</td>
+<td>Associated opportunities whose highest actual stage rank is 3 or more (Due Diligence, IC / Documentation or Committed).</td>
+<td><code>assoc_opps_reached_dd</code></td>
+</tr>
+<tr>
+<td>Committed</td>
+<td>Sum of amounts of this event's associated opportunities with outcome Committed, and their count.</td>
+<td><code>assoc_committed_usd</code>, <code>assoc_committed_opps</code></td>
+</tr>
+<tr>
+<td>Cost per associated opp</td>
+<td>Cost / associated opportunities. Blank when there are none.</td>
+<td><code>cost_per_assoc_opp</code></td>
+</tr>
+<tr>
+<td>New-opp rate: attendees before → after</td>
+<td>Share of attending firms that created at least one opportunity in the window before the event → in the window after.</td>
+<td><code>attendee_prior_opp_rate</code>, <code>attendee_new_opp_rate</code></td>
+</tr>
+<tr>
+<td>New-opp rate: non-attendees before → after</td>
+<td>The same two shares for the comparison group.</td>
+<td><code>non_attendee_prior_opp_rate</code>, <code>non_attendee_new_opp_rate</code></td>
+</tr>
+<tr>
+<td>Difference-in-differences</td>
+<td>(attendee after − attendee before) − (non-attendee after − non-attendee before), in percentage points. Positive means attendees' rate rose more than non-attendees' over the same dates.</td>
+<td><code>diff_in_diff_opp_rate</code></td>
+</tr>
+<tr>
+<td>p-value, permutation test</td>
+<td>Two-sided permutation test on the difference-in-differences. Which firms attended is randomly reshuffled 5,000 times, keeping the number of attendees fixed; the p-value is the share of reshuffles whose gap is at least as large as the observed one. Significant only if p &lt; 0.05. Recomputed with a fresh set of reshuffles under any extra filter, so it can differ in the second decimal between the two dashboards.</td>
+<td><code>p_value_did</code>, <code>did_significant</code></td>
+</tr>
+<tr>
+<td>Open opps advancing a stage (attendees vs not)</td>
+<td>Of opportunities that were open on the event date (created before it, not yet committed or declined), the share that reached a higher actual stage within the window after the event. Shown for attending firms vs the comparison group.</td>
+<td><code>open_opps_attendees_advanced</code> / <code>open_opps_attendees</code>, and the non-attendee pair</td>
+</tr>
+<tr>
+<td>Days since event (as-of)</td>
+<td>As-of date − event date. Berlin (99 days) has had less time to convert than New York (195).</td>
+<td><code>days_since_event</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Event scorecard charts</h3>
+<table>
+<thead>
+<tr>
+<th>Chart</th>
+<th>What each mark shows</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New opportunities and meetings by month</td>
+<td>Opportunities created in each calendar month (by <code>created_date</code>) and meetings held in each month, for firms in scope. Dashed lines mark the selected events' months. September is partial (to the as-of date).</td>
+<td><code>mart_monthly</code>, recomputed under filters from <code>fct_opportunity</code> and <code>fct_meeting</code></td>
+</tr>
+<tr>
+<td>Where 2026 pipeline came from (donut)</td>
+<td>Share of total pipeline $ in three buckets: event-associated (default rule), attendee firms outside the window, and firms with no confirmed attendance.</td>
+<td><code>mart_opportunity.source_bucket</code></td>
+</tr>
+<tr>
+<td>Cost per associated opportunity</td>
+<td>The scorecard's cost per associated opp. Label adds "firms converting".</td>
+<td><code>cost_per_assoc_opp</code>, <code>firm_conversion_rate</code></td>
+</tr>
+<tr>
+<td>Associated pipeline and commitments</td>
+<td>Associated pipeline $ and associated committed $ per event. The % on the committed bar is committed $ / associated pipeline $.</td>
+<td><code>assoc_pipeline_usd</code>, <code>assoc_committed_usd</code></td>
+</tr>
+<tr>
+<td>Did attending change new-opportunity rates?</td>
+<td>The four new-opp rates from the scorecard, as bars.</td>
+<td>the four <code>*_opp_rate</code> columns</td>
+</tr>
+<tr>
+<td>Meetings with attending firms, 60 days before vs after</td>
+<td>The scorecard's meeting counts.</td>
+<td><code>meetings_pre_60</code>, <code>meetings_post_60</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Follow-up &amp; segments tab</h3>
+<p>Source: <code>mart_firm_event</code> (one row per firm-event), filtered to attending firm-events under the current rule.</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Definition</th>
+<th>Column</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Follow-up within 30 days, by tier and event</td>
+<td>For each tier and event: firm-events with a meeting 1 to 30 days after the event / firm-events. Tooltip shows the count.</td>
+<td><code>meetings_post_30 &gt; 0</code></td>
+</tr>
+<tr>
+<td>Firms converting to a new opportunity, by cut</td>
+<td>For each value of the chosen cut (Tier, Segment, Relationship band, Senior attendee, Follow-up in 30d): share of firm-events with at least one associated opportunity, and share followed up within 30 days. n = firm-events in the group.</td>
+<td><code>assoc_opps_90 &gt; 0</code>, <code>meetings_post_30 &gt; 0</code></td>
+</tr>
+<tr>
+<td>Relationship band</td>
+<td>New relationship: historical commitments $0. Existing &lt; $50M. Existing $50M+.</td>
+<td><code>dim_firm.relationship_band</code></td>
+</tr>
+<tr>
+<td>Senior attendee</td>
+<td>A CIO or Managing Director was registered for the firm at that event (Confirmed only by default; any status with the tentative toggle).</td>
+<td><code>has_confirmed_senior</code>, <code>senior_contacts</code></td>
+</tr>
+<tr>
+<td>Follow-up status donut</td>
+<td>Firm-events split by days from event to first later meeting: within 30 days, 31 to 60, after 60, or no meeting since the event.</td>
+<td><code>days_to_first_followup</code></td>
+</tr>
+<tr>
+<td>Follow-up gaps table</td>
+<td>Attending firm-events with no meeting in the 60 days after the event, sorted by tier then the firm's total pipeline. "Days to next meeting" is the first meeting after the event, if any.</td>
+<td><code>meetings_post_60 = 0</code>, <code>days_to_first_followup</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Firm explorer tab</h3>
+<p>Source: <code>mart_firm</code> (one row per firm), <code>mart_firm_timeline</code>, <code>mart_stage_history</code>. This tab has its own filters and ignores the page filters.</p>
+<table>
+<thead>
+<tr>
+<th>Column / element</th>
+<th>Definition</th>
+<th>Column</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Events</td>
+<td>Events the firm was confirmed for; tentative-only events shown separately.</td>
+<td><code>events_confirmed</code>, <code>events_tentative_only</code></td>
+</tr>
+<tr>
+<td>Mtgs</td>
+<td>All meetings with the firm in the file, any date.</td>
+<td><code>meetings</code></td>
+</tr>
+<tr>
+<td>Opps</td>
+<td>All of the firm's opportunities.</td>
+<td><code>opps</code></td>
+</tr>
+<tr>
+<td>Pipeline</td>
+<td>Sum of the firm's opportunity amounts, any stage.</td>
+<td><code>pipeline_usd</code></td>
+</tr>
+<tr>
+<td>Event-assoc.</td>
+<td>Sum of amounts of the firm's event-associated opportunities at the default rule.</td>
+<td><code>assoc_pipeline_90_usd</code></td>
+</tr>
+<tr>
+<td>Committed</td>
+<td>Sum of amounts of the firm's opportunities with outcome Committed.</td>
+<td><code>committed_usd</code></td>
+</tr>
+<tr>
+<td>Follow-up gap</td>
+<td>The firm was confirmed at an event and had no meeting in the 60 days after it.</td>
+<td><code>has_unfollowed_event</code></td>
+</tr>
+<tr>
+<td>Firm timeline</td>
+<td>Every event registration, meeting and opportunity stage entry for the firm, in date order. Projected stage entries are marked.</td>
+<td><code>mart_firm_timeline</code></td>
+</tr>
+<tr>
+<td>Pipeline dollars by stage, by month</td>
+<td>Month-end snapshot: each of the firm's opportunities is counted, at its amount, in the stage it held on the last day of the month. September is taken at the as-of date; later months use projected stages and are marked *. Bars stack Committed at the base up to Initial Conversation, with Declined on top.</td>
+<td><code>mart_stage_history</code>, <code>fct_opportunity.amount_usd</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Opportunities tab</h3>
+<p>Source: <code>mart_opportunity</code> (one row per opportunity) and <code>mart_stage_history</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Definition</th>
+<th>Column</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source bucket</td>
+<td>Event-associated (in window, attended); Attendee, outside window (the firm attended some selected event but this opportunity is outside every window); No confirmed attendance (the firm attended no selected event under the current rule).</td>
+<td><code>source_bucket</code>, recomputed under filters</td>
+</tr>
+<tr>
+<td>Where pipeline came from</td>
+<td>Pipeline $ and committed $ per source bucket, with opportunity counts.</td>
+<td><code>amount_usd</code>, <code>outcome</code></td>
+</tr>
+<tr>
+<td>Funnel: highest stage reached</td>
+<td>For event-associated vs all other opportunities: how many reached each stage or beyond, by highest actual stage rank. An opportunity reaching IC counts at Initial Conversation, Follow-up / VDR, Due Diligence and IC.</td>
+<td><code>max_stage_rank</code></td>
+</tr>
+<tr>
+<td>Opportunity flow (Sankey)</td>
+<td>Every opportunity flows from its source (credited event, attendee outside window, or no attendance) to its furthest actual stage group (Intro / VDR = ranks 1-2, Due diligence = 3, IC / documentation = 4) and then to its status (Open or Declined). Committed opportunities flow straight from source to Committed. Node labels show the count and the pipeline $ passing through.</td>
+<td><code>assoc_event_id</code>, <code>max_stage_rank</code>, <code>outcome</code>, <code>amount_usd</code></td>
+</tr>
+<tr>
+<td>How fast opportunities followed each event</td>
+<td>Cumulative count of associated opportunities by days after the event, using a 180-day window. Each line stops at the event's age at the as-of date.</td>
+<td><code>bridge_opp_event</code> at 180 days</td>
+</tr>
+<tr>
+<td>Current stage</td>
+<td>The opportunity's latest actual stage.</td>
+<td><code>current_stage</code></td>
+</tr>
+<tr>
+<td>Associated event, +Nd</td>
+<td>The credited event and days from it to <code>created_date</code>.</td>
+<td><code>assoc_event_id</code>, <code>days_after_event</code></td>
+</tr>
+<tr>
+<td>Flags</td>
+<td>outlier: amount at or above $500M (one opportunity, $650M). projected stages: has stage entries after the as-of date. no early stages: first logged stage is not Initial Conversation. float amount: the amount was stored as a decimal string in the source.</td>
+<td><code>is_amount_outlier</code>, <code>projected_stage_rows</code>, <code>skipped_early_stages</code>, <code>amount_float_format</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Next Event Planner (Streamlit only)</h3>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Benchmark pool</td>
+<td>Confirmed firm-events from 2026 with each firm's outcomes at the default rule (<code>mart_firm_event</code>): associated opportunities, associated pipeline, follow-up within 30 days. "All 2026 events" uses all 70; "Same format only" uses the events of the chosen format.</td>
+</tr>
+<tr>
+<td>Estimates</td>
+<td>For the planned number of firms in each tier, the pool's firm-events of that tier are resampled with replacement 4,000 times (a bootstrap); the sums give a distribution of total associated opportunities and pipeline. The card shows the median, and the tooltip and footnote show the 10th to 90th percentile range.</td>
+</tr>
+<tr>
+<td>Cost per firm / per associated opp</td>
+<td>Budget / firms reached; budget / median associated opportunities.</td>
+</tr>
+<tr>
+<td>Firms met within 30 days</td>
+<td>Firms reached x the target slider. The planner adds no pipeline for follow-up because, in 2026, firms followed up within 30 days did not convert at a higher rate.</td>
+</tr>
+<tr>
+<td>Expected opportunities by tier</td>
+<td>Median of the same bootstrap run for each tier alone.</td>
+</tr>
+</tbody>
+</table>
+<h3>Page filters</h3>
+<table>
+<thead>
+<tr>
+<th>Filter</th>
+<th>Effect</th>
+<th>Where it applies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Association window</td>
+<td>Sets W (30, 60, 90, 180 days) for every association-based metric.</td>
+<td>All analytic tabs</td>
+</tr>
+<tr>
+<td>Include tentative firm registrations as attendance</td>
+<td>Counts tentative-only registrations as attendance; adds 9 firm-events.</td>
+<td>All analytic tabs</td>
+</tr>
+<tr>
+<td>Event</td>
+<td>Keeps only the selected events in cards, scorecard and charts. Credit is still assigned across all events, so no opportunity moves between events.</td>
+<td>All analytic tabs</td>
+</tr>
+<tr>
+<td>Investor segment</td>
+<td>Keeps only firms in the selected segments: attendees, comparison group and opportunities.</td>
+<td>All analytic tabs</td>
+</tr>
+<tr>
+<td>Fund</td>
+<td>Keeps only opportunities for the selected funds. Attendance, meetings and follow-up are unaffected.</td>
+<td>All analytic tabs</td>
+</tr>
+<tr>
+<td>Attendee seniority</td>
+<td>Counts attendance only where a CIO or MD was registered (or only where none was). Selecting both is the same as no filter. Firms dropped by this filter leave the comparison group too.</td>
+<td>All analytic tabs</td>
+</tr>
+<tr>
+<td>Exclude $650M outlier</td>
+<td>Removes O0017. The firm attended no event, so event metrics are unchanged; totals and opportunity charts change.</td>
+<td>All analytic tabs</td>
+</tr>
+</tbody>
+</table>
+<p>Event cost is never split by filter, so cost per opportunity under a filter is the full event cost over the filtered opportunities. Filtered groups are small (often under 10 firms per event); read rates as directional.</p>
+<h3>Source tables behind the metrics</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Grain</th>
+<th>Built from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dim_event</code></td>
+<td>1 row per event (3)</td>
+<td><code>events.csv</code></td>
+</tr>
+<tr>
+<td><code>dim_firm</code></td>
+<td>1 row per firm (60)</td>
+<td><code>firms.csv</code>, plus <code>relationship_band</code></td>
+</tr>
+<tr>
+<td><code>fct_firm_event</code></td>
+<td>1 row per firm x event with any registrant (79)</td>
+<td><code>event_attendees.csv</code>, deduplicated, unmapped contact excluded</td>
+</tr>
+<tr>
+<td><code>fct_meeting</code></td>
+<td>1 row per meeting (112)</td>
+<td><code>meetings.csv</code></td>
+</tr>
+<tr>
+<td><code>stg_opp_stage</code></td>
+<td>1 row per opportunity x stage (first date the stage was reached)</td>
+<td><code>opportunity_stage_history.csv</code>, repeated stage rows collapsed, duplicate opportunity O9999 removed</td>
+</tr>
+<tr>
+<td><code>fct_opportunity</code></td>
+<td>1 row per opportunity (106)</td>
+<td><code>stg_opp_stage</code>, evaluated as of the as-of date</td>
+</tr>
+<tr>
+<td><code>bridge_opp_event</code></td>
+<td>1 row per opportunity x window x attendance rule where an event gets credit</td>
+<td><code>fct_opportunity</code>, <code>fct_firm_event</code>, <code>dim_event</code></td>
+</tr>
+<tr>
+<td><code>mart_event_kpis</code></td>
+<td>1 row per event x window x attendance rule (24)</td>
+<td>all of the above</td>
+</tr>
+<tr>
+<td><code>mart_firm_event</code>, <code>mart_firm</code>, <code>mart_opportunity</code>, <code>mart_firm_timeline</code>, <code>mart_segment</code>, <code>mart_monthly</code>, <code>mart_event_curve</code>, <code>mart_stage_history</code>, <code>mart_meetings</code></td>
+<td>see <code>docs/DATA.md</code></td>
+<td>the core tables</td>
+</tr>
+</tbody>
+</table></div>
     </div>
     <div class="card">
       <h2>Data-quality log</h2>

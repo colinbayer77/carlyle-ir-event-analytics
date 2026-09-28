@@ -768,6 +768,10 @@ with tab_m:
     st.graphviz_chart(DATA_MODEL_DOT, width="stretch")
     st.divider()
     st.markdown(md_doc("METHOD.md"))
+    st.divider()
+    st.subheader("Data dictionary")
+    st.caption("Every metric on the dashboard: definition, source column, and how the page filters affect it. Also in the repo as docs/DATA_DICTIONARY.md.")
+    st.markdown(md_doc("DATA_DICTIONARY.md"))
     st.subheader("Data-quality log")
     st.dataframe(dq, width="stretch", hide_index=True)
 

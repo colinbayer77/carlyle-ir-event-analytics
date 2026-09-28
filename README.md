@@ -5,7 +5,8 @@
 **Live dashboard:** https://colinbayer77.github.io/carlyle-ir-event-analytics/ (static, no install)
 **Executive readout (3 slides):** [readout/exec_readout.pdf](readout/exec_readout.pdf)
 **How AI was used and checked:** [AI_USAGE.md](AI_USAGE.md)
-**Method, metric definitions, data-quality decisions:** [docs/METHOD.md](docs/METHOD.md)
+**Method and data-quality decisions:** [docs/METHOD.md](docs/METHOD.md)
+**Data dictionary (every metric, its source column and filter behaviour):** [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md)
 
 ![Executive summary](screenshots/01_executive_summary.png)
 
