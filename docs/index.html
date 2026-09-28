@@ -54,6 +54,10 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 @media (max-width: 760px) { .ctl-selects { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .sig-note { margin: 12px 0 0; padding-top: 6px; border-top: 1px solid var(--border); font-size: 10px; line-height: 1.35; color: var(--muted); }
 td .info, .info { color: var(--muted); cursor: help; font-size: 12px; }
+.info { cursor: help; border-radius: 50%; outline-offset: 2px; }
+.info:hover, .info:focus-visible { color: var(--accent); }
+#tip { position: fixed; z-index: 1000; max-width: 300px; background: #1b1f24; color: #fff; font-size: 12px; line-height: 1.4; padding: 8px 10px; border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.2); pointer-events: none; opacity: 0; transition: opacity .12s; }
+#tip.show { opacity: 1; }
 .controls .info { color: var(--muted); cursor: help; font-size: 13px; }
 .controls label { display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 13px; }
 select, input[type=search] { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; }
@@ -794,6 +798,32 @@ function renderAll() {
 }
 $('#win').onchange = renderAll; $('#tent').onchange = renderAll;
 initFirmFilters();
+// Tooltips for the ⓘ icons: shown immediately on hover, keyboard focus or tap.
+// Text comes from the icon's own title or its label's title; native titles are removed so they don't double up.
+const tipEl = document.body.appendChild(Object.assign(document.createElement('div'), {id: 'tip', role: 'tooltip'}));
+function tipText(el) {
+  if (!el.dataset.tip) {
+    const host = el.hasAttribute('title') ? el : el.closest('[title]');
+    el.dataset.tip = host ? host.getAttribute('title') : '';
+    if (host) host.removeAttribute('title');
+    el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', el.dataset.tip);
+  }
+  return el.dataset.tip;
+}
+function showTip(el) {
+  const t = tipText(el); if (!t) return;
+  tipEl.textContent = t; tipEl.classList.add('show');
+  const r = el.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+  const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
+  const top = r.bottom + 8 + h > innerHeight ? r.top - h - 8 : r.bottom + 8;
+  tipEl.style.left = left + 'px'; tipEl.style.top = top + 'px';
+}
+const hideTip = () => tipEl.classList.remove('show');
+document.addEventListener('mouseover', e => { const el = e.target.closest('.info'); el ? showTip(el) : hideTip(); });
+document.addEventListener('focusin', e => { const el = e.target.closest('.info'); el ? showTip(el) : hideTip(); });
+document.addEventListener('click', e => { const el = e.target.closest('.info'); if (el) { e.preventDefault(); showTip(el); } }, true);
+addEventListener('scroll', hideTip, true);
+document.querySelectorAll('.info').forEach(tipText);
 const msOptions = (id, vals) => $(`#${id} .ms-panel`).insertAdjacentHTML('afterbegin', vals.map(v => `<label><input type="checkbox" value="${esc(v)}"> ${esc(v)}</label>`).join(''));
 msOptions('gEv', EVENTS.map(e => e.event_id));
 document.querySelectorAll('#gEv .ms-panel label').forEach(l => { const v = l.querySelector('input').value; l.lastChild.textContent = ' ' + evShort(v); });
