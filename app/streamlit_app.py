@@ -369,8 +369,7 @@ with tab_s:
             fig.add_annotation(x=k, y=1.0 + 0.08 * (n % 2), yref="paper", yanchor="bottom",
                                text=" / ".join(EV_SHORT[e] for e in ev.split(",")), showarrow=False, font=dict(size=11, color="#5b6570"))
             n += 1
-    fig.update_layout(legend=dict(orientation="h", y=-0.15, x=0))
-    fig = line_layout(fig, top=60).update_layout(legend=dict(orientation="h", y=-0.15, x=0))
+        fig = line_layout(fig, top=60).update_layout(legend=dict(orientation="h", y=-0.18, x=0.5, xanchor="center"))
     fig.update_yaxes(visible=False, range=[-3, max(monthly.new_opps.max(), monthly.meetings.max()) * 1.25])
     a.plotly_chart(fig, width="stretch")
     chart_head(b, "Where 2026 pipeline came from", "Share of $ pipeline by source, under the current filters.")
@@ -403,17 +402,17 @@ with tab_s:
                        hovertemplate="%{x}<br>Committed: $%{y:.0f}M<extra></extra>", cliponaxis=False,
                        **inside_labels(K.assoc_committed_usd / 1e6, pmax, min_share=0.2))
     fig.update_yaxes(range=[0, pmax * 1.12], visible=False)
-    fig.update_layout(uniformtext_minsize=10, uniformtext_mode="show", legend=dict(y=1.18), bargap=0.25, bargroupgap=0.05)
+    fig.update_layout(uniformtext_minsize=10, uniformtext_mode="show", legend=dict(orientation="h", y=-0.12, x=0.5, xanchor="center"), bargap=0.25, bargroupgap=0.05)
     b.plotly_chart(fig, width="stretch")
     a, b = st.columns(2)
     chart_head(a, "New-opportunity rate before vs after the event")
     lift = [K.attendee_prior_opp_rate, K.attendee_new_opp_rate, K.non_attendee_prior_opp_rate, K.non_attendee_new_opp_rate]
     fig = bar_fig(labels, [("Attendees, before", lift[0], NEUTRAL), ("Attendees, after", lift[1], BLUE),
                            ("Non-attendees, before", lift[2], "#dcdad4"), ("Non-attendees, after", lift[3], ORANGE)])
-    a.plotly_chart(label_bars(fig, [[pct(v) for v in s] for s in lift], light=(0, 2), min_share=0.15), width="stretch")
+    a.plotly_chart(label_bars(fig, [[pct(v) for v in s] for s in lift], light=(0, 2), min_share=0.15).update_layout(legend=dict(orientation="h", y=-0.12, x=0.5, xanchor="center")), width="stretch")
     chart_head(b, "Meetings with attending firms, 60 days before vs after")
     fig = bar_fig(labels, [("Before", K.meetings_pre_60, NEUTRAL), ("After", K.meetings_post_60, BLUE)])
-    b.plotly_chart(label_bars(fig, [[str(int(v)) for v in K.meetings_pre_60], [str(int(v)) for v in K.meetings_post_60]], light=(0,)), width="stretch")
+    b.plotly_chart(label_bars(fig, [[str(int(v)) for v in K.meetings_pre_60], [str(int(v)) for v in K.meetings_post_60]], light=(0,)).update_layout(legend=dict(orientation="h", y=-0.12, x=0.5, xanchor="center")), width="stretch")
 
 with tab_f:
     conf = ATT.copy()

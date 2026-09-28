@@ -1065,7 +1065,7 @@ function donut(id, labels, values, colors, center, fmt) {
   chart(id, {type: 'doughnut', plugins: [ChartDataLabels, centerText],
     data: {labels, datasets: [{data: values, backgroundColor: colors, borderColor: css('--surface'), borderWidth: 2, hoverOffset: 4}]},
     options: {cutout: '62%', interaction: {mode: 'nearest', intersect: true}, scales: {},
-      plugins: {legend: {position: 'right', labels: {boxWidth: 10, boxHeight: 10, color: css('--text-2')}},
+      plugins: {legend: {position: 'bottom', align: 'center', labels: {boxWidth: 10, boxHeight: 10, color: css('--text-2')}},
         tooltip: {callbacks: {label: c => `${c.label}: ${fmt(c.raw)} (${Math.round(c.raw / total * 100)}%)`}},
         datalabels: {color: '#fff', font: {weight: 600, size: 12}, formatter: v => v / total >= 0.06 ? Math.round(v / total * 100) + '%' : ''},
         centerText: center}}});
@@ -1182,7 +1182,7 @@ function renderOverview() {
       bar('Associated pipeline', pipeVals, css('--s1'), {...wide, maxBarThickness: 72}),
       bar('Committed', K.map(r => r.assoc_committed_usd / 1e6), css('--s3'), {...wide, maxBarThickness: 72})]},
     options: {layout: {padding: {top: 8}},
-      plugins: {legend: {position: 'top', align: 'start', labels: {boxWidth: 10, boxHeight: 10}},
+      plugins: {legend: {position: 'bottom', align: 'center', labels: {boxWidth: 10, boxHeight: 10}},
         tooltip: {callbacks: {label: c => `${c.dataset.label}: $${c.raw.toFixed(0)}M`}},
         datalabels: lbl(c => (c.datasetIndex === 0 ? 1 : 2), {formatter: (v, c) => c.datasetIndex === 0 ? fmtM(v * 1e6)
           : [fmtM(v * 1e6), pct(K[c.dataIndex].assoc_pipeline_usd ? K[c.dataIndex].assoc_committed_usd / K[c.dataIndex].assoc_pipeline_usd : 0)]})},
@@ -1192,7 +1192,7 @@ function renderOverview() {
       bar('Attendees, after', K.map(r => r.attendee_new_opp_rate * 100), css('--s1')),
       bar('Non-attendees, before', K.map(r => r.non_attendee_prior_opp_rate * 100), css('--s2') + '59'),
       bar('Non-attendees, after', K.map(r => r.non_attendee_new_opp_rate * 100), css('--s2'))]},
-    options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label}: ${Math.round(c.raw)}%`}}, datalabels: barLabels(v => (v == null ? '' : Math.round(v) + '%'))},
+    options: {plugins: {legend: {position: 'bottom', align: 'center', labels: {boxWidth: 10, boxHeight: 10}}, tooltip: {callbacks: {label: c => `${c.dataset.label}: ${Math.round(c.raw)}%`}}, datalabels: barLabels(v => (v == null ? '' : Math.round(v) + '%'))},
       scales: {x: {grid: {display: false}}, y: hiddenAxis(maxOf(K.flatMap(r => [r.attendee_prior_opp_rate, r.attendee_new_opp_rate, r.non_attendee_prior_opp_rate, r.non_attendee_new_opp_rate]).map(v => v * 100)) * 1.1)}}});
   const firmSet = new Set(C.firmsIn.map(r => r.firm_id));
   const M = D.mart_monthly.map(r => ({...r,
@@ -1206,7 +1206,7 @@ function renderOverview() {
   chart('cMonthly', {type: 'line', plugins: [eventMarkers, ChartDataLabels], data: {labels: mLabels, datasets: [
       line('New opportunities', M.map(r => r.new_opps), css('--s1')),
       line('Meetings', M.map(r => r.meetings), css('--s2'))]},
-    options: {plugins: {legend: {position: 'top', align: 'start', labels: {boxWidth: 10, boxHeight: 10}, padding: {bottom: 14}},
+    options: {plugins: {legend: {position: 'bottom', align: 'center', labels: {boxWidth: 10, boxHeight: 10}, padding: {bottom: 14}},
         eventMarkers: {marks: M.map((r, i) => { const ev = (r.events_in_month || '').split(',').filter(e => e && C.events.some(x => x.event_id === e)); return ev.length ? {i, label: ev.map(evShort).join(' / ')} : null; }).filter(Boolean)},
         datalabels: {align: ctx => (above(ctx) ? 'top' : 'bottom'), anchor: 'center', offset: 6, clamp: true, color: css('--text'),
           font: ctx => ({size: ctx.chart.width < 420 ? 9 : 11, weight: 600}), formatter: v => v}},
@@ -1218,7 +1218,7 @@ function renderOverview() {
   chart('cMtg', {type: 'bar', plugins: [ChartDataLabels], data: {labels, datasets: [
       bar('60 days before', K.map(r => r.meetings_pre_60), css('--neutral'), wide),
       bar('60 days after', K.map(r => r.meetings_post_60), css('--s1'), wide)]},
-    options: {plugins: {datalabels: barLabels(v => String(v))},
+    options: {plugins: {legend: {position: 'bottom', align: 'center', labels: {boxWidth: 10, boxHeight: 10}}, datalabels: barLabels(v => String(v))},
       scales: {x: {grid: {display: false}}, y: hiddenAxis(maxOf(K.flatMap(r => [r.meetings_pre_60, r.meetings_post_60])) * 1.1)}}});
 }
 
