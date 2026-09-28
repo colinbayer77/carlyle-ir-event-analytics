@@ -52,7 +52,10 @@ h2, h3, .stSubheader {{ font-family: 'EB Garamond', Georgia, serif !important; c
 .chart-sub {{ color: #5b6570; font-size: 13px; margin: 2px 0 4px; }}
 div[data-testid="stMetric"] {{ background: #f2f5f7; border: 1px solid #e1e7eb; border-radius: 10px; padding: 10px 12px; text-align: center; }}
 [data-testid="stMetric"] {{ min-height: 108px; display: flex; flex-direction: column; justify-content: center; }}
-[data-testid="stMetricLabel"] {{ display: flex !important; justify-content: center !important; align-items: center; gap: 4px; width: 100%; }}
+[data-testid="stMetricLabel"] {{ display: flex !important; justify-content: center !important; align-items: center; width: 100%; position: static; }}
+/* the help icon sits in the card's top-right corner, out of the flow, so the title stays centered */
+[data-testid="stMetric"] {{ position: relative; }}
+[data-testid="stMetricLabel"] > span {{ position: absolute; right: 8px; top: 8px; }}
 [data-testid="stMetricLabel"] > div {{ width: auto !important; justify-content: center; }}
 [data-testid="stMetricLabel"] p, [data-testid="stMetricLabel"] div {{ white-space: normal !important; overflow: visible !important; text-overflow: clip !important; text-align: center; }}
 div[data-testid="stMetricValue"] {{ color: {NAVY}; font-weight: 700; justify-content: center; text-align: center; font-size: 1.9rem; }}
