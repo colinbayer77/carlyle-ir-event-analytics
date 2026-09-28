@@ -192,7 +192,7 @@ def bar_fig(x, series, yfmt=None, horizontal=False, height=300):
 brand_css()
 
 TAB_NAMES = ["Executive summary", "Event Scorecard", "Follow-up & segments", "Firm explorer", "Opportunities",
-             "Next Event Planner", "Underlying Data Model and Data Quality"]
+             "Underlying Data Model and Data Quality", "Next Event Planner"]
 # A tab bar that knows which tab is open, so page-level filters can be hidden where they don't apply (the planner).
 PAGE = st.radio("View", TAB_NAMES, horizontal=True, key="nav", label_visibility="collapsed")
 SHOW_FILTERS = PAGE != "Next Event Planner"
@@ -282,7 +282,7 @@ def _tab(name):
     return ph.container()
 
 
-tab_o, tab_s, tab_f, tab_x, tab_p, tab_n, tab_m = (_tab(n) for n in TAB_NAMES)
+tab_o, tab_s, tab_f, tab_x, tab_p, tab_m, tab_n = (_tab(n) for n in TAB_NAMES)
 
 with tab_o:
     reached = len(ATT_FIRMS)
