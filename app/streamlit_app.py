@@ -501,13 +501,14 @@ with tab_p:
     fig.update_xaxes(title="Days after event", gridcolor="#f0f2f4")
     fig.update_yaxes(title="Cumulative opportunities")
     st.plotly_chart(line_layout(fig, height=340), width="stretch")
-    c = st.columns(2)
-    s1 = c[0].selectbox("Source", ["All"] + BUCKETS)
-    s2 = c[1].selectbox("Outcome", ["All", "Open", "Committed", "Declined"])
+    c = st.columns(5)
+    s1 = c[0].multiselect("Source", BUCKETS, placeholder="All", key="ot_source")
+    s2 = c[1].multiselect("Outcome", ["Open", "Committed", "Declined"], placeholder="All", key="ot_outcome")
+    s3 = c[2].multiselect("Opportunity", sorted(FOPPS.opportunity_id), placeholder="All (type to search)", key="ot_opp")
     o = FOPPS
-    for col_, val in [("bucket", s1), ("outcome", s2)]:
-        if val != "All":
-            o = o[o[col_] == val]
+    for col_, val in [("bucket", s1), ("outcome", s2), ("opportunity_id", s3)]:
+        if val:
+            o = o[o[col_].isin(val)]
     st.dataframe(o.assign(created_date=o.created_date.dt.strftime("%Y-%m-%d"))[
                  ["opportunity_id", "firm_name", "tier", "fund_name", "created_date", "amount_usd", "current_stage", "outcome",
                   "assoc_event_id", "days_after_event", "is_amount_outlier", "projected_stage_rows"]],

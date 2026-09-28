@@ -40,6 +40,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 .ctl-selects select { width: 100%; }
 .ctl-selects input[type=search] { width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 13px; background: var(--surface); color: var(--text); }
 .ms { position: relative; }
+.ms-search { width: 100%; margin-bottom: 4px; border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; font-size: 12px; background: var(--surface); color: var(--text); }
 .ms summary { list-style: none; cursor: pointer; border: 1px solid var(--border); border-radius: 6px; padding: 5px 28px 5px 10px; background: var(--surface); color: var(--text); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
 .ms summary::-webkit-details-marker { display: none; }
 .ms summary::after { content: '▾'; position: absolute; right: 10px; color: var(--text-2); }
@@ -280,8 +281,11 @@ tr.sel { background: var(--surface-2); }
     <div class="card">
       <h2>Opportunities</h2>
       <div class="controls" style="margin:6px 0 10px">
-        <label>Source <select id="oSource"><option value="">All</option></select></label>
-        <label>Outcome <select id="oOutcome"><option value="">All</option></select></label>
+        <div class="ctl-selects">
+        <label class="sel"><span class="lbl">Source</span><details class="ms" id="oSource"><summary>All</summary><div class="ms-panel"><div class="ms-opts"></div></div></details></label>
+        <label class="sel"><span class="lbl">Outcome</span><details class="ms" id="oOutcome"><summary>All</summary><div class="ms-panel"><div class="ms-opts"></div></div></details></label>
+        <label class="sel"><span class="lbl">Opportunity</span><details class="ms" id="oOpp"><summary>All</summary><div class="ms-panel"><input type="text" class="ms-search" placeholder="Type to filter"><div class="ms-opts"></div></div></details></label>
+        </div>
       </div>
       <div class="scroll"><table id="oppTable"></table></div>
     </div>
@@ -789,14 +793,35 @@ function renderOpps() {
     options: {indexAxis: 'y', plugins: {datalabels: barLabels(v => String(v))},
       scales: {y: {grid: {display: false}}, x: hiddenAxis(Math.max(1, reach(other, 0), reach(ea, 0)) * 1.08)}}});
 
-  const fill = (sel, vals) => { if ($(sel).options.length === 1) { $(sel).insertAdjacentHTML('beforeend', vals.map(v => `<option>${esc(v)}</option>`).join('')); $(sel).onchange = renderOpps; } };
-  const keep = $('#oSource').value;
-  $('#oSource').innerHTML = '<option value="">All</option>' + buckets.map(b => `<option ${b === keep ? 'selected' : ''}>${esc(b)}</option>`).join('');
-  $('#oSource').onchange = renderOpps; fill('#oOutcome', ['Open', 'Committed', 'Declined']);
-  const s = $('#oSource').value, oc = $('#oOutcome').value;
-  const rows = O.filter(o => (!s || o.bucket === s) && (!oc || o.outcome === oc));
+  msSet('oSource', buckets);
+  msSet('oOpp', O.map(o => o.opportunity_id).sort());
+  const s = msValues('oSource'), oc = msValues('oOutcome'), ids = msValues('oOpp');
+  const rows = O.filter(o => (!s.length || s.includes(o.bucket)) && (!oc.length || oc.includes(o.outcome)) && (!ids.length || ids.includes(o.opportunity_id)));
   $('#oppTable').innerHTML = `<thead><tr><th>Opp</th><th>Firm</th><th class="hide-sm">Tier</th><th>Fund</th><th>Created</th><th class="n">Amount</th><th>Current stage</th><th>Associated event</th><th class="hide-sm">Flags</th></tr></thead><tbody>` +
     rows.map(o => `<tr><td>${o.opportunity_id}</td><td>${esc(o.firm_name)}</td><td class="hide-sm">${o.tier}</td><td>${esc(o.fund_name)}</td><td>${o.created_date}</td><td class="n">${fmtM(o.amount_usd)}</td><td>${o.outcome === 'Committed' ? '<span class="pill good">Committed</span>' : o.outcome === 'Declined' ? '<span class="pill bad">Declined</span>' : esc(o.current_stage)}</td><td>${o.assoc_event_id ? evShort(o.assoc_event_id) + ` <span class="note">+${o.days_after_event}d</span>` : '<span class="note">none</span>'}</td><td class="hide-sm">${[o.is_amount_outlier && 'outlier', o.projected_stage_rows > 0 && 'projected stages', o.skipped_early_stages && 'no early stages', o.amount_float_format && 'float amount'].filter(Boolean).map(x => `<span class="pill">${x}</span>`).join(' ')}</td></tr>`).join('') + '</tbody>';
+}
+
+// Checklist dropdowns whose options change with the filters (opportunity table).
+// Options live in .ms-opts so they can be rebuilt without losing the ticks, the search text or the Clear button.
+function msSync(id) {
+  const el = document.getElementById(id), v = [...el.querySelectorAll('.ms-opts input:checked')].map(x => x.parentElement.textContent.trim());
+  el.querySelector('summary').textContent = !v.length ? 'All' : v.length <= 2 ? v.join(', ') : `${v.length} selected`;
+}
+function msFilterSearch(el) {
+  const q = (el.querySelector('.ms-search')?.value || '').toLowerCase();
+  el.querySelectorAll('.ms-opts label').forEach(l => (l.style.display = !q || l.textContent.toLowerCase().includes(q) ? '' : 'none'));
+}
+function msSet(id, vals) {
+  const el = document.getElementById(id), keep = new Set(msValues(id));
+  el.querySelector('.ms-opts').innerHTML = vals.map(v => `<label><input type="checkbox" value="${esc(v)}" ${keep.has(v) ? 'checked' : ''}> ${esc(v)}</label>`).join('');
+  msFilterSearch(el); msSync(id);
+}
+function msWire(id, onChange) {
+  const el = document.getElementById(id), panel = el.querySelector('.ms-panel');
+  panel.insertAdjacentHTML('beforeend', '<button type="button" class="ms-clear">Clear (All)</button>');
+  panel.addEventListener('change', e => { if (e.target.type === 'checkbox') { msSync(id); onChange(); } });
+  panel.querySelector('.ms-search')?.addEventListener('input', () => msFilterSearch(el));
+  panel.querySelector('.ms-clear').onclick = () => { el.querySelectorAll('.ms-opts input').forEach(x => (x.checked = false)); msSync(id); onChange(); };
 }
 
 function renderMethod() {
@@ -861,6 +886,8 @@ msOptions('gFund', [...new Set(D.mart_opportunity.map(r => r.fund_name))].sort()
 }));
 document.addEventListener('click', e => document.querySelectorAll('details.ms[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; }));
 $('#gOut').onchange = renderAll;
+['oSource', 'oOutcome', 'oOpp'].forEach(id => msWire(id, renderOpps));
+msSet('oOutcome', ['Open', 'Committed', 'Declined']);
 if (startView) document.querySelector(`#nav button[data-view="${startView}"]`)?.click(); else renderAll();
 </script>
 </body>
