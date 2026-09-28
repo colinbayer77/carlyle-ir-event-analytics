@@ -64,6 +64,27 @@ Association, not causation: see the Method tab.</p></div>
     )
 
 
+def donut_fig(labels, values, colors, center, sub, fmt):
+    fig = go.Figure(go.Pie(labels=labels, values=values, hole=0.62, sort=False, direction="clockwise",
+                           marker=dict(colors=colors, line=dict(color="#ffffff", width=2)),
+                           texttemplate="%{percent:.0%}", textfont=dict(color="#ffffff", size=13),
+                           customdata=[fmt(v) for v in values],
+                           hovertemplate="%{label}<br>%{customdata} (%{percent:.0%})<extra></extra>"))
+    fig.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10), showlegend=True,
+                      legend=dict(orientation="v", x=1.02, y=0.5, font=dict(size=12)),
+                      font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"),
+                      annotations=[dict(text=f"<span style='font-size:22px;color:{NAVY}'><b>{center}</b></span><br><span style='font-size:12px'>{sub}</span>",
+                                        showarrow=False, x=0.5, y=0.5, xref="paper", yref="paper")])
+    return fig
+
+
+def line_layout(fig, height=320, top=40):
+    fig.update_layout(height=height, margin=dict(l=10, r=10, t=top, b=10), plot_bgcolor="rgba(0,0,0,0)", hovermode="x unified",
+                      legend=dict(orientation="h", y=1.12, x=0), font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"))
+    fig.update_yaxes(gridcolor="#e6eaed", zeroline=False, rangemode="tozero")
+    return fig
+
+
 def chart_head(col, title: str, sub: str = "") -> None:
     col.markdown(f'<div class="chart-title">{title}</div>' + (f'<div class="chart-sub">{sub}</div>' if sub else ""), unsafe_allow_html=True)
 
@@ -78,6 +99,7 @@ def load() -> dict[str, pd.DataFrame]:
 
 
 D = load()
+monthly, curve = D["mart_monthly"], D["mart_event_curve"]
 kpi_all, fe, firms, opps, tl, seg, dq = (
     D["mart_event_kpis"], D["mart_firm_event"], D["mart_firm"], D["mart_opportunity"],
     D["mart_firm_timeline"], D["mart_segment"], D["dq_log"],
@@ -87,6 +109,8 @@ kpi_all, fe, firms, opps, tl, seg, dq = (
 def fm(v: float) -> str:
     if pd.isna(v):
         return "-"
+    if v == 0:
+        return "$0M"
     return f"${v / 1e9:.2f}B" if v >= 1e9 else f"${v / 1e6:,.1f}M" if v < 1e7 else f"${v / 1e6:,.0f}M"
 
 
@@ -163,6 +187,30 @@ with tab_o:
     st.dataframe(score, width="stretch")
 
     a, b = st.columns(2)
+    chart_head(a, "New opportunities and meetings by month, 2026",
+               "Dashed lines mark events. Opportunity creation peaked in June and July for all firms. September is partial.")
+    mlab = pd.to_datetime(monthly.month).dt.strftime("%b").tolist()
+    if monthly.month.iloc[-1].startswith("2026-09"):
+        mlab[-1] += "*"
+    fig = go.Figure()
+    fig.add_scatter(x=mlab, y=monthly.new_opps, name="New opportunities", mode="lines+markers", line=dict(color=BLUE, width=2.5, shape="spline"), marker=dict(size=8))
+    fig.add_scatter(x=mlab, y=monthly.meetings, name="Meetings", mode="lines+markers", line=dict(color=ORANGE, width=2.5, shape="spline"), marker=dict(size=8))
+    n = 0
+    for k, ev in enumerate(monthly.events_in_month):
+        if isinstance(ev, str):
+            fig.add_vline(x=k, line=dict(color="#8a949c", dash="dash", width=1))
+            fig.add_annotation(x=k, y=1.0 + 0.08 * (n % 2), yref="paper", yanchor="bottom",
+                               text=" / ".join(EV_SHORT[e] for e in ev.split(",")), showarrow=False, font=dict(size=11, color="#5b6570"))
+            n += 1
+    fig.update_layout(legend=dict(orientation="h", y=-0.15, x=0))
+    a.plotly_chart(line_layout(fig, top=60).update_layout(legend=dict(orientation="h", y=-0.15, x=0)), width="stretch")
+    chart_head(b, "Where 2026 pipeline came from", "Share of $ pipeline by source, default rule (90 days, confirmed).")
+    order = ["Event-associated (90d)", "Attendee, outside window", "No confirmed attendance"]
+    vals = [opps.loc[opps.source_bucket == o, "amount_usd"].sum() for o in order]
+    b.plotly_chart(donut_fig(["Opened within 90d of an attended event", "Attendee firm, outside window", "Firm with no confirmed attendance"],
+                             vals, [BLUE, AQUA, NEUTRAL], fm(sum(vals)), "2026 pipeline", fm), width="stretch")
+
+    a, b = st.columns(2)
     chart_head(a, "Cost per associated opportunity",
                "Event cost / opportunities created in window (lower is better). Label shows the share of attending firms that converted.")
     fig = go.Figure(go.Bar(
@@ -199,6 +247,12 @@ with tab_f:
     chart_head(a, "Follow-up within 30 days, by tier and event")
     g = conf.groupby(["tier", "event_id"]).followed_up_30.mean().unstack()
     a.plotly_chart(bar_fig(list(g.index), [(EV_SHORT[e], g[e], EV_COLOR[e]) for e in g.columns], yfmt=".0%"), width="stretch")
+    d = conf.days_to_first_followup
+    fu_vals = [int((d <= 30).sum()), int(((d > 30) & (d <= 60)).sum()), int((d > 60).sum()), int(d.isna().sum())]
+    chart_head(a, "Follow-up status of attending firms", "All confirmed firm-event pairs: time from event to first meeting.")
+    a.plotly_chart(donut_fig(["Met within 30 days", "Met in 31-60 days", "Met after 60 days", "No meeting since event"], fu_vals,
+                             [BLUE, AQUA, ORANGE, NEUTRAL], f"{fu_vals[0] / len(conf):.0%}", "met within 30 days",
+                             lambda v: f"{v} firm-events"), width="stretch")
     dim = b.selectbox("Cut conversion by", sorted(seg.dimension.unique()), index=sorted(seg.dimension.unique()).index("Tier"))
     s = seg[seg.dimension == dim]
     b.plotly_chart(bar_fig(list(s.value + " (n=" + s.firm_events.astype(str) + ")"),
@@ -249,6 +303,19 @@ with tab_p:
     chart_head(b, "Funnel: count reaching each stage")
     b.plotly_chart(bar_fig(stages, [("Event-associated", [(ea.max_stage_rank >= i + 1).sum() for i in range(5)], BLUE),
                                     ("All other", [(other.max_stage_rank >= i + 1).sum() for i in range(5)], NEUTRAL)], horizontal=True), width="stretch")
+    chart_head(st, "How fast opportunities followed each event",
+               "Cumulative associated opportunities by days after the event (180-day window, confirmed, most recent event gets credit). "
+               "Lines stop at each event's age on the as-of date; no opportunities were created after 2026-08-12, so lines flatten after that.")
+    fig = go.Figure()
+    for e, name in EV_SHORT.items():
+        age = int(kpi_all.loc[kpi_all.event_id == e, "days_since_event"].iloc[0])
+        days = list(range(0, min(180, age) + 1, 5))
+        pts = curve[curve.event_id == e]
+        fig.add_scatter(x=days, y=[int(pts.loc[pts.days_after_event <= x, "opps"].sum()) for x in days], name=name, mode="lines",
+                        line=dict(color=EV_COLOR[e], width=2.5, shape="hv"))
+    fig.update_xaxes(title="Days after event", gridcolor="#f0f2f4")
+    fig.update_yaxes(title="Cumulative opportunities")
+    st.plotly_chart(line_layout(fig, height=340), width="stretch")
     c = st.columns(3)
     s1 = c[0].selectbox("Source", ["All"] + sorted(opps.source_bucket.unique()))
     s2 = c[1].selectbox("Outcome", ["All", "Open", "Committed", "Declined"])

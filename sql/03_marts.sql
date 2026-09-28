@@ -321,3 +321,31 @@ SELECT 'Relationship', relationship_band,
        COUNT(*), AVG(followed_up_30::INT), AVG((assoc_opps_90 > 0)::INT), SUM(assoc_pipeline_90_usd)
 FROM mart_firm_event WHERE is_confirmed GROUP BY ALL
 ORDER BY 1, 2;
+
+-- ------------------------------------------------------------------------------------
+-- mart_monthly: activity by month (context for seasonality around event dates).
+-- ------------------------------------------------------------------------------------
+CREATE OR REPLACE TABLE mart_monthly AS
+WITH months AS (
+    SELECT CAST(m AS DATE) AS month
+    FROM generate_series(DATE '2026-01-01', DATE_TRUNC('month', (SELECT as_of_date FROM params)), INTERVAL 1 MONTH) g(m)
+)
+SELECT
+    mo.month,
+    (SELECT COUNT(*) FROM fct_opportunity o WHERE DATE_TRUNC('month', o.created_date) = mo.month)                 AS new_opps,
+    (SELECT COALESCE(SUM(amount_usd), 0) FROM fct_opportunity o WHERE DATE_TRUNC('month', o.created_date) = mo.month) AS new_pipeline_usd,
+    (SELECT COUNT(*) FROM fct_meeting m WHERE DATE_TRUNC('month', m.meeting_date) = mo.month)                     AS meetings,
+    (SELECT STRING_AGG(event_id, ',') FROM dim_event e WHERE DATE_TRUNC('month', e.event_date) = mo.month)         AS events_in_month
+FROM months mo
+ORDER BY mo.month;
+
+-- ------------------------------------------------------------------------------------
+-- mart_event_curve: associated opportunities by days after each event (180-day window,
+-- confirmed attendance, last touch). Dashboards cumulate this into a conversion curve.
+-- ------------------------------------------------------------------------------------
+CREATE OR REPLACE TABLE mart_event_curve AS
+SELECT b.event_id, b.days_after_event, COUNT(*) AS opps, SUM(o.amount_usd) AS pipeline_usd
+FROM bridge_opp_event b JOIN fct_opportunity o USING (opportunity_id)
+WHERE b.window_days = 180 AND NOT b.include_tentative
+GROUP BY ALL
+ORDER BY 1, 2;

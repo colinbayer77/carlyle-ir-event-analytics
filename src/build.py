@@ -34,6 +34,8 @@ EXPORT_TABLES = [
     "mart_opportunity",
     "mart_firm_timeline",
     "mart_segment",
+    "mart_monthly",
+    "mart_event_curve",
     "dq_log",
 ]
 

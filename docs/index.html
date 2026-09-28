@@ -138,6 +138,18 @@ tr.sel { background: var(--surface-2); }
     </div>
     <div class="grid2">
       <div class="card">
+        <h2>New opportunities and meetings by month, 2026</h2>
+        <p class="sub">Dashed lines mark event months. Opportunity creation peaked in June and July for all firms, which is why attendees are compared with non-attendees rather than with the calendar. September is partial (to the as-of date).</p>
+        <div class="chart"><canvas id="cMonthly"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Where 2026 pipeline came from</h2>
+        <p class="sub">Share of $ pipeline by source, default rule (90 days, confirmed attendance).</p>
+        <div class="chart"><canvas id="cSourceDonut"></canvas></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
         <h2>Cost per associated opportunity</h2>
         <p class="sub">Event cost / opportunities created in window (lower is better). Label shows the share of attending firms that converted to a new opportunity.</p>
         <div class="chart"><canvas id="cCostOpp"></canvas></div>
@@ -169,6 +181,11 @@ tr.sel { background: var(--surface-2); }
         <div class="chart"><canvas id="cFuTier"></canvas></div>
       </div>
       <div class="card">
+        <h2>Follow-up status of attending firms</h2>
+        <p class="sub">All confirmed firm-event pairs: time from event to first meeting.</p>
+        <div class="chart"><canvas id="cFuDonut"></canvas></div>
+      </div>
+      <div class="card" style="grid-column: 1 / -1">
         <h2>Firms converting to a new opportunity (90d), by cut</h2>
         <p class="sub">Firm-event pairs, confirmed attendance, default rule. Small groups: read as directional.</p>
         <label class="note">Cut by
@@ -220,6 +237,11 @@ tr.sel { background: var(--surface-2); }
         <p class="sub">Event-associated vs all other opportunities (count reaching each stage).</p>
         <div class="chart"><canvas id="cFunnel"></canvas></div>
       </div>
+    </div>
+    <div class="card">
+      <h2>How fast opportunities followed each event</h2>
+      <p class="sub">Cumulative associated opportunities by days after the event (180-day window, confirmed attendance, most recent event gets credit). Lines stop at each event's age on the as-of date (Berlin: 99 days). No opportunities in the data were created after 2026-08-12, so every line flattens after that date.</p>
+      <div class="chart" style="height:300px"><canvas id="cCurve"></canvas></div>
     </div>
     <div class="card">
       <h2>Opportunities</h2>
@@ -405,6 +427,28 @@ function chart(id, cfg) {
   }, cfg.options || {});
   charts[id] = new Chart(document.getElementById(id), cfg);
 }
+const centerText = {id: 'centerText', afterDraw(ch, a, o) {
+  if (!o || !o.text) return;
+  const {ctx, chartArea: {left, right, top, bottom}} = ch, x = (left + right) / 2, y = (top + bottom) / 2;
+  ctx.save(); ctx.textAlign = 'center'; ctx.fillStyle = css('--text');
+  ctx.font = "600 22px 'EB Garamond', Georgia, serif"; ctx.fillText(o.text, x, y + 2);
+  ctx.font = '12px Inter, sans-serif'; ctx.fillStyle = css('--text-2'); ctx.fillText(o.sub || '', x, y + 20); ctx.restore(); }};
+const eventMarkers = {id: 'eventMarkers', afterDatasetsDraw(ch, a, o) {
+  if (!o || !o.marks) return;
+  const {ctx, chartArea: {top, bottom}, scales: {x}} = ch;
+  ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = css('--muted'); ctx.fillStyle = css('--text-2'); ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'center';
+  o.marks.forEach((m, k) => { const px = x.getPixelForValue(m.i), ly = top + 8 + (k % 2) * 13; ctx.beginPath(); ctx.moveTo(px, ly + 6); ctx.lineTo(px, bottom); ctx.stroke(); ctx.fillText(m.label, px, ly); });
+  ctx.restore(); }};
+function donut(id, labels, values, colors, center, fmt) {
+  const total = values.reduce((a, b) => a + b, 0);
+  chart(id, {type: 'doughnut', plugins: [ChartDataLabels, centerText],
+    data: {labels, datasets: [{data: values, backgroundColor: colors, borderColor: css('--surface'), borderWidth: 2, hoverOffset: 4}]},
+    options: {cutout: '62%', interaction: {mode: 'nearest', intersect: true}, scales: {},
+      plugins: {legend: {position: 'right', labels: {boxWidth: 10, boxHeight: 10, color: css('--text-2')}},
+        tooltip: {callbacks: {label: c => `${c.label}: ${fmt(c.raw)} (${Math.round(c.raw / total * 100)}%)`}},
+        datalabels: {color: '#fff', font: {weight: 600, size: 12}, formatter: v => v / total >= 0.06 ? Math.round(v / total * 100) + '%' : ''},
+        centerText: center}}});
+}
 const bar = (label, data, color, extra = {}) => Object.assign({label, data, backgroundColor: color, borderRadius: 4, borderSkipped: 'bottom', maxBarThickness: 44, borderColor: css('--surface'), borderWidth: 0}, extra);
 
 // ---------- overview ----------
@@ -489,6 +533,18 @@ function renderOverview() {
       bar('Non-attendees, before', K.map(r => r.non_attendee_prior_opp_rate * 100), css('--s2') + '59'),
       bar('Non-attendees, after', K.map(r => r.non_attendee_new_opp_rate * 100), css('--s2'))]},
     options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label}: ${Math.round(c.raw)}%`}}}, scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, max: 100, ticks: {callback: v => v + '%'}}}}});
+  const M = D.mart_monthly, mLabels = M.map(r => new Date(r.month + 'T00:00').toLocaleString('en-US', {month: 'short'}) + (r.month.startsWith('2026-09') ? '*' : ''));
+  const line = (label, data, color, extra = {}) => Object.assign({label, data, borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 4, pointHoverRadius: 6, tension: 0.25}, extra);
+  chart('cMonthly', {type: 'line', plugins: [eventMarkers], data: {labels: mLabels, datasets: [
+      line('New opportunities', M.map(r => r.new_opps), css('--s1')),
+      line('Meetings', M.map(r => r.meetings), css('--s2'))]},
+    options: {layout: {padding: {top: 6}}, plugins: {legend: {position: 'top', align: 'start', labels: {boxWidth: 10, boxHeight: 10}, padding: {bottom: 14}},
+        eventMarkers: {marks: M.map((r, i) => r.events_in_month ? {i, label: r.events_in_month.split(',').map(evShort).join(' / ')} : null).filter(Boolean)}},
+      scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, beginAtZero: true, suggestedMax: 30}}}});
+  const O = D.mart_opportunity, srcB = ['Event-associated (90d)', 'Attendee, outside window', 'No confirmed attendance'];
+  const srcV = srcB.map(b => O.filter(o => o.source_bucket === b).reduce((a, o) => a + o.amount_usd, 0));
+  donut('cSourceDonut', ['Opened within 90d of an attended event', 'Attendee firm, outside window', 'Firm with no confirmed attendance'], srcV,
+    [css('--s1'), css('--s3'), css('--neutral')], {text: fmtM(srcV.reduce((a, b) => a + b, 0)), sub: '2026 pipeline'}, fmtM);
   chart('cMtg', {type: 'bar', data: {labels, datasets: [
       bar('60 days before', K.map(r => r.meetings_pre_60), css('--neutral')),
       bar('60 days after', K.map(r => r.meetings_post_60), css('--s1'))]}});
@@ -505,6 +561,13 @@ function renderFollowup() {
     })},
     options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label}: ${Math.round(c.raw)}% of ${c.dataset.n[c.dataIndex]} firms`}}}, scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, max: 100, ticks: {callback: v => v + '%'}}}}});
 
+  const fuB = [['Met within 30 days', r => r.days_to_first_followup != null && r.days_to_first_followup <= 30],
+               ['Met in 31-60 days', r => r.days_to_first_followup > 30 && r.days_to_first_followup <= 60],
+               ['Met after 60 days', r => r.days_to_first_followup > 60],
+               ['No meeting since event', r => r.days_to_first_followup == null]];
+  const fuV = fuB.map(([, f]) => fe.filter(f).length);
+  donut('cFuDonut', fuB.map(b => b[0]), fuV, [css('--s1'), css('--s3'), css('--s2'), css('--neutral')],
+    {text: Math.round(fuV[0] / fe.length * 100) + '%', sub: 'met within 30 days'}, v => v + ' firm-events');
   const dims = [...new Set(D.mart_segment.map(r => r.dimension))];
   if (!$('#segDim').options.length) { $('#segDim').innerHTML = dims.map(d => `<option ${d === 'Tier' ? 'selected' : ''}>${d}</option>`).join(''); $('#segDim').onchange = renderFollowup; }
   const seg = D.mart_segment.filter(r => r.dimension === $('#segDim').value);
@@ -562,6 +625,17 @@ function renderOpps() {
       bar('Pipeline $M', buckets.map(b => agg(b).reduce((a, o) => a + o.amount_usd, 0) / 1e6), css('--s1'), {n: buckets.map(b => agg(b).length)}),
       bar('Committed $M', buckets.map(b => agg(b).filter(o => o.outcome === 'Committed').reduce((a, o) => a + o.amount_usd, 0) / 1e6), css('--s3'), {n: buckets.map(b => agg(b).filter(o => o.outcome === 'Committed').length)})]},
     options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label.replace(' $M', '')}: $${Math.round(c.raw)}M (${c.dataset.n[c.dataIndex]} opps)`}}}, scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, ticks: {callback: v => '$' + v + 'M'}}}}});
+  const days = Array.from({length: 19}, (_, i) => i * 10);
+  const asOf = new Date(D.meta.as_of_date + 'T00:00');
+  chart('cCurve', {type: 'line', data: {labels: days.map(d => d + 'd'), datasets: EVENTS.map(e => {
+      const age = Math.round((asOf - new Date(e.event_date + 'T00:00')) / 864e5);
+      const pts = D.mart_event_curve.filter(r => r.event_id === e.event_id);
+      return {label: evShort(e.event_id), borderColor: css(EV_COLOR[e.event_id]), backgroundColor: css(EV_COLOR[e.event_id]), borderWidth: 2, pointRadius: 3, tension: 0.2,
+        data: days.map(d => d > age ? null : pts.filter(r => r.days_after_event <= d).reduce((a, r) => a + r.opps, 0))};
+    })},
+    options: {plugins: {legend: {position: 'top', align: 'start', labels: {boxWidth: 10, boxHeight: 10}},
+        tooltip: {callbacks: {title: c => `Day ${days[c[0].dataIndex]} after event`, label: c => `${c.dataset.label}: ${c.raw} opportunities`}}},
+      scales: {x: {grid: {display: false}, title: {display: true, text: 'Days after event'}}, y: {grid: {color: css('--grid')}, border: {display: false}, beginAtZero: true, title: {display: true, text: 'Cumulative opportunities'}}}}});
   const stages = ['Initial Conversation', 'Follow-up / VDR', 'Due Diligence', 'IC / Documentation', 'Committed'];
   const reach = (arr, i) => arr.filter(o => o.max_stage_rank >= i + 1 && (i < 4 || o.outcome === 'Committed')).length;
   const ea = O.filter(o => o.assoc_event_id_90), other = O.filter(o => !o.assoc_event_id_90);
