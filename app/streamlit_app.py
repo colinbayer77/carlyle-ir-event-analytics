@@ -403,17 +403,18 @@ with tab_f:
 
 with tab_x:
     c = st.columns(5)
-    ev = c[0].selectbox("Event", ["All"] + list(EV_SHORT), format_func=lambda e: EV_SHORT.get(e, e))
-    tier = c[1].selectbox("Tier", ["All"] + sorted(firms.tier.unique()))
-    sg = c[2].selectbox("Segment", ["All"] + sorted(firms.segment.unique()))
-    rg = c[3].selectbox("Region", ["All"] + sorted(firms.region.unique()))
-    q = c[4].text_input("Search firm")
+    ev = c[0].multiselect("Event", list(EV_SHORT), format_func=EV_SHORT.get, placeholder="All", key="fx_event")
+    tier = c[1].multiselect("Tier", sorted(firms.tier.unique()), placeholder="All", key="fx_tier")
+    sg = c[2].multiselect("Investor segment", sorted(firms.segment.unique()), placeholder="All", key="fx_segment")
+    rg = c[3].multiselect("Region", sorted(firms.region.unique()), placeholder="All", key="fx_region")
+    q = c[4].text_input("Search firm", placeholder="Name or ID")
     f = firms.copy()
-    if ev != "All":
-        f = f[f.events_confirmed.fillna("").str.contains(ev) | f.events_tentative_only.fillna("").str.contains(ev)]
+    if ev:
+        has = lambda col: f[col].fillna("").str.split(", ").apply(lambda xs: any(e in xs for e in ev))
+        f = f[has("events_confirmed") | has("events_tentative_only")]
     for col, val in [("tier", tier), ("segment", sg), ("region", rg)]:
-        if val != "All":
-            f = f[f[col] == val]
+        if val:
+            f = f[f[col].isin(val)]
     if q:
         f = f[f.firm_name.str.contains(q, case=False) | f.firm_id.str.contains(q, case=False)]
     st.caption(f"{len(f)} firms. Select a firm below to see its timeline.")

@@ -38,6 +38,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 .ctl-selects { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px 16px; }
 .ctl-selects label.sel { flex-direction: column; align-items: stretch; gap: 4px; }
 .ctl-selects select { width: 100%; }
+.ctl-selects input[type=search] { width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 13px; background: var(--surface); color: var(--text); }
 .ms { position: relative; }
 .ms summary { list-style: none; cursor: pointer; border: 1px solid var(--border); border-radius: 6px; padding: 5px 28px 5px 10px; background: var(--surface); color: var(--text); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
 .ms summary::-webkit-details-marker { display: none; }
@@ -228,11 +229,13 @@ tr.sel { background: var(--surface-2); }
   <!-- FIRMS -->
   <section class="view" id="view-firms">
     <div class="controls">
-      <label>Event <select id="fEvent"><option value="">All</option></select></label>
-      <label>Tier <select id="fTier"><option value="">All</option></select></label>
-      <label>Segment <select id="fSeg"><option value="">All</option></select></label>
-      <label>Region <select id="fReg"><option value="">All</option></select></label>
-      <label><input type="search" id="fSearch" placeholder="Search firm"></label>
+      <div class="ctl-selects">
+      <label class="sel"><span class="lbl">Event</span><details class="ms" id="fEvent"><summary>All</summary><div class="ms-panel"></div></details></label>
+      <label class="sel"><span class="lbl">Tier</span><details class="ms" id="fTier"><summary>All</summary><div class="ms-panel"></div></details></label>
+      <label class="sel"><span class="lbl">Investor segment</span><details class="ms" id="fSeg"><summary>All</summary><div class="ms-panel"></div></details></label>
+      <label class="sel"><span class="lbl">Region</span><details class="ms" id="fReg"><summary>All</summary><div class="ms-panel"></div></details></label>
+      <label class="sel"><span class="lbl">Search firm</span><input type="search" id="fSearch" placeholder="Name or ID"></label>
+      </div>
     </div>
     <div class="grid2">
       <div class="card">
@@ -698,17 +701,14 @@ function renderFollowup() {
 // ---------- firms ----------
 let firmSort = {k: 'pipeline_usd', dir: -1}, selFirm = null;
 function initFirmFilters() {
-  const opt = (sel, vals) => $(sel).insertAdjacentHTML('beforeend', vals.map(v => `<option value="${esc(v[0] ?? v)}">${esc(v[1] ?? v)}</option>`).join(''));
-  opt('#fEvent', EVENTS.map(e => [e.event_id, evShort(e.event_id)]));
-  opt('#fTier', [...new Set(D.mart_firm.map(r => r.tier))].sort());
-  opt('#fSeg', [...new Set(D.mart_firm.map(r => r.segment))].sort());
-  opt('#fReg', [...new Set(D.mart_firm.map(r => r.region))].sort());
-  ['#fEvent', '#fTier', '#fSeg', '#fReg', '#fSearch'].forEach(s => $(s).addEventListener('input', renderFirms));
+  $('#fSearch').addEventListener('input', renderFirms);  // the checklist dropdowns are wired with the other filters below
 }
 function renderFirms() {
-  const ev = $('#fEvent').value, tier = $('#fTier').value, seg = $('#fSeg').value, reg = $('#fReg').value, q = $('#fSearch').value.toLowerCase();
-  let rows = D.mart_firm.filter(r => (!ev || (r.events_confirmed || '').includes(ev) || (r.events_tentative_only || '').includes(ev)) &&
-    (!tier || r.tier === tier) && (!seg || r.segment === seg) && (!reg || r.region === reg) && (!q || r.firm_name.toLowerCase().includes(q) || r.firm_id.toLowerCase().includes(q)));
+  const ev = msValues('fEvent'), tier = msValues('fTier'), seg = msValues('fSeg'), reg = msValues('fReg'), q = $('#fSearch').value.toLowerCase();
+  const inAny = (list, sel) => !sel.length || sel.some(e => (list || '').split(', ').includes(e));
+  let rows = D.mart_firm.filter(r => (!ev.length || inAny(r.events_confirmed, ev) || inAny(r.events_tentative_only, ev)) &&
+    (!tier.length || tier.includes(r.tier)) && (!seg.length || seg.includes(r.segment)) && (!reg.length || reg.includes(r.region)) &&
+    (!q || r.firm_name.toLowerCase().includes(q) || r.firm_id.toLowerCase().includes(q)));
   rows.sort((a, b) => { const x = a[firmSort.k], y = b[firmSort.k]; return (x > y ? 1 : x < y ? -1 : 0) * firmSort.dir; });
   $('#firmCount').textContent = `(${rows.length})`;
   const cols = [['firm_name', 'Firm'], ['tier', 'Tier'], ['segment', 'Segment', 'hide-sm'], ['events_confirmed', 'Events'], ['meetings', 'Mtgs', 'n'], ['opps', 'Opps', 'n'], ['pipeline_usd', 'Pipeline', 'n'], ['assoc_pipeline_90_usd', 'Event-assoc.', 'n hide-sm'], ['committed_usd', 'Committed', 'n']];
@@ -835,17 +835,23 @@ addEventListener('scroll', hideTip, true);
 document.querySelectorAll('.info').forEach(tipText);
 const msOptions = (id, vals) => $(`#${id} .ms-panel`).insertAdjacentHTML('afterbegin', vals.map(v => `<label><input type="checkbox" value="${esc(v)}"> ${esc(v)}</label>`).join(''));
 msOptions('gEv', EVENTS.map(e => e.event_id));
+msOptions('fEvent', EVENTS.map(e => e.event_id));
+msOptions('fTier', [...new Set(D.mart_firm.map(r => r.tier))].sort());
+msOptions('fSeg', [...new Set(D.mart_firm.map(r => r.segment))].sort());
+msOptions('fReg', [...new Set(D.mart_firm.map(r => r.region))].sort());
+document.querySelectorAll('#fEvent .ms-panel label').forEach(l => { l.lastChild.textContent = ' ' + evShort(l.querySelector('input').value); });
 document.querySelectorAll('#gEv .ms-panel label').forEach(l => { const v = l.querySelector('input').value; l.lastChild.textContent = ' ' + evShort(v); });
 msOptions('gSeg', [...new Set(D.mart_firm.map(r => r.segment))].sort());
 msOptions('gFund', [...new Set(D.mart_opportunity.map(r => r.fund_name))].sort());
-['gEv', 'gSeg', 'gFund', 'gSen'].forEach(id => {
+[['gEv', 'gSeg', 'gFund', 'gSen'], ['fEvent', 'fTier', 'fSeg', 'fReg']].forEach((ids, k) => ids.forEach(id => {
+  const rerender = k === 0 ? () => renderAll() : () => renderFirms();
   const el = document.getElementById(id), panel = el.querySelector('.ms-panel');
   panel.insertAdjacentHTML('beforeend', '<button type="button" class="ms-clear">Clear (All)</button>');
   const sync = () => { const v = [...el.querySelectorAll('input:checked')].map(x => x.parentElement.textContent.trim());
     el.querySelector('summary').textContent = !v.length ? 'All' : v.length <= 2 ? v.join(', ') : `${v.length} selected`; };
-  panel.addEventListener('change', () => { sync(); renderAll(); });
-  panel.querySelector('.ms-clear').onclick = () => { el.querySelectorAll('input').forEach(x => (x.checked = false)); sync(); renderAll(); };
-});
+  panel.addEventListener('change', () => { sync(); rerender(); });
+  panel.querySelector('.ms-clear').onclick = () => { el.querySelectorAll('input').forEach(x => (x.checked = false)); sync(); rerender(); };
+}));
 document.addEventListener('click', e => document.querySelectorAll('details.ms[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; }));
 $('#gOut').onchange = renderAll;
 if (startView) document.querySelector(`#nav button[data-view="${startView}"]`)?.click(); else renderAll();
