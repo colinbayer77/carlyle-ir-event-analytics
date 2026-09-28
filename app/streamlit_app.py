@@ -58,7 +58,7 @@ div[data-testid="stAlert"] * {{ color: #1b1f24 !important; }}
 <div class="brand-bar"><div class="row"><img src="data:image/png;base64,{logo}" alt="Carlyle"><span class="div"></span>
 <h1>Investor Relations · Event Outcomes</h1></div>
 <p>What happened after our 2026 investor events, what outcomes are associated with them, and what to change next time.
-Association, not causation: see the Method tab.</p></div>
+Association, not causation: see the Underlying Data and Model tab.</p></div>
 """,
         unsafe_allow_html=True,
     )
@@ -142,7 +142,7 @@ tent = c2.toggle("Include tentative firm registrations as attendance", value=Fal
 K = kpi_all[(kpi_all.window_days == window) & (kpi_all.include_tentative == tent)].sort_values("event_id")
 labels = [EV_SHORT[e] for e in K.event_id]
 
-tab_o, tab_f, tab_x, tab_p, tab_m = st.tabs(["Executive summary", "Follow-up & segments", "Firm explorer", "Opportunities", "Method & data quality"])
+tab_o, tab_f, tab_x, tab_p, tab_m = st.tabs(["Executive summary", "Follow-up & segments", "Firm explorer", "Opportunities", "Underlying Data and Model"])
 
 with tab_o:
     reached = fe[fe.is_confirmed | tent].firm_id.nunique()
