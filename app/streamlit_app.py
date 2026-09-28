@@ -181,7 +181,7 @@ with tab_o:
     footnote("* " + sig_note(d.reset_index(), "Default rule (90 days, confirmed)"))
 
     rows = {
-        "Date / type": K.event_date + " · " + K.event_type,
+        "Date / type": pd.to_datetime(K.event_date).dt.strftime("%m-%d-%Y") + " · " + K.event_type,
         "Cost": K.cost_usd.map(fk),
         "Firms attended (Tier 1)": K.firms_attended.astype(str) + " (" + K.tier1_firms.astype(str) + ")",
         "Cost per firm": K.cost_per_firm.map(fk),

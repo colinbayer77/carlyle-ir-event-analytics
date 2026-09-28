@@ -370,6 +370,7 @@ const $ = s => document.querySelector(s);
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const fmtM = v => v == null ? '-' : v >= 1e9 ? '$' + (v / 1e9).toFixed(2) + 'B' : '$' + (v / 1e6).toLocaleString(undefined, {maximumFractionDigits: v < 1e7 && v > 0 ? 1 : 0}) + 'M';
 const fmtK = v => v == null ? '-' : '$' + Math.round(v / 1e3).toLocaleString() + 'K';
+const mdy = iso => { const [y, m, d] = iso.split('-'); return `${m}-${d}-${y}`; };
 const pct = v => v == null ? '-' : Math.round(v * 100) + '%';
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const EVENTS = [...new Map(D.mart_event_kpis.map(r => [r.event_id, r])).values()];
@@ -469,7 +470,7 @@ function renderOverview() {
   $('#sigNoteScore').innerHTML = sigText(K, `Current settings (${$('#win').value} days${$('#tent').checked ? ', incl. tentative' : ''})`);
   // scorecard
   const rows = [
-    ['Date / type', r => `${r.event_date} · ${r.event_type}`],
+    ['Date / type', r => `${mdy(r.event_date)} · ${r.event_type}`],
     ['Cost', r => fmtK(r.cost_usd)],
     ['Firms attended (Tier 1)', r => `${r.firms_attended} (${r.tier1_firms})`],
     ['Cost per firm', r => fmtK(r.cost_per_firm)],
