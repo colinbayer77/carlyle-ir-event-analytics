@@ -52,7 +52,7 @@ FINDINGS = [
         "Stage dated after as-of date",
         "Medium",
         "SELECT COUNT(*) FROM stg_opp_stage WHERE is_future",
-        "Treated as projected: excluded from current stage, commitments and conversion; shown in firm timelines.",
+        "23 raw rows are dated after 2026-09-23 (latest 2026-11-19); 19 remain after collapsing repeated same-stage rows (latest 2026-10-28). Treated as projected: excluded from current stage, commitments and conversion; shown in firm timelines.",
     ),
     (
         "Repeated stage rows",

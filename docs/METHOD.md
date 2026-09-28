@@ -69,7 +69,7 @@ The short list below covers the headline metrics. Every metric on the dashboard,
 | Tentative-only firm attendance | 9 firm-events | Excluded by default, available via toggle |
 | Amounts stored as float text (1500000.0, 2500000.0) | 61 | Cast to integer USD; read as small tickets, not a unit error |
 | $650M ticket (O0017), next largest $150M | 1 opp | Kept and flagged. It is not linked to any event, so event metrics are unchanged either way |
-| Stage dated after the as-of date (2026-09-23, up to 2026-10-28) | 19 stage entries | Treated as projected: excluded from current stage, commitments, and conversion; shown in firm timelines |
+| Stage dated after the as-of date | 23 raw rows (latest 2026-11-19); 19 after collapsing repeated same-stage rows (latest 2026-10-28) | Treated as projected: excluded from current stage, commitments, and conversion; shown in firm timelines |
 | Same stage logged twice | 13 | Collapsed to the first date the stage was reached |
 | Duplicate opportunity: O9998 and O9999 identical (same firm, fund, dates, stage, $25M) | 1 opp | Kept O9998, dropped O9999. Found in the independent audit; before the fix it added 1 opportunity and $25M to London's associated commitments |
 | Opportunity with no early stages (O9998 logged directly as Committed) | 1 | Kept; funnel counts the stages it reached |
@@ -77,7 +77,7 @@ The short list below covers the headline metrics. Every metric on the dashboard,
 | Meetings on a weekend | 38 of 112 | Kept. A third of meetings fall on Saturday or Sunday, which points to generated dates; no metric depends on the weekday |
 | First stage logged 5 to 30 days after created_date | all 106 | Kept. created_date reads as the CRM entry date rather than first contact, so the true start of an opportunity may be up to a month later than the date the association window uses |
 
-**As-of date.** 2026-09-23, the date the data extract was delivered. It is a parameter in `src/build.py`.
+**As-of date.** 2026-09-23, the analysis cutoff. It is the extract date (the file timestamps inside the delivered zip), chosen over the 2026-09-28 email date so that no stage dated after the extract counts as achieved. A parameter in `src/build.py`.
 
 ## Build-time assertions (the build fails if any break)
 

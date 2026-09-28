@@ -6,7 +6,7 @@ Every metric shown on the dashboards, with its exact definition, the table and c
 
 | Term | Meaning |
 |---|---|
-| As-of date | 2026-09-23, the date the data extract was delivered. A parameter in `src/build.py`. Stage entries dated later are "projected" and never count as achieved. |
+| As-of date | 2026-09-23, the analysis cutoff. It is the extract date (the file timestamps inside the delivered zip), chosen over the 2026-09-28 email date so that no stage dated after the extract counts as achieved. A parameter in `src/build.py`. Stage entries dated later are "projected" and never count as achieved. |
 | Attended / attending firm | A firm with at least one **Confirmed** registrant at the event. With the "Include tentative firm registrations as attendance" toggle on, any registrant counts. Registration is not check-in; the data has no check-in field. |
 | Firm-event | One firm's attendance at one event. A firm at two events is two firm-events. 70 confirmed firm-events in 2026 (79 including tentative-only). |
 | Association window (W) | Days after an event during which a newly created opportunity can be linked to it: 30, 60, 90 (default) or 180. |
@@ -29,7 +29,7 @@ Source: `mart_event_kpis` summed across the selected events, except where noted.
 | Firms reached | Distinct firms that attended at least one selected event. Sub-label: number of covered firms (60, or those in the selected segments). | `fct_firm_event` |
 | Associated opportunities | Count of event-associated opportunities across the selected events. Sub-label: total opportunities in scope (106 after removing one duplicate; fewer under the fund, segment or outlier filters). | `bridge_opp_event` → `fct_opportunity` |
 | Associated pipeline | Sum of amounts of the associated opportunities. Sub-label: event spend / associated opportunities. | `fct_opportunity.amount_usd` |
-| Associated commitments | Sum of amounts of associated opportunities whose outcome is Committed. Sub-label: their count. | `fct_opportunity` |
+| Associated commitments (face value) | Sum of amounts of associated opportunities whose outcome is Committed. Face value of the opportunity, not capital called. Sub-label: their count. | `fct_opportunity` |
 | Follow-up within 30 days | Firm-events with at least one meeting 1 to 30 days after the event / attending firm-events. Sub-label: the two counts. | `fct_firm_event`, `fct_meeting` |
 
 The "What leadership should take away" box is fixed at the default rule and does not respond to filters; its numbers are generated from the marts at load time.
@@ -115,12 +115,12 @@ Source: `mart_opportunity` (one row per opportunity) and `mart_stage_history`.
 | Associated event, +Nd | The credited event and days from it to `created_date`. | `assoc_event_id`, `days_after_event` |
 | Flags | outlier: amount at or above $500M (one opportunity, $650M). projected stages: has stage entries after the as-of date. no early stages: first logged stage is not Initial Conversation. float amount: the amount was stored as a decimal string in the source. | `is_amount_outlier`, `projected_stage_rows`, `skipped_early_stages`, `amount_float_format` |
 
-## Next Event Planner (Streamlit only)
+## Historical Analog (Streamlit only)
 
 | Element | Definition |
 |---|---|
 | Benchmark pool | Confirmed firm-events from 2026 with each firm's outcomes at the default rule (`mart_firm_event`): associated opportunities, associated pipeline, follow-up within 30 days. "All 2026 events" uses all 70; "Same format only" uses the events of the chosen format. |
-| Estimates | For the planned number of firms in each tier, the pool's firm-events of that tier are resampled with replacement 4,000 times (a bootstrap); the sums give a distribution of total associated opportunities and pipeline. The card shows the median, and the tooltip and footnote show the 10th to 90th percentile range. |
+| Ranges | For the planned number of firms in each tier, the pool's firm-events of that tier are resampled with replacement 4,000 times (a bootstrap); the sums give a distribution of total associated opportunities and pipeline. The cards lead with the 10th to 90th percentile range; the middle value is in the tooltip and footnote. It is a historical analog, not a forecast. |
 | Cost per firm / per associated opp | Budget / firms reached; budget / median associated opportunities. |
 | Firms met within 30 days | Firms reached x the target slider. The planner adds no pipeline for follow-up because, in 2026, firms followed up within 30 days did not convert at a higher rate. |
 | Expected opportunities by tier | Median of the same bootstrap run for each tier alone. |

@@ -47,6 +47,7 @@ header[data-testid="stHeader"] {{ display: none; }}
 .brand-bar .div {{ width: 1px; height: 28px; background: rgba(255,255,255,.35); }}
 .brand-bar h1 {{ font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 26px; margin: 0; padding: 0; color: #fff; }}
 .brand-bar p {{ margin: 6px 0 0; color: #c9d7df; font-size: clamp(11px, 0.95vw, 13px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+.brand-bar p.disclaimer {{ margin-top: 4px; color: #9fb3c2; font-size: 11px; }}
 h2, h3, .stSubheader {{ font-family: 'EB Garamond', Georgia, serif !important; color: {NAVY} !important; font-weight: 600 !important; }}
 .chart-title {{ font-family: 'EB Garamond', Georgia, serif; font-size: 20px; font-weight: 600; color: {NAVY}; margin: 6px 0 0; }}
 .chart-sub {{ color: #5b6570; font-size: 13px; margin: 2px 0 4px; }}
@@ -88,7 +89,8 @@ div[data-testid="stAlert"] * {{ color: #1b1f24 !important; }}
 </style>
 <div class="brand-bar"><div class="row"><img src="data:image/png;base64,{logo}" alt="Carlyle"><span class="div"></span>
 <h1>Investor Relations · Event Outcomes</h1></div>
-<p>What happened after our 2026 investor events, what outcomes followed, and what to change next time. Association, not causation.</p></div>
+<p>What happened after our 2026 investor events, what outcomes followed, and what to change next time. Association, not causation.</p>
+<p class="disclaimer">Candidate take-home submission, not an official Carlyle publication. Synthetic data.</p></div>
 """,
         unsafe_allow_html=True,
     )
@@ -201,10 +203,10 @@ def bar_fig(x, series, yfmt=None, horizontal=False, height=300):
 brand_css()
 
 TAB_NAMES = ["Executive summary", "Event Scorecard", "Follow-up & segments", "Firm explorer", "Opportunities",
-             "Underlying Data Model and Data Quality", "Next Event Planner"]
+             "Underlying Data Model and Data Quality", "Historical Analog"]
 # A tab bar that knows which tab is open, so page-level filters can be hidden where they don't apply (the planner).
 PAGE = st.radio("View", TAB_NAMES, horizontal=True, key="nav", label_visibility="collapsed")
-SHOW_FILTERS = PAGE not in ("Next Event Planner", "Firm explorer", "Underlying Data Model and Data Quality")  # filters do not apply on these tabs
+SHOW_FILTERS = PAGE not in ("Historical Analog", "Firm explorer", "Underlying Data Model and Data Quality")  # filters do not apply on these tabs
 # Remember filter choices across tabs: a widget that isn't drawn on a run loses its state, so keep a copy.
 SAVED = st.session_state.setdefault("_filters", {"window": 90, "events": [], "segment": [], "fund": [], "seniority": [], "tent": False, "excl": False})
 
@@ -300,18 +302,18 @@ with tab_o:
     cols[1].metric("Firms reached", reached, help=f"of {len(FIRMS_IN)} covered firms" + (" in selected segments" if segment else ""))
     cols[2].metric("Associated opportunities", int(K.assoc_opps.sum()), help=f"of {len(FOPPS)} opened this year" + ("" if F.is_default_extra else " (filtered)"))
     cols[3].metric("Associated pipeline", fm(K.assoc_pipeline_usd.sum()))
-    cols[4].metric("Associated commitments", fm(K.assoc_committed_usd.sum()))
+    cols[4].metric("Associated commitments", fm(K.assoc_committed_usd.sum()), help="Face value of opportunities that reached Committed on or before 2026-09-23")
     cols[5].metric("Follow-up within 30 days", pct(K.firms_followup_30.sum() / K.firms_attended.sum() if K.firms_attended.sum() else None))
 
     d = kpi_all[(kpi_all.window_days == 90) & (~kpi_all.include_tentative)].set_index("event_id")
     t1 = fe[fe.is_confirmed & (fe.tier == "Tier 1")]
     st.info(
-        f"""**What leadership should take away (90 days association window)**
+        f"""**What leadership should take away** · Baseline view: 90-day window, confirmed attendance, all events. This box does not change with the filters above; the cards and charts do.
 
 1. **Most pipeline did not follow an event.** {int(d.assoc_opps.sum())} of {len(opps)} opportunities ({fm(d.assoc_pipeline_usd.sum())} of {fm(opps.amount_usd.sum())}) opened within 90 days of an attended event. The largest commitment ($650M) came from a firm that attended nothing.
-2. **No consistent lift versus non-attendees.** Difference-in-differences in new-opportunity rate: NY {d.loc['E001','diff_in_diff_opp_rate']*100:+.0f} pts, London {d.loc['E002','diff_in_diff_opp_rate']*100:+.0f} pts, Berlin {d.loc['E003','diff_in_diff_opp_rate']*100:+.0f} pts; none statistically significant\\*.
+2. **No evidence of incremental lift versus non-attendees.** Difference-in-differences in new-opportunity rate: NY {d.loc['E001','diff_in_diff_opp_rate']*100:+.0f} pts, London {d.loc['E002','diff_in_diff_opp_rate']*100:+.0f} pts, Berlin {d.loc['E003','diff_in_diff_opp_rate']*100:+.0f} pts; none statistically significant\\*.
 3. **Follow-up is the controllable gap.** {d.firms_followup_30.sum() / d.firms_attended.sum():.0%} of attending firms met within 30 days; Tier 1 only {int(t1.followed_up_30.sum())} of {len(t1)}.
-4. **London dinner ($185K) was most efficient:** {fk(d.loc['E002','cost_per_assoc_opp'])} per associated opp vs {fk(d.loc['E001','cost_per_assoc_opp'])} NY and {fk(d.loc['E003','cost_per_assoc_opp'])} Berlin.
+4. **London dinner ($185K) had the lowest spend per associated opportunity:** {fk(d.loc['E002','cost_per_assoc_opp'])} vs {fk(d.loc['E001','cost_per_assoc_opp'])} NY and {fk(d.loc['E003','cost_per_assoc_opp'])} Berlin.
 5. **Berlin ($610K) needs a case before renewal:** attendee meetings fell {int(d.loc['E003','meetings_pre_60'])} → {int(d.loc['E003','meetings_post_60'])}, no commitments yet (recheck at 180 days)."""
         .replace("$", "\\$")  # stop Streamlit markdown reading $...$ as LaTeX
     )
@@ -381,7 +383,7 @@ with tab_s:
 
     a, b = st.columns(2)
     chart_head(a, "Cost per associated opportunity",
-               "Event cost / opportunities created in window (lower is better). Label shows the share of attending firms that converted.")
+               "Event cost / opportunities created in window. Association, not attribution: a low figure means more opportunities followed the event per dollar, not that the event caused them. Label shows the share of attending firms that converted.")
     cmax = K.cost_per_assoc_opp.max() if K.cost_per_assoc_opp.notna().any() else 1
     fig = go.Figure(go.Bar(
         x=labels, y=K.cost_per_assoc_opp, marker_color=[EV_COLOR[e] for e in K.event_id], width=0.75,
@@ -653,10 +655,10 @@ def plan_estimate(tier_counts: dict, fmt: str | None, n_boot: int = 4000, seed: 
 
 with tab_n:
     st.markdown(
-        '<div class="chart-sub" style="font-size:14px;margin-bottom:6px">Size up a future event against what 2026 events delivered. '
-        'Estimates resample the 2026 outcomes of firms in each tier (90-day window, confirmed attendance), so they show a <b>range</b> of plausible results. '
-        'This is a planning aid, not a forecast: 2026 showed no statistically significant lift from attending, so these are outcomes that '
-        '<i>followed</i> similar events, not outcomes an event will cause. It uses fixed 2026 benchmarks, so the page filters are not shown on this tab.</div>',
+        '<div class="chart-sub" style="font-size:14px;margin-bottom:6px"><b>A historical analog, not a forecast.</b> Describe a planned event and see what '
+        '<i>followed</i> the most similar 2026 attendances: the tool resamples the 2026 outcomes of firms in each tier (90-day window, confirmed attendance) '
+        'and reports the range they span. The three 2026 events differ in format, timing and audience, and none showed evidence of incremental lift, so '
+        'these are ranges of what has happened after comparable events, not what a new event will produce. Fixed 2026 benchmarks; the page filters are not shown here.</div>',
         unsafe_allow_html=True)
     fmt_defaults = {"Hospitality (dinner)": ("Hospitality", 185, 6, 12, 7), "Conference": ("Conference", 515, 8, 10, 6)}
     c = st.columns(5)
@@ -685,19 +687,20 @@ with tab_n:
         m = st.columns(3) + st.columns(3)
         m[0].metric("Firms reached", firms_n, help=f"Tier 1 {int(t1)} · Tier 2 {int(t2)} · Tier 3 {int(t3)}")
         m[1].metric("Cost per firm", fk(cost / firms_n))
-        m[2].metric("Associated opportunities (90d)", f"{mid:.0f}", help=f"10th to 90th percentile of resampled outcomes: {lo:.0f} to {hi_:.0f}")
-        m[3].metric("Associated pipeline", fm(pmid), help=f"Range {fm(plo)} to {fm(phi)}")
-        m[4].metric("Cost per associated opp", fk(cpo(mid)), help=f"Range {fk(cpo(hi_))} to {fk(cpo(lo))}")
+        m[2].metric("Opportunities that followed similar events", f"{lo:.0f}–{hi_:.0f}", help=f"10th to 90th percentile of the resampled 2026 outcomes; middle value {mid:.0f}")
+        # a value like "$299M to $839M" would be read as LaTeX ($...$) by the metric widget; use an en dash and one dollar sign
+        m[3].metric("Pipeline that followed (face value)", f"{fm(plo)}–{fm(phi)[1:]}", help=f"Range of resampled 2026 outcomes; middle value {fm(pmid)}. Historical analog, not a forecast.")
+        m[4].metric("Spend per associated opp", f"{fk(cpo(hi_))}–{fk(cpo(lo))[1:]}", help=f"Budget / opportunities across the range; middle value {fk(cpo(mid))}")
         m[5].metric("Firms met within 30 days", f"{round(firms_n * fu_target / 100)} of {firms_n}",
                     help=f"At the 2026 rate (39%) it would be about {round(firms_n * 0.39)}.")
-        footnote(f"Ranges (10th to 90th percentile): {lo:.0f} to {hi_:.0f} opportunities, {fm(plo)} to {fm(phi)} pipeline, "
-                 f"{fk(cpo(hi_))} to {fk(cpo(lo))} per opportunity. Basis: {basis.lower()}, 4,000 resamples.")
+        footnote(f"Ranges are the 10th to 90th percentile of 4,000 resamples of 2026 firm-level outcomes (basis: {basis.lower()}). "
+                 f"Middle values: {mid:.0f} opportunities, {fm(pmid)} pipeline, {fk(cpo(mid))} per opportunity.")
 
         a, b = st.columns(2)
-        chart_head(a, "Cost per associated opportunity: plan vs 2026",
-                   "Plan shows the middle estimate with its 10th to 90th percentile range. Lower is better.")
+        chart_head(a, "Spend per associated opportunity: analog vs 2026",
+                   "The analog bar shows the middle value with its 10th to 90th percentile range.")
         k90 = kpi_all.query("window_days == 90 and not include_tentative").sort_values("event_id")
-        names = ["Plan"] + [EV_SHORT[e] for e in k90.event_id]
+        names = ["Analog"] + [EV_SHORT[e] for e in k90.event_id]
         vals = [cpo(mid)] + list(k90.cost_per_assoc_opp)
         fig = go.Figure(go.Bar(x=names, y=vals, marker_color=[NAVY] + [EV_COLOR[e] for e in k90.event_id], width=0.6,
                                error_y=dict(type="data", symmetric=False, array=[cpo(lo) - cpo(mid)] + [0] * 3,
@@ -708,7 +711,7 @@ with tab_n:
         fig.update_yaxes(visible=False, range=[0, max(v for v in vals + [cpo(lo)] if v == v) * 1.12])
         a.plotly_chart(fig, width="stretch")
 
-        chart_head(b, "Where the associated opportunities come from, by tier",
+        chart_head(b, "Opportunities that followed, by tier",
                    "Middle estimate per tier from the same resampling. 2026 opportunities per attending firm: Tier 1 0.33, Tier 2 0.48, Tier 3 0.83.")
         per_tier = []
         for tier, n in [("Tier 1", t1), ("Tier 2", t2), ("Tier 3", t3)]:
@@ -727,7 +730,7 @@ with tab_n:
                                       "cost_per_firm": "Cost per firm", "assoc_opps": "Associated opps (90d)", "cost_per_assoc_opp": "Cost per opp",
                                       "followup_rate_30": "Met within 30d", "opps_per_firm": "Opps per firm"}),
                      width="stretch", hide_index=True)
-        st.info("**How to use this.** Compare formats at the same budget, or see how many more Tier 3 firms it takes to match a Tier 1-heavy list. "
+        st.info("**How to use this.** Compare formats at the same budget, or see how many more Tier 3 firms it takes to match a Tier 1-heavy list. Read every figure as a range of what followed comparable 2026 attendances. "
                 "The follow-up target is shown as a count only: in 2026, firms met within 30 days did not convert at a higher rate (37% vs 40%), "
                 "so the planner does not add pipeline for faster follow-up. Treat that as something to test, not assume.")
 

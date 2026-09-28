@@ -34,7 +34,7 @@ def test_filters_survive_a_visit_to_the_planner():
     at = AppTest.from_file(APP, default_timeout=120)
     at.run()
     next(s for s in at.multiselect if s.label == "Investor segment").set_value(["Pension"]); at.run()
-    at.radio(key="nav").set_value("Next Event Planner"); at.run()
+    at.radio(key="nav").set_value("Historical Analog"); at.run()
     at.radio(key="nav").set_value("Executive summary"); at.run()
     assert not at.exception and metric(at, "Associated opportunities") == "6"
 
@@ -67,10 +67,10 @@ def test_filters():
 
 def test_planner_reproduces_london():
     """Default dinner scenario (London's budget and tier mix) should land on London's actual 2026 result."""
-    at = run(lambda a: a.radio(key="nav").set_value("Next Event Planner"))
+    at = run(lambda a: a.radio(key="nav").set_value("Historical Analog"))
     assert not at.multiselect, "page filters should be hidden on the planner tab"
-    assert metric(at, "Associated opportunities (90d)") == "13"
-    assert metric(at, "Cost per associated opp") == "$14K"
+    assert next(m for m in at.metric if m.label == "Opportunities that followed similar events").help.endswith("middle value 13")
+    assert next(m for m in at.metric if m.label == "Spend per associated opp").help.endswith("middle value $14K")
 
 
 if __name__ == "__main__":

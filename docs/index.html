@@ -27,6 +27,7 @@ header { background: var(--brand); color: #fff; padding: 18px 24px 0; }
 .brandrow img { height: 22px; width: auto; display: block; }
 .brandrow .divider { width: 1px; height: 26px; background: rgba(255,255,255,.35); }
 header h1 { margin: 0; font: 600 24px/1.2 'EB Garamond', Georgia, serif; letter-spacing: .01em; }
+header p.disclaimer { margin: 0 0 10px; color: #9fb3c2; font-size: 11px; }
 header p { margin: 8px 0 12px; color: #c9d7df; font-size: clamp(11px, 0.95vw, 13px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 nav { display: flex; gap: 4px; overflow-x: auto; }
 nav button { background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 12px; font: inherit; color: #c9d7df; cursor: pointer; white-space: nowrap; }
@@ -121,6 +122,7 @@ tr.sel { background: var(--surface-2); }
 <header>
   <div class="brandrow"><img src="assets/carlyle_logo_white.png" alt="Carlyle"><span class="divider"></span><h1>Investor Relations · Event Outcomes</h1></div>
   <p id="subtitle" title="What happened after our 2026 investor events, what outcomes followed, and what to change next time. Association, not causation.">What happened after our 2026 investor events, what outcomes followed, and what to change next time. Association, not causation.</p>
+  <p class="disclaimer">Candidate take-home submission, not an official Carlyle publication. Synthetic data.</p>
   <nav id="nav">
     <button data-view="overview" class="active">Executive summary</button>
     <button data-view="scorecard">Event Scorecard</button>
@@ -157,7 +159,8 @@ tr.sel { background: var(--surface-2); }
   <section class="view active" id="view-overview">
     <div class="tiles" id="tiles"></div>
     <div class="insights">
-      <h2>What leadership should take away (90 days association window)</h2>
+      <h2>What leadership should take away</h2>
+      <p class="sub">Baseline view: 90-day window, confirmed attendance, all events. This box does not change with the filters above; the cards and charts do.</p>
       <ol id="insights"></ol>
       <p class="note sig-note" id="sigNoteIns"></p>
     </div>
@@ -186,7 +189,7 @@ tr.sel { background: var(--surface-2); }
     <div class="grid2">
       <div class="card">
         <h2>Cost per associated opportunity</h2>
-        <p class="sub">Event cost / opportunities created in window (lower is better). Label shows the share of attending firms that converted to a new opportunity.</p>
+        <p class="sub">Event cost / opportunities created in window. Association, not attribution: a low figure means more opportunities followed the event per dollar, not that the event caused them. Label shows the share of attending firms that converted.</p>
         <div class="chart"><canvas id="cCostOpp"></canvas></div>
       </div>
       <div class="card">
@@ -430,7 +433,7 @@ tr.sel { background: var(--surface-2); }
 <tbody>
 <tr>
 <td>As-of date</td>
-<td>2026-09-23, the date the data extract was delivered. A parameter in <code>src/build.py</code>. Stage entries dated later are "projected" and never count as achieved.</td>
+<td>2026-09-23, the analysis cutoff. It is the extract date (the file timestamps inside the delivered zip), chosen over the 2026-09-28 email date so that no stage dated after the extract counts as achieved. A parameter in <code>src/build.py</code>. Stage entries dated later are "projected" and never count as achieved.</td>
 </tr>
 <tr>
 <td>Attended / attending firm</td>
@@ -826,7 +829,7 @@ tr.sel { background: var(--surface-2); }
 </tr>
 </tbody>
 </table>
-<h3>Next Event Planner (Streamlit only)</h3>
+<h3>Historical Analog (Streamlit only)</h3>
 <table>
 <thead>
 <tr>
@@ -1106,7 +1109,7 @@ function renderOverview() {
     ['Firms reached', firms, `of ${C.firmsIn.length} covered firms${C.f.segment.length ? ' in selected segments' : ''}`],
     ['Associated opportunities', sum('assoc_opps'), `of ${C.opps.length} opened this year${extraActive(C.f) ? ' (filtered)' : ''}`],
     ['Associated pipeline', fmtM(sum('assoc_pipeline_usd')), `${fmtK(cost / Math.max(1, sum('assoc_opps')))} spend per opp`],
-    ['Associated commitments', fmtM(sum('assoc_committed_usd')), `${sum('assoc_committed_opps')} opportunities committed`],
+    ['Associated commitments (face value)', fmtM(sum('assoc_committed_usd')), `${sum('assoc_committed_opps')} opportunities committed`],
     ['Follow-up within 30 days', pct(sum('firms_followup_30') / sum('firms_attended')), `${sum('firms_followup_30')} of ${sum('firms_attended')} firm-events`],
   ];
   $('#tiles').innerHTML = tiles.map(([k, v, s]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
@@ -1121,9 +1124,9 @@ function renderOverview() {
   const leakT1 = D.mart_firm.filter(r => r.has_unfollowed_event && r.tier === 'Tier 1').length;
   $('#insights').innerHTML = [
     `<b>Events touch most of the book, but most pipeline did not follow an event.</b> ${allAssoc} of ${D.mart_opportunity.length} opportunities (${fmtM(d.reduce((a,r)=>a+r.assoc_pipeline_usd,0))} of ${fmtM(D.mart_opportunity.reduce((a,r)=>a+r.amount_usd,0))}) were opened within 90 days of an attended event. The largest commitment of the year (${fmtM(650e6)}, O0017) came from a firm that attended nothing.`,
-    `<b>No consistent lift versus non-attendees.</b> After adjusting for each group's prior rate, only the NY Summit shows attendees opening new opportunities faster (+${Math.round(by.E001.diff_in_diff_opp_rate*100)} pts); London (${Math.round(by.E002.diff_in_diff_opp_rate*100)} pts) and Berlin (${Math.round(by.E003.diff_in_diff_opp_rate*100)} pts) do not. None of the three gaps is statistically significant<sup>*</sup>: this is association on small numbers, not proof either way.`,
+    `<b>No evidence of incremental lift versus non-attendees.</b> After adjusting for each group's prior rate, only the NY Summit shows attendees opening new opportunities faster (+${Math.round(by.E001.diff_in_diff_opp_rate*100)} pts); London (${Math.round(by.E002.diff_in_diff_opp_rate*100)} pts) and Berlin (${Math.round(by.E003.diff_in_diff_opp_rate*100)} pts) do not. None of the three gaps is statistically significant<sup>*</sup>: this is association on small numbers, not proof either way.`,
     `<b>Follow-up is the biggest controllable gap, worst at Tier 1.</b> Only ${pct(d.reduce((a,r)=>a+r.firms_followup_30,0)/d.reduce((a,r)=>a+r.firms_attended,0))} of attending firms got a meeting within 30 days; Tier 1 was ${t1fu} of ${t1.length}. ${leakT1} Tier 1 firms have an event with no meeting in the following 60 days.`,
-    `<b>The $185K London dinner was the most efficient event.</b> ${fmtK(by.E002.cost_per_assoc_opp)} per associated opportunity and the highest 30-day follow-up (${pct(by.E002.followup_rate_30)}), versus ${fmtK(by.E001.cost_per_assoc_opp)} for NY and ${fmtK(by.E003.cost_per_assoc_opp)} for Berlin.`,
+    `<b>The $185K London dinner had the lowest spend per associated opportunity.</b> ${fmtK(by.E002.cost_per_assoc_opp)}, and the highest 30-day follow-up (${pct(by.E002.followup_rate_30)}), versus ${fmtK(by.E001.cost_per_assoc_opp)} for NY and ${fmtK(by.E003.cost_per_assoc_opp)} for Berlin.`,
     `<b>Berlin ($610K) needs a case before it is renewed.</b> Meetings with attendees fell after the event (${by.E003.meetings_pre_60} in the 60 days before, ${by.E003.meetings_post_60} after), ${by.E003.assoc_opps} associated opportunities, no commitments yet. It is the youngest event (${by.E003.days_since_event} days), so recheck at 180 days.`,
   ].map(s => `<li>${s}</li>`).join('');
 
@@ -1143,7 +1146,7 @@ function renderOverview() {
     ['Firms converting', r => pct(r.firm_conversion_rate)],
     ['Associated pipeline', r => fmtM(r.assoc_pipeline_usd)],
     ['Reached due diligence+', r => r.assoc_opps_reached_dd],
-    ['Committed', r => `${fmtM(r.assoc_committed_usd)} (${r.assoc_committed_opps})`],
+    ['Committed (face value)', r => `${fmtM(r.assoc_committed_usd)} (${r.assoc_committed_opps})`],
     ['Cost per associated opp', r => fmtK(r.cost_per_assoc_opp)],
     ['New-opp rate: attendees before → after', r => `${pct(r.attendee_prior_opp_rate)} → ${pct(r.attendee_new_opp_rate)}`],
     ['New-opp rate: non-attendees before → after', r => `${pct(r.non_attendee_prior_opp_rate)} → ${pct(r.non_attendee_new_opp_rate)}`],
