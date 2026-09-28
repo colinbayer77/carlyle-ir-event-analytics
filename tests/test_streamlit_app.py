@@ -45,6 +45,11 @@ def test_firm_explorer_has_only_its_own_filters():
     assert labels == ["Event", "Tier", "Investor segment", "Region", "Stage"], labels  # Stage is the in-chart filter
 
 
+def test_data_tab_has_no_page_filters():
+    at = run(lambda a: a.radio(key="nav").set_value("Underlying Data Model and Data Quality"))
+    assert not at.multiselect and not at.toggle
+
+
 def test_filters():
     base = run()
     assert metric(base, "Associated opportunities") == "37"
@@ -71,5 +76,6 @@ def test_planner_reproduces_london():
 if __name__ == "__main__":
     test_planner_reproduces_london()
     test_firm_explorer_has_only_its_own_filters()
+    test_data_tab_has_no_page_filters()
     test_filters_survive_a_visit_to_the_planner()
     test_filters(); print("streamlit app tests passed")
