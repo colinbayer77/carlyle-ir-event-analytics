@@ -40,6 +40,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 .ctl-selects select { width: 100%; }
 .ctl-selects input[type=search] { width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 13px; background: var(--surface); color: var(--text); }
 .ms { position: relative; }
+.ctl-inline { display: flex; flex-direction: column; gap: 4px; color: var(--text-2); font-size: 13px; }
 .ms-search { width: 100%; margin-bottom: 4px; border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; font-size: 12px; background: var(--surface); color: var(--text); }
 .ms summary { list-style: none; cursor: pointer; border: 1px solid var(--border); border-radius: 6px; padding: 5px 28px 5px 10px; background: var(--surface); color: var(--text); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
 .ms summary::-webkit-details-marker { display: none; }
@@ -253,8 +254,13 @@ tr.sel { background: var(--surface-2); }
       </div>
     </div>
     <div class="card">
-      <h2 id="stageTitle">Opportunity stages over time</h2>
-      <p class="sub">Each line is one of the selected firm's opportunities, stepping up as it moves through the pipeline. Dashed vertical lines mark events the firm attended; dotted segments are stages dated after the as-of date (projected). Hover a point for details.</p>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <h2 id="stageTitle">Pipeline dollars by stage over time</h2>
+          <p class="sub">Dollars of the selected firm's opportunities sitting in each stage on each date. Dashed vertical lines mark events the firm attended; dotted segments are after the as-of date (projected stages). Hover a point for details.</p>
+        </div>
+        <label class="sel ctl-inline" style="width:220px"><span class="lbl">Stage</span><details class="ms" id="stageFilter"><summary>All</summary><div class="ms-panel"><div class="ms-opts"><label><input type="checkbox" value="1"> Initial Conversation</label><label><input type="checkbox" value="2"> Follow-up / VDR</label><label><input type="checkbox" value="3"> Due Diligence</label><label><input type="checkbox" value="4"> IC / Documentation</label><label><input type="checkbox" value="5"> Committed</label><label><input type="checkbox" value="0"> Declined</label></div></div></details></label>
+      </div>
       <div class="chart" style="height:320px"><canvas id="cStage"></canvas></div>
       <p class="note" id="stageEmpty" style="display:none">This firm has no opportunities.</p>
     </div>
@@ -745,9 +751,11 @@ function renderTimeline() {
   $('#timeline').innerHTML = items.map(r => `<li class="${r.is_projected ? 'proj' : ''}"><span class="date">${r.dt}</span><span class="kind"><span class="dot" style="background:var(${kindColor[r.kind]})"></span>${r.kind}</span><span>${esc(r.detail)}${r.is_projected ? ' (projected, after as-of date)' : ''}</span></li>`).join('') || '<li>No activity.</li>';
 }
 
-// Opportunity stage path for one firm: stepped lines, one per opportunity.
+// Pipeline dollars by stage over time for one firm: one stepped line per stage.
+// A deal sits in a stage from the date it reached it until its next stage; Committed and Declined persist.
 const STAGE_NAMES = ['Declined', 'Initial Conversation', 'Follow-up / VDR', 'Due Diligence', 'IC / Documentation', 'Committed'];
-const OPP_COLORS = () => [css('--s1'), css('--s2'), css('--s3'), '#7b5ea7', '#c2185b', '#5d7a2a'];
+const STAGE_ORDER = [1, 2, 3, 4, 5, 0];
+const STAGE_COLORS = () => ({1: '#9fb3c2', 2: '#6f8ea6', 3: '#3f6784', 4: '#1f3f5a', 5: css('--good'), 0: css('--bad')});
 const eventLines = {id: 'eventLines', afterDatasetsDraw(ch, a, o) {
   if (!o || !o.marks) return;
   const {ctx, chartArea: {top, bottom}, scales: {x}} = ch;
@@ -755,36 +763,48 @@ const eventLines = {id: 'eventLines', afterDatasetsDraw(ch, a, o) {
   o.marks.forEach((m, k) => { const px = x.getPixelForValue(m.t); if (px < x.left || px > x.right) return; const ly = top + 8 + (k % 2) * 13;
     ctx.beginPath(); ctx.moveTo(px, ly + 6); ctx.lineTo(px, bottom); ctx.stroke(); ctx.fillText(m.label, px, ly); });
   ctx.restore(); }};
+function stageDollarSeries(firmId) {
+  const t = d => new Date(d + 'T00:00:00Z').getTime();
+  const opps = D.mart_opportunity.filter(o => o.firm_id === firmId);
+  const hist = opps.map(o => ({o, h: D.mart_stage_history.filter(s => s.opportunity_id === o.opportunity_id)
+    .map(s => ({t: t(s.stage_date), rank: s.stage_rank, projected: s.is_future})).sort((a, b) => a.t - b.t)}));
+  const times = [...new Set(hist.flatMap(x => x.h.map(s => s.t)))].sort((a, b) => a - b);
+  const stageAt = (h, tt) => { let cur = null; h.forEach(s => { if (s.t <= tt) cur = s; }); return cur; };
+  const series = {};
+  STAGE_ORDER.forEach(r => (series[r] = times.map(tt => {
+    const inStage = hist.filter(x => { const c = stageAt(x.h, tt); return c && c.rank === r; });
+    return {x: tt, y: inStage.reduce((a, x) => a + x.o.amount_usd, 0), ids: inStage.map(x => x.o.opportunity_id)};
+  })));
+  return {times, series, n: opps.length};
+}
 function renderStageChart(f) {
-  $('#stageTitle').textContent = `Opportunity stages over time: ${f.firm_name}`;
-  const opps = D.mart_opportunity.filter(o => o.firm_id === f.firm_id).sort((a, b) => a.created_date.localeCompare(b.created_date));
-  $('#stageEmpty').style.display = opps.length ? 'none' : '';
-  $('#cStage').parentElement.style.display = opps.length ? '' : 'none';
-  if (!opps.length) { if (charts.cStage) charts.cStage.destroy(); delete charts.cStage; return; }
-  const t = d => new Date(d + 'T00:00:00Z').getTime(), colors = OPP_COLORS();
-  const asOf = t(D.meta.as_of_date);
-  const datasets = opps.map((o, i) => {
-    const h = D.mart_stage_history.filter(s => s.opportunity_id === o.opportunity_id).sort((a, b) => a.stage_date.localeCompare(b.stage_date));
-    const pts = h.map(s => ({x: t(s.stage_date), y: s.stage_rank, stage: STAGE_NAMES[s.stage_rank], date: s.stage_date, projected: s.is_future}));
-    return {label: `${o.opportunity_id} · ${o.fund_name} · ${fmtM(o.amount_usd)}`, data: pts, stepped: 'before', borderColor: colors[i % colors.length],
-      backgroundColor: colors[i % colors.length], borderWidth: 2, pointRadius: pts.map(p => (p.y === 0 ? 7 : 4)), pointStyle: pts.map(p => (p.y === 0 ? 'crossRot' : 'circle')),
-      segment: {borderDash: c => (c.p1.raw.projected ? [3, 3] : undefined)}};
-  });
-  const allT = datasets.flatMap(d => d.data.map(p => p.x));
+  $('#stageTitle').textContent = `Pipeline dollars by stage over time: ${f.firm_name}`;
+  const {times, series, n} = stageDollarSeries(f.firm_id);
+  $('#stageEmpty').style.display = n ? 'none' : '';
+  $('#cStage').parentElement.style.display = n ? '' : 'none';
+  if (!n) { if (charts.cStage) charts.cStage.destroy(); delete charts.cStage; return; }
+  const t = d => new Date(d + 'T00:00:00Z').getTime(), asOf = t(D.meta.as_of_date);
   const evs = D.mart_firm_event.filter(r => r.firm_id === f.firm_id).map(r => ({t: t(r.event_date), label: evShort(r.event_id) + (r.is_confirmed ? '' : ' (tent.)')}));
-  const lo = Math.min(...allT, ...evs.map(e => e.t)) - 10 * 864e5, hi = Math.max(...allT, ...evs.map(e => e.t), asOf) + 10 * 864e5;
+  const lo = Math.min(...times, ...evs.map(e => e.t)) - 10 * 864e5, hi = Math.max(...times, ...evs.map(e => e.t), asOf) + 10 * 864e5;
+  const picked = [...document.querySelectorAll('#stageFilter input:checked')].map(x => +x.value);
+  const show = STAGE_ORDER.filter(r => (!picked.length || picked.includes(r)) && series[r].some(p => p.y > 0));
+  const colors = STAGE_COLORS();
+  const datasets = show.map(r => {
+    const pts = [...series[r], {...series[r][series[r].length - 1], x: hi}];  // carry the last value to the right edge
+    return {label: STAGE_NAMES[r], data: pts, stepped: 'before', borderColor: colors[r], backgroundColor: colors[r], borderWidth: 2.5,
+      pointRadius: pts.map((p, i) => (i < pts.length - 1 && (i === 0 || p.y !== pts[i - 1].y) ? 4 : 0)), pointHoverRadius: 6,
+      segment: {borderDash: c => (c.p1.parsed.x > asOf ? [3, 3] : undefined)}};
+  });
   chart('cStage', {type: 'line', plugins: [eventLines], data: {datasets},
-    options: {interaction: {mode: 'nearest', intersect: true}, layout: {padding: {top: 18}},
+    options: {interaction: {mode: 'nearest', intersect: false, axis: 'x'}, layout: {padding: {top: 18}},
       plugins: {legend: {position: 'bottom', align: 'start', labels: {boxWidth: 10, boxHeight: 10}}, eventLines: {marks: evs},
-        tooltip: {callbacks: {title: c => c[0].dataset.label, label: c => `${c.raw.stage} · ${mdy(c.raw.date)}${c.raw.projected ? ' (projected)' : ''}`}}},
+        tooltip: {callbacks: {title: c => mdy(new Date(c[0].parsed.x).toISOString().slice(0, 10)) + (c[0].parsed.x > asOf ? ' (projected)' : ''),
+          label: c => `${c.dataset.label}: ${fmtM(c.raw.y)}${c.raw.ids.length ? ' (' + c.raw.ids.join(', ') + ')' : ''}`}}},
       scales: {x: {type: 'linear', min: lo, max: hi, grid: {display: false},
-          // one tick at the start of each month
           afterBuildTicks: ax => { const out = [], d = new Date(ax.min); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() + 1);
             for (; d.getTime() <= ax.max; d.setUTCMonth(d.getUTCMonth() + 1)) out.push({value: d.getTime()}); ax.ticks = out; },
           ticks: {callback: v => new Date(v).toLocaleString('en-US', {month: 'short', timeZone: 'UTC'})}},
-        y: {min: -0.4, max: 5.4, grid: {color: css('--grid')}, border: {display: false},
-          afterBuildTicks: ax => { ax.ticks = [0, 1, 2, 3, 4, 5].map(value => ({value})); },
-          ticks: {callback: v => STAGE_NAMES[v] ?? ''}}}}});
+        y: {beginAtZero: true, grid: {color: css('--grid')}, border: {display: false}, ticks: {callback: v => fmtM(v)}}}}});
 }
 
 // ---------- opps ----------
@@ -812,11 +832,13 @@ function renderOpps() {
     'Intro / VDR': '#9fb3c2', 'Due diligence': '#6f8ea6', 'IC / documentation': '#3f6784',
     'Committed': css('--good'), 'Declined': css('--bad'), 'Open': '#b8c3cb'};
   const nodeTotals = {};
-  Object.values(flows).forEach(f => { nodeTotals[f.to] = (nodeTotals[f.to] || 0) + f.flow; if (!['Intro / VDR', 'Due diligence', 'IC / documentation'].includes(f.from)) nodeTotals[f.from] = (nodeTotals[f.from] || 0) + f.flow; });
+  const nodeUsd = {};
+  Object.values(flows).forEach(f => { nodeTotals[f.to] = (nodeTotals[f.to] || 0) + f.flow; nodeUsd[f.to] = (nodeUsd[f.to] || 0) + f.usd;
+    if (!['Intro / VDR', 'Due diligence', 'IC / documentation'].includes(f.from)) { nodeTotals[f.from] = (nodeTotals[f.from] || 0) + f.flow; nodeUsd[f.from] = (nodeUsd[f.from] || 0) + f.usd; } });
   chart('cSankey', {type: 'sankey', data: {datasets: [{
       data: Object.values(flows), colorFrom: c => nodeColor[c.dataset.data[c.dataIndex].from], colorTo: c => nodeColor[c.dataset.data[c.dataIndex].to],
       colorMode: 'gradient', alpha: 0.55, borderWidth: 0, nodeWidth: 12, size: 'max', color: css('--text'), font: {size: 12, weight: 500},
-      labels: Object.fromEntries(Object.keys(nodeColor).map(n => [n, `${n === 'No confirmed attendance' ? C.noneLabel : n} (${nodeTotals[n] || 0})`])),
+      labels: Object.fromEntries(Object.keys(nodeColor).map(n => [n, `${n === 'No confirmed attendance' ? C.noneLabel : n} (${nodeTotals[n] || 0} · ${fmtM(nodeUsd[n] || 0)})`])),
       priority: {'NY Summit': 1, 'London Dinner': 2, 'Berlin Forum': 3, [outside]: 4, 'No confirmed attendance': 5,
                  'Intro / VDR': 1, 'Due diligence': 2, 'IC / documentation': 3, 'Committed': 1, 'Open': 2, 'Declined': 3},
       column: {'Committed': 2, 'Open': 2, 'Declined': 2}}]},
@@ -830,7 +852,7 @@ function renderOpps() {
       return {label: evShort(e.event_id), borderColor: css(EV_COLOR[e.event_id]), backgroundColor: css(EV_COLOR[e.event_id]), borderWidth: 2, pointRadius: 3, tension: 0.2,
         data: days.map(d => d > age ? null : pts.filter(r => r.days_after_event <= d).reduce((a, r) => a + r.opps, 0))};
     })},
-    options: {plugins: {legend: {position: 'top', align: 'start', labels: {boxWidth: 10, boxHeight: 10}},
+    options: {plugins: {legend: {position: 'top', align: 'center', labels: {boxWidth: 10, boxHeight: 10}},
         tooltip: {callbacks: {title: c => `Day ${days[c[0].dataIndex]} after event`, label: c => `${c.dataset.label}: ${c.raw} opportunities`}}},
       scales: {x: {grid: {display: false}, title: {display: true, text: 'Days after event'}}, y: {grid: {color: css('--grid')}, border: {display: false}, beginAtZero: true, title: {display: true, text: 'Cumulative opportunities'}}}}});
   const stages = ['Initial Conversation', 'Follow-up / VDR', 'Due Diligence', 'IC / Documentation', 'Committed'];
@@ -936,6 +958,7 @@ msOptions('gFund', [...new Set(D.mart_opportunity.map(r => r.fund_name))].sort()
 document.addEventListener('click', e => document.querySelectorAll('details.ms[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; }));
 $('#gOut').onchange = renderAll;
 ['oSource', 'oOutcome', 'oOpp'].forEach(id => msWire(id, renderOpps));
+msWire('stageFilter', () => { const f = D.mart_firm.find(r => r.firm_id === selFirm); if (f) renderStageChart(f); });
 msSet('oOutcome', ['Open', 'Committed', 'Declined']);
 if (startView) document.querySelector(`#nav button[data-view="${startView}"]`)?.click(); else renderAll();
 </script>

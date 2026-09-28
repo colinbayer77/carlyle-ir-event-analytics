@@ -428,35 +428,55 @@ with tab_x:
         t = tl[tl.firm_id == pick].copy()
         t["detail"] = t.detail + t.is_projected.map({True: " (projected, after as-of date)", False: ""})
         st.dataframe(t[["dt", "kind", "detail"]], width="stretch", hide_index=True)
-        chart_head(st, f"Opportunity stages over time: {info.firm_name}",
-                   "Each line is one of the firm's opportunities, stepping up as it moves through the pipeline. Dashed vertical lines mark "
-                   "events the firm attended; dotted segments are stages dated after the as-of date (projected).")
-        fo = opps[opps.firm_id == pick].sort_values("created_date")
+        hc = st.columns([3, 1])
+        chart_head(hc[0], f"Pipeline dollars by stage over time: {info.firm_name}",
+                   "Dollars of the firm's opportunities sitting in each stage on each date. Dashed vertical lines mark events the firm "
+                   "attended; dotted segments are after the as-of date (projected stages).")
+        stage_names = {1: "Initial Conversation", 2: "Follow-up / VDR", 3: "Due Diligence", 4: "IC / Documentation", 5: "Committed", 0: "Declined"}
+        pick_st = hc[1].multiselect("Stage", list(stage_names), format_func=stage_names.get, placeholder="All", key="fx_stage")
+        fo = opps[opps.firm_id == pick]
         if fo.empty:
             st.caption("This firm has no opportunities.")
         else:
-            stage_names = ["Declined", "Initial Conversation", "Follow-up / VDR", "Due Diligence", "IC / Documentation", "Committed"]
             sh = D["mart_stage_history"]
-            palette = [BLUE, ORANGE, AQUA, "#7b5ea7", "#c2185b", "#5d7a2a"]
+            sh = sh[sh.opportunity_id.isin(fo.opportunity_id)].assign(stage_date=lambda x: pd.to_datetime(x.stage_date)).sort_values("stage_date")
+            times = sorted(sh.stage_date.unique())
+            as_of = pd.Timestamp("2026-09-23")
+            ev_rows = fe[fe.firm_id == pick]
+            hi = max([pd.Timestamp(x) for x in times] + [pd.Timestamp(d) for d in ev_rows.event_date] + [as_of]) + pd.Timedelta(days=10)
+            amt = fo.set_index("opportunity_id").amount_usd
+
+            def stage_at(oid, tt):
+                h = sh[(sh.opportunity_id == oid) & (sh.stage_date <= tt)]
+                return None if h.empty else int(h.iloc[-1].stage_rank)
+
+            colors = {1: "#9fb3c2", 2: "#6f8ea6", 3: "#3f6784", 4: "#1f3f5a", 5: "#008300", 0: "#c23b3a"}
             fig = go.Figure()
-            for i, o in enumerate(fo.itertuples()):
-                h = sh[sh.opportunity_id == o.opportunity_id].sort_values("stage_date")
-                color = palette[i % len(palette)]
-                actual, proj = h[~h.is_future], h[h.is_future]
-                name = f"{o.opportunity_id} · {o.fund_name} · {fm(o.amount_usd)}"
-                fig.add_scatter(x=actual.stage_date, y=actual.stage_rank, mode="lines+markers", name=name, legendgroup=name, line=dict(color=color, width=2.5, shape="hv"),
-                                marker=dict(size=[12 if r == 0 else 8 for r in actual.stage_rank], symbol=["x" if r == 0 else "circle" for r in actual.stage_rank]),
-                                customdata=[stage_names[r] for r in actual.stage_rank], hovertemplate="%{customdata} · %{x|%m-%d-%Y}<extra>" + o.opportunity_id + "</extra>")
-                if len(proj):
-                    bridge = pd.concat([actual.tail(1), proj])
-                    fig.add_scatter(x=bridge.stage_date, y=bridge.stage_rank, mode="lines+markers", name=name + " (projected)", legendgroup=name, showlegend=False,
-                                    line=dict(color=color, width=2, dash="dot", shape="hv"), marker=dict(size=7, color=color),
-                                    customdata=[stage_names[r] for r in bridge.stage_rank], hovertemplate="%{customdata} · %{x|%m-%d-%Y} (projected)<extra>" + o.opportunity_id + "</extra>")
-            for k, r in enumerate(fe[fe.firm_id == pick].itertuples()):
+            for r in [1, 2, 3, 4, 5, 0]:
+                if pick_st and r not in pick_st:
+                    continue
+                ys, ids = [], []
+                for tt in times:
+                    inn = [o for o in fo.opportunity_id if stage_at(o, tt) == r]
+                    ys.append(float(amt[inn].sum())); ids.append(", ".join(inn))
+                if not any(ys):
+                    continue
+                xs = list(times) + [hi]
+                ys, ids = ys + [ys[-1]], ids + [ids[-1]]
+                actual = [i for i, x in enumerate(xs) if pd.Timestamp(x) <= as_of]
+                split = (actual[-1] + 1) if actual else 0
+                seg = [(xs[:split + 1], ys[:split + 1], ids[:split + 1], "solid", True), (xs[split:], ys[split:], ids[split:], "dot", False)]
+                for sx, sy, sid, dash, legend in seg:
+                    if len(sx) < 2 and dash == "dot":
+                        continue
+                    fig.add_scatter(x=sx, y=sy, mode="lines+markers", name=stage_names[r], legendgroup=str(r), showlegend=legend,
+                                    line=dict(color=colors[r], width=2.5, shape="hv", dash=dash), marker=dict(size=6),
+                                    customdata=sid, hovertemplate=stage_names[r] + ": %{y:$,.0f} · %{x|%m-%d-%Y}<br>%{customdata}<extra></extra>")
+            for k, r in enumerate(ev_rows.itertuples()):
                 fig.add_vline(x=pd.Timestamp(r.event_date).value / 1e6, line=dict(color="#8a949c", dash="dash", width=1))
                 fig.add_annotation(x=r.event_date, y=1.02 + 0.07 * (k % 2), yref="paper", yanchor="bottom", showarrow=False,
                                    text=EV_SHORT[r.event_id] + ("" if r.is_confirmed else " (tent.)"), font=dict(size=11, color="#5b6570"))
-            fig.update_yaxes(tickvals=list(range(6)), ticktext=stage_names, range=[-0.4, 5.4], gridcolor="#e6eaed", zeroline=False)
+            fig.update_yaxes(tickprefix="$", gridcolor="#e6eaed", zeroline=False, rangemode="tozero")
             fig.update_xaxes(showgrid=False, tickformat="%b")
             fig.update_layout(height=380, margin=dict(l=10, r=10, t=50, b=10), plot_bgcolor="rgba(0,0,0,0)", hovermode="closest",
                               legend=dict(orientation="h", y=-0.15, x=0), font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"))
@@ -502,6 +522,7 @@ with tab_p:
         h = hex_.lstrip("#"); return f"rgba({int(h[0:2], 16)},{int(h[2:4], 16)},{int(h[4:6], 16)},{a})"
     names = [n for n in names if any(n in k for k in flows)]
     totals = {n: sum(v[0] for (x, y), v in flows.items() if y == n) or sum(v[0] for (x, y), v in flows.items() if x == n) for n in names}
+    usd = {n: sum(v[1] for (x, y), v in flows.items() if y == n) or sum(v[1] for (x, y), v in flows.items() if x == n) for n in names}
     order0 = ["NY Summit", "London Dinner", "Berlin Forum", outside, NONE_LABEL]
     order1, order2 = ["Intro / VDR", "Due diligence", "IC / documentation"], ["Committed", "Open", "Declined"]
     def spread(group):
@@ -511,7 +532,7 @@ with tab_p:
     ypos = spread(order0) | spread(order1) | spread(order2)
     fig = go.Figure(go.Sankey(
         arrangement="fixed",
-        node=dict(label=[f"{n} ({totals[n]})" for n in names], color=[node_color[n] for n in names], pad=18, thickness=14, line=dict(width=0),
+        node=dict(label=[f"{n} ({totals[n]} · {fm(usd[n])})" for n in names], color=[node_color[n] for n in names], pad=18, thickness=14, line=dict(width=0),
                   x=[col[n] for n in names], y=[ypos[n] for n in names],
                   hovertemplate="%{label}: %{value} opportunities<extra></extra>"),
         link=dict(source=[names.index(a) for a, b in flows], target=[names.index(b) for a, b in flows],
@@ -533,7 +554,7 @@ with tab_p:
                         line=dict(color=EV_COLOR[e], width=2.5, shape="hv"))
     fig.update_xaxes(title="Days after event", gridcolor="#f0f2f4")
     fig.update_yaxes(title="Cumulative opportunities")
-    st.plotly_chart(line_layout(fig, height=340), width="stretch")
+    st.plotly_chart(line_layout(fig, height=340).update_layout(legend=dict(orientation="h", y=1.12, x=0.5, xanchor="center")), width="stretch")
     c = st.columns(5)
     s1 = c[0].multiselect("Source", BUCKETS, placeholder="All", key="ot_source")
     s2 = c[1].multiselect("Outcome", ["Open", "Committed", "Declined"], placeholder="All", key="ot_outcome")
