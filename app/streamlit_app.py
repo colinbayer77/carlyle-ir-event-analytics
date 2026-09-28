@@ -464,13 +464,21 @@ with tab_x:
             f = f[f[col].isin(val)]
     if q:
         f = f[f.firm_name.str.contains(q, case=False) | f.firm_id.str.contains(q, case=False)]
-    st.caption(f"{len(f)} firms. Select a firm below to see its timeline.")
-    st.dataframe(f[["firm_id", "firm_name", "tier", "segment", "region", "events_confirmed", "events_tentative_only", "meetings", "opps",
-                    "pipeline_usd", "assoc_pipeline_90_usd", "committed_usd", "has_unfollowed_event"]]
-                 .sort_values("pipeline_usd", ascending=False), width="stretch", hide_index=True)
-    if len(f):
-        pick = st.selectbox("Firm timeline", f.sort_values("pipeline_usd", ascending=False).firm_id, format_func=lambda i: f"{i} · {firms.set_index('firm_id').loc[i, 'firm_name']}")
+    st.caption(f"{len(f)} firms. Click a row to show that firm's timeline and pipeline chart below (the first firm is shown until you pick one).")
+    table = (f[["firm_id", "firm_name", "tier", "segment", "region", "events_confirmed", "events_tentative_only", "meetings", "opps",
+                "pipeline_usd", "assoc_pipeline_90_usd", "committed_usd", "has_unfollowed_event"]]
+             .sort_values("pipeline_usd", ascending=False).reset_index(drop=True))
+    sel = st.dataframe(table, width="stretch", hide_index=True, on_select="rerun", selection_mode="single-row", key="fx_table",
+                       column_config={"firm_id": st.column_config.TextColumn("Firm ID", pinned=True), "firm_name": "Firm",
+                                      "pipeline_usd": st.column_config.NumberColumn("Pipeline", format="dollar"),
+                                      "assoc_pipeline_90_usd": st.column_config.NumberColumn("Event-assoc. pipeline", format="dollar"),
+                                      "committed_usd": st.column_config.NumberColumn("Committed", format="dollar"),
+                                      "has_unfollowed_event": st.column_config.CheckboxColumn("Follow-up gap")})
+    if len(table):
+        rows = [r for r in sel.selection.rows if r < len(table)]
+        pick = table.firm_id[rows[0]] if rows else table.firm_id[0]
         info = firms.set_index("firm_id").loc[pick]
+        st.markdown(f"<div class='chart-title' style='margin-top:10px'>Selected firm: {info.firm_name} ({pick})</div>", unsafe_allow_html=True)
         st.markdown(f"**{info.firm_name}** · {info.tier} · {info.segment} · {info.region} · historical commitments {fm(info.historical_commitments_usd)}")
         t = tl[tl.firm_id == pick].copy()
         t["detail"] = t.detail + t.is_projected.map({True: " (projected, after as-of date)", False: ""})
