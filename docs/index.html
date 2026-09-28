@@ -94,7 +94,7 @@ tr.sel { background: var(--surface-2); }
     <button data-view="followup">Follow-up &amp; segments</button>
     <button data-view="firms">Firm explorer</button>
     <button data-view="opps">Opportunities</button>
-    <button data-view="method">Underlying Data and Model</button>
+    <button data-view="method">Underlying Data Model and Data Quality</button>
   </nav>
 </header>
 <main>
@@ -149,7 +149,7 @@ tr.sel { background: var(--surface-2); }
       </div>
       <div class="card">
         <h2>Associated pipeline and commitments ($M)</h2>
-        <p class="sub">Label on Committed shows commitment conversion (committed $ / associated pipeline $). Later-dated stages are treated as projected.</p>
+        <p class="sub">Percentage on Committed bars is commitment conversion: committed $ / associated pipeline $. Later-dated stages are treated as projected.</p>
         <div class="chart"><canvas id="cPipe"></canvas></div>
       </div>
       <div class="card">
@@ -520,25 +520,33 @@ function renderOverview() {
 
   const labels = K.map(r => evShort(r.event_id));
   const evc = K.map(r => css(EV_COLOR[r.event_id]));
-  const lbl = (extra = {}) => Object.assign({anchor: 'end', align: 'end', offset: 2, clamp: true, color: css('--text'), textAlign: 'center',
-    font: ctx => ctx.chart.width < 420 ? {size: 10, weight: 600} : {size: 12, weight: 600}}, extra);
+  // Labels sit inside the bar in white; a bar too short to hold its label gets it just above, in dark text.
+  const fits = (ctx, lines) => {
+    const v = ctx.dataset.data[ctx.dataIndex], y = ctx.chart.scales.y;
+    return v != null && y && (v / y.max) * ctx.chart.chartArea.height >= lines * 13 + 8;
+  };
+  const lbl = (lines, extra = {}) => Object.assign({clamp: true, textAlign: 'center', anchor: 'end',
+    align: ctx => (fits(ctx, lines(ctx)) ? 'start' : 'end'), offset: ctx => (fits(ctx, lines(ctx)) ? 4 : 2),
+    color: ctx => (fits(ctx, lines(ctx)) ? '#ffffff' : css('--text')),
+    font: ctx => ({size: ctx.chart.width < 420 ? 9 : 11, weight: 600})}, extra);
+  const wide = {maxBarThickness: 96, categoryPercentage: 0.8, barPercentage: 0.92};
   const maxOf = a => Math.max(...a.filter(v => v != null));
   const costVals = K.map(r => r.cost_per_assoc_opp);
-  chart('cCostOpp', {type: 'bar', plugins: [ChartDataLabels], data: {labels, datasets: [bar('Cost per associated opp', costVals, evc)]},
+  chart('cCostOpp', {type: 'bar', plugins: [ChartDataLabels], data: {labels, datasets: [bar('Cost per associated opp', costVals, evc, wide)]},
     options: {layout: {padding: {top: 8}},
       plugins: {legend: {display: false}, tooltip: {callbacks: {label: c => `${fmtK(c.raw)} per opp · ${pct(K[c.dataIndex].firm_conversion_rate)} of firms converted`}},
-        datalabels: lbl({formatter: (v, c) => [v == null ? 'no opps' : fmtK(v), `${pct(K[c.dataIndex].firm_conversion_rate)} converted`]})},
-      scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, suggestedMax: maxOf(costVals) * 1.3, ticks: {callback: v => fmtK(v)}}}}});
+        datalabels: lbl(() => 2, {formatter: (v, c) => [v == null ? 'no opps' : fmtK(v), `${pct(K[c.dataIndex].firm_conversion_rate)} converted`]})},
+      scales: {x: {grid: {display: false}}, y: {display: false, beginAtZero: true, suggestedMax: maxOf(costVals) * 1.15}}}});
   const pipeVals = K.map(r => r.assoc_pipeline_usd / 1e6);
   chart('cPipe', {type: 'bar', plugins: [ChartDataLabels], data: {labels, datasets: [
-      bar('Associated pipeline', pipeVals, css('--s1')),
-      bar('Committed', K.map(r => r.assoc_committed_usd / 1e6), css('--s3'))]},
+      bar('Associated pipeline', pipeVals, css('--s1'), {...wide, maxBarThickness: 72}),
+      bar('Committed', K.map(r => r.assoc_committed_usd / 1e6), css('--s3'), {...wide, maxBarThickness: 72})]},
     options: {layout: {padding: {top: 8}},
       plugins: {legend: {position: 'top', align: 'start', labels: {boxWidth: 10, boxHeight: 10}},
         tooltip: {callbacks: {label: c => `${c.dataset.label}: $${c.raw.toFixed(0)}M`}},
-        datalabels: lbl({formatter: (v, c) => c.datasetIndex === 0 ? fmtM(v * 1e6)
-          : [fmtM(v * 1e6), pct(K[c.dataIndex].assoc_pipeline_usd ? K[c.dataIndex].assoc_committed_usd / K[c.dataIndex].assoc_pipeline_usd : 0) + ' of pipeline']})},
-      scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, suggestedMax: maxOf(pipeVals) * 1.2, ticks: {callback: v => '$' + v + 'M'}}}}});
+        datalabels: lbl(c => (c.datasetIndex === 0 ? 1 : 2), {formatter: (v, c) => c.datasetIndex === 0 ? fmtM(v * 1e6)
+          : [fmtM(v * 1e6), pct(K[c.dataIndex].assoc_pipeline_usd ? K[c.dataIndex].assoc_committed_usd / K[c.dataIndex].assoc_pipeline_usd : 0)]})},
+      scales: {x: {grid: {display: false}}, y: {display: false, beginAtZero: true, suggestedMax: maxOf(pipeVals) * 1.1}}}});
   chart('cLift', {type: 'bar', data: {labels, datasets: [
       bar('Attendees, before', K.map(r => r.attendee_prior_opp_rate * 100), css('--s1') + '59'),
       bar('Attendees, after', K.map(r => r.attendee_new_opp_rate * 100), css('--s1')),

@@ -64,7 +64,7 @@ div[data-testid="stAlert"] * {{ color: #1b1f24 !important; }}
 <div class="brand-bar"><div class="row"><img src="data:image/png;base64,{logo}" alt="Carlyle"><span class="div"></span>
 <h1>Investor Relations · Event Outcomes</h1></div>
 <p>What happened after our 2026 investor events, what outcomes are associated with them, and what to change next time.
-Association, not causation: see the Underlying Data and Model tab.</p></div>
+Association, not causation: see the Underlying Data Model and Data Quality tab.</p></div>
 """,
         unsafe_allow_html=True,
     )
@@ -76,8 +76,8 @@ def donut_fig(labels, values, colors, center, sub, fmt):
                            texttemplate="%{percent:.0%}", textfont=dict(color="#ffffff", size=13),
                            customdata=[fmt(v) for v in values],
                            hovertemplate="%{label}<br>%{customdata} (%{percent:.0%})<extra></extra>"))
-    fig.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10), showlegend=True,
-                      legend=dict(orientation="v", x=1.02, y=0.5, font=dict(size=12)),
+    fig.update_layout(height=380, margin=dict(l=10, r=10, t=10, b=70), showlegend=True,
+                      legend=dict(orientation="h", x=0.5, xanchor="center", y=-0.08, yanchor="top", font=dict(size=12)),
                       font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"),
                       annotations=[dict(text=f"<span style='font-size:22px;color:{NAVY}'><b>{center}</b></span><br><span style='font-size:12px'>{sub}</span>",
                                         showarrow=False, x=0.5, y=0.5, xref="paper", yref="paper")])
@@ -100,6 +100,13 @@ def sig_note(rows: pd.DataFrame, label: str) -> str:
     return (f"Statistical significance: two-sided permutation test. Which firms attended each event was randomly reshuffled "
             f"{int(rows.n_permutations.iloc[0]):,} times to see how often a difference-in-differences this large appears by chance; "
             f"a gap counts as significant only if p < 0.05. {label}: p = {ps}.")
+
+
+def inside_labels(values, axis_max, min_share):
+    """White labels inside the bar; bars shorter than min_share of the axis get dark labels just above."""
+    inside = [(v is not None and not pd.isna(v) and v / axis_max >= min_share) for v in values]
+    return dict(textposition=["inside" if i else "outside" for i in inside], insidetextanchor="end", textangle=0,
+                textfont=dict(color=["#ffffff" if i else "#1b1f24" for i in inside], size=10))
 
 
 def chart_head(col, title: str, sub: str = "") -> None:
@@ -211,7 +218,7 @@ if not F.is_default_extra:
     footnote(f"<b>Filters on:</b> {describe(F)} · {len(ATT)} attending firm-events, {len(FOPPS)} opportunities. "
              "Event cost is not split by filter. Small groups: read rates as directional.")
 
-tab_o, tab_f, tab_x, tab_p, tab_m = st.tabs(["Executive summary", "Follow-up & segments", "Firm explorer", "Opportunities", "Underlying Data and Model"])
+tab_o, tab_f, tab_x, tab_p, tab_m = st.tabs(["Executive summary", "Follow-up & segments", "Firm explorer", "Opportunities", "Underlying Data Model and Data Quality"])
 
 with tab_o:
     reached = len(ATT_FIRMS)
@@ -292,25 +299,28 @@ with tab_o:
     a, b = st.columns(2)
     chart_head(a, "Cost per associated opportunity",
                "Event cost / opportunities created in window (lower is better). Label shows the share of attending firms that converted.")
+    cmax = K.cost_per_assoc_opp.max() if K.cost_per_assoc_opp.notna().any() else 1
     fig = go.Figure(go.Bar(
-        x=labels, y=K.cost_per_assoc_opp, marker_color=[EV_COLOR[e] for e in K.event_id],
+        x=labels, y=K.cost_per_assoc_opp, marker_color=[EV_COLOR[e] for e in K.event_id], width=0.75,
         text=[("no opps" if pd.isna(c) else f"<b>{fk(c)}</b>") + f"<br>{pct(r)} converted" for c, r in zip(K.cost_per_assoc_opp, K.firm_conversion_rate)],
-        textposition="outside", cliponaxis=False))
-    fig.update_layout(height=340, margin=dict(l=10, r=10, t=30, b=10), yaxis_tickprefix="$", plot_bgcolor="rgba(0,0,0,0)",
+        **inside_labels(K.cost_per_assoc_opp, cmax, min_share=0.3), cliponaxis=False))
+    fig.update_layout(height=340, margin=dict(l=10, r=10, t=30, b=10), plot_bgcolor="rgba(0,0,0,0)",
                       font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"),
-                      yaxis=dict(range=[0, (K.cost_per_assoc_opp.max() if K.cost_per_assoc_opp.notna().any() else 1) * 1.3], gridcolor="#e6eaed"))
-    fig.update_layout(uniformtext_minsize=11, uniformtext_mode="show")
+                      yaxis=dict(range=[0, cmax * 1.15], visible=False))
+    fig.update_layout(uniformtext_minsize=10, uniformtext_mode="show")
     a.plotly_chart(fig, width="stretch")
     chart_head(b, "Associated pipeline and commitments",
                "Percentage on Committed bars is commitment conversion: committed $ / associated pipeline $.")
     conv = (K.assoc_committed_usd / K.assoc_pipeline_usd.where(K.assoc_pipeline_usd > 0)).fillna(0)
+    pmax = max(K.assoc_pipeline_usd.max() / 1e6, 1)
     fig = bar_fig(labels, [("Associated pipeline", K.assoc_pipeline_usd / 1e6, BLUE), ("Committed", K.assoc_committed_usd / 1e6, AQUA)], height=340)
-    fig.data[0].update(text=[f"<b>{fm(v)}</b>" for v in K.assoc_pipeline_usd], textposition="outside", cliponaxis=False)
+    fig.data[0].update(text=[f"<b>{fm(v)}</b>" for v in K.assoc_pipeline_usd], cliponaxis=False,
+                       **inside_labels(K.assoc_pipeline_usd / 1e6, pmax, min_share=0.12))
     fig.data[1].update(text=[f"<b>{fm(v) if v else '$0M'}</b><br>{c:.0%}" for v, c in zip(K.assoc_committed_usd, conv)],
-                       hovertemplate="%{x}<br>Committed: $%{y:.0f}M<extra></extra>",
-                       textposition="outside", cliponaxis=False)
-    fig.update_yaxes(tickprefix="$", ticksuffix="M", range=[0, max(K.assoc_pipeline_usd.max() / 1e6, 1) * 1.25])
-    fig.update_layout(uniformtext_minsize=11, uniformtext_mode="show", legend=dict(y=1.18))
+                       hovertemplate="%{x}<br>Committed: $%{y:.0f}M<extra></extra>", cliponaxis=False,
+                       **inside_labels(K.assoc_committed_usd / 1e6, pmax, min_share=0.2))
+    fig.update_yaxes(range=[0, pmax * 1.12], visible=False)
+    fig.update_layout(uniformtext_minsize=10, uniformtext_mode="show", legend=dict(y=1.18), bargap=0.25, bargroupgap=0.05)
     b.plotly_chart(fig, width="stretch")
     a, b = st.columns(2)
     chart_head(a, "New-opportunity rate before vs after the event")

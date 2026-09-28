@@ -11,7 +11,7 @@
   - Donut charts (where pipeline came from, follow-up status of attending firms) and line charts (monthly opportunities and meetings with event markers, cumulative opportunities after each event).
   - Renaming the landing tab to "Executive summary".
   - Filters for investor segment, fund, attendee seniority, and excluding the $650M outlier, alongside the association window and tentative-attendance controls.
-  - A section in the Underlying Data and Model tab that explains the source data and the data model.
+  - A section in the Underlying Data Model and Data Quality tab that explains the source data and the data model.
 - **Approach and data model.** Claude proposed the plan: the KPI set and headline cards, the three-layer SQL model, the attribution rule, and how to treat data-quality issues. I reviewed and approved it before any code was written.
 - **Testing.** I used both dashboards and caught that the Streamlit controls had stopped responding (the app server had been stopped); it was restarted and every control retested.
 
