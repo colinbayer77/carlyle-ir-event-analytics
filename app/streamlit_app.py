@@ -116,7 +116,7 @@ tent = c2.toggle("Include tentative-only firms", value=False)
 K = kpi_all[(kpi_all.window_days == window) & (kpi_all.include_tentative == tent)].sort_values("event_id")
 labels = [EV_SHORT[e] for e in K.event_id]
 
-tab_o, tab_f, tab_x, tab_p, tab_m = st.tabs(["Overview", "Follow-up & segments", "Firm explorer", "Opportunities", "Method & data quality"])
+tab_o, tab_f, tab_x, tab_p, tab_m = st.tabs(["Executive summary", "Follow-up & segments", "Firm explorer", "Opportunities", "Method & data quality"])
 
 with tab_o:
     reached = fe[fe.is_confirmed | tent].firm_id.nunique()
@@ -261,8 +261,42 @@ with tab_p:
                     "assoc_event_id_90", "days_after_event_90", "is_amount_outlier", "projected_stage_rows"]],
                  width="stretch", hide_index=True)
 
+def md_doc(name: str) -> str:
+    """Read a docs/ markdown file, demote headings under the tab's subheader, escape $ (Streamlit treats $..$ as LaTeX)."""
+    import re
+
+    text = (ROOT / "docs" / name).read_text().replace("$", "\\$")
+    return re.sub(r"^(#{1,3}) ", lambda m: "#" * (len(m.group(1)) + 2) + " ", text, flags=re.M)
+
+
+DATA_MODEL_DOT = """
+digraph G {
+  rankdir=LR; nodesep=0.25; ranksep=0.5;
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11, color="#c9d3da", fillcolor="#f2f5f7"];
+  edge [color="#8a98a3", arrowsize=0.6];
+  subgraph cluster_raw { label="Source CSVs"; fontname="Helvetica"; fontsize=12; color="#e1e7eb";
+    r_ev [label="events (3)"]; r_fi [label="firms (60)"]; r_at [label="event_attendees (131)"];
+    r_me [label="meetings (112)"]; r_op [label="opportunity_stage_history (358)"]; }
+  subgraph cluster_core { label="Core model"; fontname="Helvetica"; fontsize=12; color="#e1e7eb";
+    d_ev [label="dim_event", fillcolor="#dbe7f1"]; d_fi [label="dim_firm", fillcolor="#dbe7f1"];
+    f_fe [label="fct_firm_event\nfirm x event"]; f_me [label="fct_meeting"];
+    f_op [label="fct_opportunity\n1 row per opp"]; }
+  br [label="bridge_opp_event\nopp -> credited event\n(window x attendance rule)", fillcolor="#f6ecd6"];
+  subgraph cluster_mart { label="Marts (dashboards read these)"; fontname="Helvetica"; fontsize=12; color="#e1e7eb";
+    m_k [label="mart_event_kpis"]; m_fe [label="mart_firm_event"]; m_f [label="mart_firm"];
+    m_o [label="mart_opportunity"]; m_t [label="mart_firm_timeline"]; m_s [label="mart_segment"]; }
+  r_ev -> d_ev; r_fi -> d_fi; r_at -> f_fe; r_me -> f_me; r_op -> f_op;
+  d_ev -> f_fe; d_fi -> f_fe; f_fe -> br; f_op -> br; d_ev -> br;
+  br -> m_k; f_me -> m_k; f_fe -> m_fe; br -> m_fe; br -> m_o; f_op -> m_o; m_o -> m_f; f_me -> m_t; f_op -> m_t; m_fe -> m_s;
+}
+"""
+
 with tab_m:
-    st.markdown((ROOT / "docs" / "METHOD.md").read_text().replace("$", "\\$"))
+    st.subheader("Underlying data and data model")
+    st.markdown(md_doc("DATA.md"))
+    st.graphviz_chart(DATA_MODEL_DOT, width="stretch")
+    st.divider()
+    st.markdown(md_doc("METHOD.md"))
     st.subheader("Data-quality log")
     st.dataframe(dq, width="stretch", hide_index=True)
 

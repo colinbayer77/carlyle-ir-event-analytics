@@ -105,7 +105,7 @@ tr.sel { background: var(--surface-2); }
   <div class="brandrow"><img src="assets/carlyle_logo_white.png" alt="Carlyle"><span class="divider"></span><h1>Investor Relations · Event Outcomes</h1></div>
   <p id="subtitle">What happened after our 2026 investor events, what outcomes are associated with them, and what to change next time.</p>
   <nav id="nav">
-    <button data-view="overview" class="active">Overview</button>
+    <button data-view="overview" class="active">Executive summary</button>
     <button data-view="followup">Follow-up &amp; segments</button>
     <button data-view="firms">Firm explorer</button>
     <button data-view="opps">Opportunities</button>
@@ -234,6 +234,94 @@ tr.sel { background: var(--surface-2); }
 
   <!-- METHOD -->
   <section class="view method" id="view-method">
+    <div class="card">
+      <h2>Underlying data and data model</h2>
+      <div class="scroll" style="max-height:none"><h3>Source data</h3>
+<p>Five CSV extracts, all synthetic. Every table joins on <code>firm_id</code>; attendance also joins to events on <code>event_id</code>.</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Rows</th>
+<th>Grain (one row per)</th>
+<th>Key fields</th>
+<th>What it tells us</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>events.csv</code></td>
+<td>3</td>
+<td>Event</td>
+<td>event_id, date, type, location, cost_usd</td>
+<td>What we spent and when: NY Summit (Mar), London Dinner (May), Berlin Forum (Jun), $1.215M total</td>
+</tr>
+<tr>
+<td><code>firms.csv</code></td>
+<td>60</td>
+<td>Investor firm</td>
+<td>firm_id, segment, priority tier, region, historical commitments</td>
+<td>Who the investor is and how important they are</td>
+</tr>
+<tr>
+<td><code>event_attendees.csv</code></td>
+<td>131</td>
+<td>Contact registered for an event</td>
+<td>event_id, firm_id, title, status (Confirmed / Tentative)</td>
+<td>Who we reached, how senior, and how firm the registration was</td>
+</tr>
+<tr>
+<td><code>meetings.csv</code></td>
+<td>112</td>
+<td>Meeting with a firm</td>
+<td>firm_id, date, type, internal attendee, purpose</td>
+<td>Engagement before and after each event</td>
+</tr>
+<tr>
+<td><code>opportunity_stage_history.csv</code></td>
+<td>358 (107 opportunities)</td>
+<td>Stage change on an opportunity</td>
+<td>opportunity_id, firm_id, fund, created date, stage date, stage, amount</td>
+<td>Pipeline creation, progression, and commitments</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What is not in the data:</strong> no field records which event (if any) produced an opportunity, and no check-in data (only registration status). Both limits shape the method below.</p>
+<h3>Data model</h3>
+<p>Built in DuckDB with plain SQL in three layers (<code>sql/01_staging.sql</code>, <code>02_core.sql</code>, <code>03_marts.sql</code>), run by <code>src/build.py</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Tables</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Staging</strong></td>
+<td><code>stg_events</code>, <code>stg_firms</code>, <code>stg_attendees</code>, <code>stg_meetings</code>, <code>stg_opp_stage</code></td>
+<td>Cast types, drop the exact duplicate, flag unmapped contacts, collapse repeated stages, flag stages dated after the as-of date</td>
+</tr>
+<tr>
+<td><strong>Core</strong></td>
+<td><code>dim_event</code>, <code>dim_firm</code>, <code>fct_firm_event</code>, <code>fct_meeting</code>, <code>fct_opportunity</code></td>
+<td>One clean table per business entity. <code>fct_firm_event</code> rolls contacts up to firm x event (confirmed?, senior attendee?). <code>fct_opportunity</code> is one row per opportunity with highest stage reached, outcome, and dates</td>
+</tr>
+<tr>
+<td><strong>Link</strong></td>
+<td><code>bridge_opp_event</code></td>
+<td>Credits each opportunity to at most one event, for every window (30/60/90/180 days) and attendance rule (confirmed only or incl. tentative)</td>
+</tr>
+<tr>
+<td><strong>Marts</strong></td>
+<td><code>mart_event_kpis</code>, <code>mart_firm_event</code>, <code>mart_firm</code>, <code>mart_opportunity</code>, <code>mart_firm_timeline</code>, <code>mart_segment</code>, <code>dq_log</code></td>
+<td>What the dashboards read. All metric logic lives here, so the HTML page and this app show identical numbers</td>
+</tr>
+</tbody>
+</table>
+<p>The build also runs 11 assertions (totals reconcile to raw files, one row per opportunity, no double-credited opportunity) and fails if any break.</p></div>
+    </div>
     <div class="card">
       <h2>How to read this</h2>
       <h3>Association, not causation</h3>
