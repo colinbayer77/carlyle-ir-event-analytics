@@ -217,7 +217,7 @@ if not F.is_default_extra:
     footnote(f"<b>Filters on:</b> {describe(F)} · {len(ATT)} attending firm-events, {len(FOPPS)} opportunities. "
              "Event cost is not split by filter. Small groups: read rates as directional.")
 
-tab_o, tab_f, tab_x, tab_p, tab_m = st.tabs(["Executive summary", "Follow-up & segments", "Firm explorer", "Opportunities", "Underlying Data Model and Data Quality"])
+tab_o, tab_s, tab_f, tab_x, tab_p, tab_m = st.tabs(["Executive summary", "Event Scorecard", "Follow-up & segments", "Firm explorer", "Opportunities", "Underlying Data Model and Data Quality"])
 
 with tab_o:
     reached = len(ATT_FIRMS)
@@ -242,6 +242,8 @@ with tab_o:
         .replace("$", "\\$")  # stop Streamlit markdown reading $...$ as LaTeX
     )
     footnote("* " + sig_note(d.reset_index(), "Default rule (90 days, confirmed)"))
+
+with tab_s:
 
     rows = {
         "Date / type": pd.to_datetime(K.event_date).dt.strftime("%m-%d-%Y") + " · " + K.event_type,

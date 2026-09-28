@@ -98,6 +98,7 @@ tr.sel { background: var(--surface-2); }
   <p id="subtitle">What happened after our 2026 investor events, what outcomes are associated with them, and what to change next time.</p>
   <nav id="nav">
     <button data-view="overview" class="active">Executive summary</button>
+    <button data-view="scorecard">Event Scorecard</button>
     <button data-view="followup">Follow-up &amp; segments</button>
     <button data-view="firms">Firm explorer</button>
     <button data-view="opps">Opportunities</button>
@@ -134,6 +135,10 @@ tr.sel { background: var(--surface-2); }
       <ol id="insights"></ol>
       <p class="note sig-note" id="sigNoteIns"></p>
     </div>
+  </section>
+
+  <!-- EVENT SCORECARD -->
+  <section class="view" id="view-scorecard">
     <div class="card">
       <h2>Event scorecard</h2>
       <p class="sub">All metrics respond to the window and tentative controls. "Associated" means the opportunity was created within the window after an event the firm attended (most recent event gets credit).</p>
@@ -402,7 +407,7 @@ const startView = new URLSearchParams(location.search).get('view');
 document.querySelectorAll('#nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('#nav button').forEach(x => x.classList.toggle('active', x === b));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + b.dataset.view));
-  $('#controls').style.display = ['overview', 'followup', 'opps'].includes(b.dataset.view) ? '' : 'none';
+  $('#controls').style.display = ['overview', 'scorecard', 'followup', 'opps'].includes(b.dataset.view) ? '' : 'none';
   renderAll();
 });
 
@@ -730,7 +735,7 @@ function renderAll() {
   $('#filterNote').innerHTML = extraActive(f)
     ? `<b>Filters on:</b> ${esc(describeFilters(f))} · ${c.att.length} attending firm-events, ${c.opps.length} opportunities. Small groups: read rates as directional.`
     : '';
-  ({overview: renderOverview, followup: renderFollowup, firms: renderFirms, opps: renderOpps, method: renderMethod})[v]();
+  ({overview: renderOverview, scorecard: renderOverview, followup: renderFollowup, firms: renderFirms, opps: renderOpps, method: renderMethod})[v]();
 }
 $('#win').onchange = renderAll; $('#tent').onchange = renderAll;
 initFirmFilters();

@@ -7,7 +7,7 @@
 **How AI was used and checked:** [AI_USAGE.md](AI_USAGE.md)
 **Method, metric definitions, data-quality decisions:** [docs/METHOD.md](docs/METHOD.md)
 
-![Overview](screenshots/01_overview.png)
+![Executive summary](screenshots/01_executive_summary.png)
 
 ## The answer in five points
 
