@@ -102,11 +102,23 @@ def sig_note(rows: pd.DataFrame, label: str) -> str:
             f"a gap counts as significant only if p < 0.05. {label}: p = {ps}.")
 
 
-def inside_labels(values, axis_max, min_share):
-    """White labels inside the bar; bars shorter than min_share of the axis get dark labels just above."""
-    inside = [(v is not None and not pd.isna(v) and v / axis_max >= min_share) for v in values]
+def inside_labels(values, axis_max, min_share, light_bar=False):
+    """Labels centered inside the bar; bars shorter than min_share of the axis get their label just outside.
+    White text on dark bars, dark text on light bars (light_bar=True)."""
+    inside = [(v is not None and not pd.isna(v) and axis_max and v / axis_max >= min_share) for v in values]
     return dict(textposition=["inside" if i else "outside" for i in inside], insidetextanchor="middle", textangle=0,
-                textfont=dict(color=["#ffffff" if i else "#1b1f24" for i in inside], size=10))
+                textfont=dict(color=["#ffffff" if i and not light_bar else "#1b1f24" for i in inside], size=10))
+
+
+def label_bars(fig, labels_per_trace, light=(), min_share=0.12, horizontal=False, headroom=1.12):
+    """Add centered data labels to every trace of a bar_fig and hide the value axis."""
+    vals = [list(t.x if horizontal else t.y) for t in fig.data]
+    vmax = max([v for vs in vals for v in vs if v is not None and not pd.isna(v)] + [1])
+    for i, (t, txt) in enumerate(zip(fig.data, labels_per_trace)):
+        t.update(text=txt, cliponaxis=False, **inside_labels(vals[i], vmax, min_share, light_bar=i in light))
+    (fig.update_xaxes if horizontal else fig.update_yaxes)(visible=False, range=[0, vmax * headroom])
+    fig.update_layout(uniformtext_minsize=9, uniformtext_mode="show")
+    return fig
 
 
 def chart_head(col, title: str, sub: str = "") -> None:
@@ -333,11 +345,13 @@ with tab_s:
     b.plotly_chart(fig, width="stretch")
     a, b = st.columns(2)
     chart_head(a, "New-opportunity rate before vs after the event")
-    a.plotly_chart(bar_fig(labels, [
-        ("Attendees, before", K.attendee_prior_opp_rate, NEUTRAL), ("Attendees, after", K.attendee_new_opp_rate, BLUE),
-        ("Non-attendees, before", K.non_attendee_prior_opp_rate, "#dcdad4"), ("Non-attendees, after", K.non_attendee_new_opp_rate, ORANGE)], yfmt=".0%"), width="stretch")
+    lift = [K.attendee_prior_opp_rate, K.attendee_new_opp_rate, K.non_attendee_prior_opp_rate, K.non_attendee_new_opp_rate]
+    fig = bar_fig(labels, [("Attendees, before", lift[0], NEUTRAL), ("Attendees, after", lift[1], BLUE),
+                           ("Non-attendees, before", lift[2], "#dcdad4"), ("Non-attendees, after", lift[3], ORANGE)])
+    a.plotly_chart(label_bars(fig, [[pct(v) for v in s] for s in lift], light=(0, 2), min_share=0.15), width="stretch")
     chart_head(b, "Meetings with attending firms, 60 days before vs after")
-    b.plotly_chart(bar_fig(labels, [("Before", K.meetings_pre_60, NEUTRAL), ("After", K.meetings_post_60, BLUE)]), width="stretch")
+    fig = bar_fig(labels, [("Before", K.meetings_pre_60, NEUTRAL), ("After", K.meetings_post_60, BLUE)])
+    b.plotly_chart(label_bars(fig, [[str(int(v)) for v in K.meetings_pre_60], [str(int(v)) for v in K.meetings_post_60]], light=(0,)), width="stretch")
 
 with tab_f:
     conf = ATT.copy()
@@ -403,12 +417,16 @@ with tab_p:
     src = FOPPS.groupby("bucket").agg(pipeline=("amount_usd", "sum"), n=("opportunity_id", "count")).reindex(BUCKETS).fillna(0)
     src["committed"] = FOPPS[FOPPS.outcome == "Committed"].groupby("bucket").amount_usd.sum()
     chart_head(a, "Where pipeline came from ($M)")
-    a.plotly_chart(bar_fig(list(src.index), [("Pipeline", src.pipeline / 1e6, BLUE), ("Committed", src.committed.fillna(0) / 1e6, AQUA)]), width="stretch")
+    ncom = FOPPS[FOPPS.outcome == "Committed"].groupby("bucket").size().reindex(src.index).fillna(0).astype(int)
+    fig = bar_fig(list(src.index), [("Pipeline", src.pipeline / 1e6, BLUE), ("Committed", src.committed.fillna(0) / 1e6, AQUA)])
+    a.plotly_chart(label_bars(fig, [[f"{fm(v)}<br>{int(n)} opps" for v, n in zip(src.pipeline, src.n)],
+                                    [f"{fm(v)}<br>{int(n)} opps" for v, n in zip(src.committed.fillna(0), ncom)]], min_share=0.18), width="stretch")
     stages = ["Initial Conversation", "Follow-up / VDR", "Due Diligence", "IC / Documentation", "Committed"]
     ea, other = FOPPS[FOPPS.assoc_event_id.notna()], FOPPS[FOPPS.assoc_event_id.isna()]
     chart_head(b, "Funnel: count reaching each stage")
-    b.plotly_chart(bar_fig(stages, [("Event-associated", [(ea.max_stage_rank >= i + 1).sum() for i in range(5)], BLUE),
-                                    ("All other", [(other.max_stage_rank >= i + 1).sum() for i in range(5)], NEUTRAL)], horizontal=True), width="stretch")
+    fun = [[int((ea.max_stage_rank >= i + 1).sum()) for i in range(5)], [int((other.max_stage_rank >= i + 1).sum()) for i in range(5)]]
+    fig = bar_fig(stages, [("Event-associated", fun[0], BLUE), ("All other", fun[1], NEUTRAL)], horizontal=True)
+    b.plotly_chart(label_bars(fig, [[str(v) for v in f] for f in fun], light=(1,), min_share=0.08, horizontal=True), width="stretch")
     chart_head(st, "Opportunity flow: source → furthest stage → status",
                "Opportunities under the current filters. Band width is the number of opportunities; "
                "hover for $ pipeline. Committed opportunities flow straight to Committed.")

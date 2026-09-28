@@ -485,6 +485,33 @@ function donut(id, labels, values, colors, center, fmt) {
         datalabels: {color: '#fff', font: {weight: 600, size: 12}, formatter: v => v / total >= 0.06 ? Math.round(v / total * 100) + '%' : ''},
         centerText: center}}});
 }
+// Data labels centered inside bars where they fit, just outside where they don't.
+// White text on dark bars, dark text on light or translucent bars.
+function isLightColor(c) {
+  if (!c || c[0] !== '#') return false;
+  const h = c.slice(1), rgb = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16) / 255);
+  const alpha = h.length === 8 ? parseInt(h.substr(6, 2), 16) / 255 : 1;
+  const lum = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+  return alpha < 0.6 || lum > 0.55;
+}
+function barLabels(fmt, lines = () => 1) {
+  const text = ctx => [].concat(fmt(ctx.dataset.data[ctx.dataIndex], ctx));
+  const fits = ctx => {
+    const v = ctx.dataset.data[ctx.dataIndex];
+    if (v == null || !v) return false;
+    const horiz = ctx.chart.options.indexAxis === 'y', sc = ctx.chart.scales[horiz ? 'x' : 'y'];
+    if (!sc) return false;
+    const len = (v / sc.max) * (horiz ? ctx.chart.chartArea.width : ctx.chart.chartArea.height);
+    const need = horiz ? Math.max(...text(ctx).map(t => String(t).length)) * 6.5 + 10 : lines(ctx) * 13 + 8;
+    return len >= need;
+  };
+  const bg = ctx => { const b = ctx.dataset.backgroundColor; return Array.isArray(b) ? b[ctx.dataIndex] : b; };
+  return {clamp: true, textAlign: 'center', formatter: (v, ctx) => text(ctx),
+    anchor: ctx => (fits(ctx) ? 'center' : 'end'), align: ctx => (fits(ctx) ? 'center' : 'end'), offset: ctx => (fits(ctx) ? 0 : 2),
+    color: ctx => (fits(ctx) && !isLightColor(bg(ctx)) ? '#ffffff' : css('--text')),
+    font: ctx => ({size: ctx.chart.width < 420 ? 9 : 11, weight: 600})};
+}
+const hiddenAxis = max => ({display: false, beginAtZero: true, suggestedMax: max});
 const bar = (label, data, color, extra = {}) => Object.assign({label, data, backgroundColor: color, borderRadius: 4, borderSkipped: 'bottom', maxBarThickness: 44, borderColor: css('--surface'), borderWidth: 0}, extra);
 
 // ---------- overview ----------
@@ -575,12 +602,13 @@ function renderOverview() {
         datalabels: lbl(c => (c.datasetIndex === 0 ? 1 : 2), {formatter: (v, c) => c.datasetIndex === 0 ? fmtM(v * 1e6)
           : [fmtM(v * 1e6), pct(K[c.dataIndex].assoc_pipeline_usd ? K[c.dataIndex].assoc_committed_usd / K[c.dataIndex].assoc_pipeline_usd : 0)]})},
       scales: {x: {grid: {display: false}}, y: {display: false, beginAtZero: true, suggestedMax: maxOf(pipeVals) * 1.1}}}});
-  chart('cLift', {type: 'bar', data: {labels, datasets: [
+  chart('cLift', {type: 'bar', plugins: [ChartDataLabels], data: {labels, datasets: [
       bar('Attendees, before', K.map(r => r.attendee_prior_opp_rate * 100), css('--s1') + '59'),
       bar('Attendees, after', K.map(r => r.attendee_new_opp_rate * 100), css('--s1')),
       bar('Non-attendees, before', K.map(r => r.non_attendee_prior_opp_rate * 100), css('--s2') + '59'),
       bar('Non-attendees, after', K.map(r => r.non_attendee_new_opp_rate * 100), css('--s2'))]},
-    options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label}: ${Math.round(c.raw)}%`}}}, scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, max: 100, ticks: {callback: v => v + '%'}}}}});
+    options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label}: ${Math.round(c.raw)}%`}}, datalabels: barLabels(v => (v == null ? '' : Math.round(v) + '%'))},
+      scales: {x: {grid: {display: false}}, y: hiddenAxis(maxOf(K.flatMap(r => [r.attendee_prior_opp_rate, r.attendee_new_opp_rate, r.non_attendee_prior_opp_rate, r.non_attendee_new_opp_rate]).map(v => v * 100)) * 1.1)}}});
   const firmSet = new Set(C.firmsIn.map(r => r.firm_id));
   const M = D.mart_monthly.map(r => ({...r,
     new_opps: C.opps.filter(o => o.created_date.slice(0, 7) === r.month.slice(0, 7)).length,
@@ -596,9 +624,11 @@ function renderOverview() {
   const srcV = C.buckets.map(b => C.opps.filter(o => o.bucket === b).reduce((a, o) => a + o.amount_usd, 0));
   donut('cSourceDonut', [`Opened within ${C.f.window}d of an attended event`, 'Attendee firm, outside window', C.noneLabel === 'No confirmed attendance' ? 'Firm with no confirmed attendance' : C.noneLabel], srcV,
     [css('--s1'), css('--s3'), css('--neutral')], {text: fmtM(srcV.reduce((a, b) => a + b, 0)), sub: '2026 pipeline'}, fmtM);
-  chart('cMtg', {type: 'bar', data: {labels, datasets: [
-      bar('60 days before', K.map(r => r.meetings_pre_60), css('--neutral')),
-      bar('60 days after', K.map(r => r.meetings_post_60), css('--s1'))]}});
+  chart('cMtg', {type: 'bar', plugins: [ChartDataLabels], data: {labels, datasets: [
+      bar('60 days before', K.map(r => r.meetings_pre_60), css('--neutral'), wide),
+      bar('60 days after', K.map(r => r.meetings_post_60), css('--s1'), wide)]},
+    options: {plugins: {datalabels: barLabels(v => String(v))},
+      scales: {x: {grid: {display: false}}, y: hiddenAxis(maxOf(K.flatMap(r => [r.meetings_pre_60, r.meetings_post_60])) * 1.1)}}});
 }
 
 // ---------- follow-up ----------
@@ -678,10 +708,12 @@ function renderTimeline() {
 function renderOpps() {
   const C = ctx(), O = C.opps, buckets = C.buckets;
   const agg = b => O.filter(o => o.bucket === b);
-  chart('cSource', {type: 'bar', data: {labels: buckets, datasets: [
+  chart('cSource', {type: 'bar', plugins: [ChartDataLabels], data: {labels: buckets, datasets: [
       bar('Pipeline $M', buckets.map(b => agg(b).reduce((a, o) => a + o.amount_usd, 0) / 1e6), css('--s1'), {n: buckets.map(b => agg(b).length)}),
       bar('Committed $M', buckets.map(b => agg(b).filter(o => o.outcome === 'Committed').reduce((a, o) => a + o.amount_usd, 0) / 1e6), css('--s3'), {n: buckets.map(b => agg(b).filter(o => o.outcome === 'Committed').length)})]},
-    options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label.replace(' $M', '')}: $${Math.round(c.raw)}M (${c.dataset.n[c.dataIndex]} opps)`}}}, scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, ticks: {callback: v => '$' + v + 'M'}}}}});
+    options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label.replace(' $M', '')}: $${Math.round(c.raw)}M (${c.dataset.n[c.dataIndex]} opps)`}},
+        datalabels: barLabels((v, c) => [fmtM(v * 1e6), `${c.dataset.n[c.dataIndex]} opps`], () => 2)},
+      scales: {x: {grid: {display: false}}, y: hiddenAxis(Math.max(1, ...buckets.map(b => agg(b).reduce((a, o) => a + o.amount_usd, 0) / 1e6)) * 1.1)}}});
   const outside = `Attendee, outside ${C.f.window}d`;
   const srcName = o => o.assoc_event_id ? evShort(o.assoc_event_id) : o.bucket === 'Attendee, outside window' ? outside : 'No confirmed attendance';
   const stgName = r => r <= 2 ? 'Intro / VDR' : r === 3 ? 'Due diligence' : 'IC / documentation';
@@ -721,10 +753,11 @@ function renderOpps() {
   const stages = ['Initial Conversation', 'Follow-up / VDR', 'Due Diligence', 'IC / Documentation', 'Committed'];
   const reach = (arr, i) => arr.filter(o => o.max_stage_rank >= i + 1 && (i < 4 || o.outcome === 'Committed')).length;
   const ea = O.filter(o => o.assoc_event_id), other = O.filter(o => !o.assoc_event_id);
-  chart('cFunnel', {type: 'bar', data: {labels: stages, datasets: [
+  chart('cFunnel', {type: 'bar', plugins: [ChartDataLabels], data: {labels: stages, datasets: [
       bar('Event-associated', stages.map((s, i) => reach(ea, i)), css('--s1')),
       bar('All other', stages.map((s, i) => reach(other, i)), css('--neutral'))]},
-    options: {indexAxis: 'y', scales: {y: {grid: {display: false}}, x: {grid: {color: css('--grid')}, border: {display: false}}}}});
+    options: {indexAxis: 'y', plugins: {datalabels: barLabels(v => String(v))},
+      scales: {y: {grid: {display: false}}, x: hiddenAxis(Math.max(1, reach(other, 0), reach(ea, 0)) * 1.08)}}});
 
   const fill = (sel, vals) => { if ($(sel).options.length === 1) { $(sel).insertAdjacentHTML('beforeend', vals.map(v => `<option>${esc(v)}</option>`).join('')); $(sel).onchange = renderOpps; } };
   const keep = $('#oSource').value;
