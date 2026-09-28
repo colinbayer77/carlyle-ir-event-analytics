@@ -198,7 +198,7 @@ TAB_NAMES = ["Executive summary", "Event Scorecard", "Follow-up & segments", "Fi
              "Underlying Data Model and Data Quality", "Next Event Planner"]
 # A tab bar that knows which tab is open, so page-level filters can be hidden where they don't apply (the planner).
 PAGE = st.radio("View", TAB_NAMES, horizontal=True, key="nav", label_visibility="collapsed")
-SHOW_FILTERS = PAGE != "Next Event Planner"
+SHOW_FILTERS = PAGE not in ("Next Event Planner", "Firm explorer")  # these tabs have their own controls
 # Remember filter choices across tabs: a widget that isn't drawn on a run loses its state, so keep a copy.
 SAVED = st.session_state.setdefault("_filters", {"window": 90, "events": [], "segment": [], "fund": [], "seniority": [], "tent": False, "excl": False})
 

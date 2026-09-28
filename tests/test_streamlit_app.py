@@ -39,6 +39,12 @@ def test_filters_survive_a_visit_to_the_planner():
     assert not at.exception and metric(at, "Associated opportunities") == "6"
 
 
+def test_firm_explorer_has_only_its_own_filters():
+    at = run(lambda a: a.radio(key="nav").set_value("Firm explorer"))
+    labels = [m.label for m in at.multiselect]
+    assert labels == ["Event", "Tier", "Investor segment", "Region", "Stage"], labels  # Stage is the in-chart filter
+
+
 def test_filters():
     base = run()
     assert metric(base, "Associated opportunities") == "37"
@@ -64,5 +70,6 @@ def test_planner_reproduces_london():
 
 if __name__ == "__main__":
     test_planner_reproduces_london()
+    test_firm_explorer_has_only_its_own_filters()
     test_filters_survive_a_visit_to_the_planner()
     test_filters(); print("streamlit app tests passed")
