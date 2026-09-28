@@ -34,7 +34,14 @@ nav button:hover { color: #fff; }
 nav button.active { color: #fff; border-bottom-color: #fff; font-weight: 600; }
 .card h2, .insights h2 { font-family: 'EB Garamond', Georgia, serif; font-size: 19px; font-weight: 600; color: var(--text); }
 main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
-.controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; }
+.controls { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; }
+.ctl-selects { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 16px; }
+.ctl-selects label.sel { flex-direction: column; align-items: stretch; gap: 4px; }
+.ctl-selects select { width: 100%; }
+.ctl-toggles { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+#filterNote:not(:empty) { margin-top: 8px; }
+#asof { margin-top: 6px; }
+@media (max-width: 760px) { .ctl-selects { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .sig-note { margin: 12px 0 0; padding-top: 6px; border-top: 1px solid var(--border); font-size: 10px; line-height: 1.35; color: var(--muted); }
 td .info, .info { color: var(--muted); cursor: help; font-size: 12px; }
 .controls .info { color: var(--muted); cursor: help; font-size: 13px; }
@@ -99,20 +106,24 @@ tr.sel { background: var(--surface-2); }
 </header>
 <main>
   <div class="controls" id="controls">
-    <label title="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker.">Association window <span class="info">ⓘ</span>
+    <div class="ctl-selects">
+    <label class="sel" title="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker."><span class="lbl">Association window <span class="info">ⓘ</span></span>
       <select id="win">
         <option value="30">30 days</option><option value="60">60 days</option>
         <option value="90" selected>90 days</option><option value="180">180 days</option>
       </select>
     </label>
-    <label title="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended."><input type="checkbox" id="tent"> Include tentative firm registrations as attendance <span class="info">ⓘ</span></label>
-    <label title="Keep only firms in this investor segment: attendees, the non-attendee comparison group, and their opportunities.">Segment <span class="info">ⓘ</span> <select id="gSeg"><option>All</option></select></label>
-    <label title="Keep only opportunities for this fund. Attendance, meetings and follow-up are not affected.">Fund <span class="info">ⓘ</span> <select id="gFund"><option>All</option></select></label>
-    <label title="Count attendance only where a CIO or Managing Director was registered (or only where none was). Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees.">Attendee seniority <span class="info">ⓘ</span>
+    <label class="sel" title="Keep only firms in this investor segment: attendees, the non-attendee comparison group, and their opportunities."><span class="lbl">Investor segment <span class="info">ⓘ</span></span><select id="gSeg"><option>All</option></select></label>
+    <label class="sel" title="Keep only opportunities for this fund. Attendance, meetings and follow-up are not affected."><span class="lbl">Fund <span class="info">ⓘ</span></span><select id="gFund"><option>All</option></select></label>
+    <label class="sel" title="Count attendance only where a CIO or Managing Director was registered (or only where none was). Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees."><span class="lbl">Attendee seniority <span class="info">ⓘ</span></span>
       <select id="gSen"><option value="All">All</option><option value="senior">CIO or MD registered</option><option value="non_senior">No CIO or MD</option></select></label>
+    </div>
+    <div class="ctl-toggles">
+    <label title="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended."><input type="checkbox" id="tent"> Include tentative firm registrations as attendance <span class="info">ⓘ</span></label>
     <label title="Removes O0017, a $650M commitment (next largest ticket is $150M). The firm attended no event, so event metrics do not change; totals, the pipeline donut and opportunity charts do."><input type="checkbox" id="gOut"> Exclude $650M outlier <span class="info">ⓘ</span></label>
-    <div class="note" id="filterNote" style="flex-basis:100%"></div>
-    <span class="note" id="asof"></span>
+    </div>
+    <div class="note" id="filterNote"></div>
+    <div class="note" id="asof"></div>
   </div>
 
   <!-- OVERVIEW -->

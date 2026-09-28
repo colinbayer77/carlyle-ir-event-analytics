@@ -158,22 +158,21 @@ def bar_fig(x, series, yfmt=None, horizontal=False, height=300):
 
 brand_css()
 
-c1, c2 = st.columns([1, 3])
-window = c1.selectbox("Association window (days)", [30, 60, 90, 180], index=2,
-                      help="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker.")
-tent = c2.toggle("Include tentative firm registrations as attendance", value=False,
-                 help="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended.")
-c = st.columns([1, 1, 1, 1.3])
-segment = c[0].selectbox("Investor segment", ["All"] + sorted(firms.segment.unique()),
-                         help="Keep only firms in this investor segment: attendees, the non-attendee comparison group, and their opportunities.")
-fund = c[1].selectbox("Fund", ["All"] + sorted(opps.fund_name.unique()),
-                      help="Keep only opportunities for this fund. Attendance, meetings and follow-up are not affected.")
-seniority = c[2].selectbox("Attendee seniority", ["All", "senior", "non_senior"],
-                           format_func={"All": "All", "senior": "CIO or MD registered", "non_senior": "No CIO or MD"}.get,
-                           help="Count attendance only where a CIO or Managing Director was registered (or only where none was). Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees.")
-c[3].markdown("<div style='height:30px'></div>", unsafe_allow_html=True)
-excl = c[3].toggle("Exclude $650M outlier",
-                   help="Removes O0017, a $650M commitment (next largest ticket is $150M). The firm attended no event, so event metrics do not change; totals, the pipeline donut and opportunity charts do.")
+row = st.columns(4)
+window = row[0].selectbox("Association window (days)", [30, 60, 90, 180], index=2,
+                          help="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker.")
+segment = row[1].selectbox("Investor segment", ["All"] + sorted(firms.segment.unique()),
+                           help="Keep only firms in this investor segment: attendees, the non-attendee comparison group, and their opportunities.")
+fund = row[2].selectbox("Fund", ["All"] + sorted(opps.fund_name.unique()),
+                        help="Keep only opportunities for this fund. Attendance, meetings and follow-up are not affected.")
+seniority = row[3].selectbox("Attendee seniority", ["All", "senior", "non_senior"],
+                             format_func={"All": "All", "senior": "CIO or MD registered", "non_senior": "No CIO or MD"}.get,
+                             help="Count attendance only where a CIO or Managing Director was registered (or only where none was). Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees.")
+row = st.columns([2.2, 1.3, 2.5])
+tent = row[0].toggle("Include tentative firm registrations as attendance", value=False,
+                     help="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended.")
+excl = row[1].toggle("Exclude $650M outlier",
+                     help="Removes O0017, a $650M commitment (next largest ticket is $150M). The firm attended no event, so event metrics do not change; totals, the pipeline donut and opportunity charts do.")
 F = Filters(window=window, tentative=tent, segment=segment, fund=fund, seniority=seniority, exclude_outlier=excl)
 P = prepare(D)
 
