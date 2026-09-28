@@ -138,7 +138,7 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
 <section class="slide">
   <img class="logo" src="{LOGO}" alt="Carlyle">
   <div class="kicker">Investor events 2026 · readout for the Head of IR</div>
-  <h1>Events reach most of our priority firms, but the gap is what happens after</h1>
+  <h1>Events reach most of our priority firms but the gap is what happens after</h1>
   <div class="stats">
     <div class="stat"><div class="n">${N['spend'] / 1e6:.1f}M</div><div class="l">spent on 3 events<br>(NY, London, Berlin)</div></div>
     <div class="stat"><div class="n">{N['t1_reached']} of {N['t1_all']}</div><div class="l">Tier 1 firms attended at least one event ({N['firms']} of {N['firms_all']} firms overall)</div></div>
