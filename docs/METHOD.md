@@ -62,9 +62,10 @@ Event cost is not split by filter, so cost-per-opportunity under a filter is ful
 | Tentative-only firm attendance | 9 firm-events | Excluded by default, available via toggle |
 | Amounts stored as float text (1500000.0, 2500000.0) | 61 | Cast to integer USD; read as small tickets, not a unit error |
 | $650M ticket (O0017), next largest $150M | 1 opp | Kept and flagged. It is not linked to any event, so event metrics are unchanged either way |
-| Stage dated after the as-of date (2026-09-23, up to 2026-11-19) | 19 stage entries | Treated as projected: excluded from current stage, commitments, and conversion; shown in firm timelines |
+| Stage dated after the as-of date (2026-09-23, up to 2026-10-28) | 19 stage entries | Treated as projected: excluded from current stage, commitments, and conversion; shown in firm timelines |
 | Same stage logged twice | 13 | Collapsed to the first date the stage was reached |
-| Opportunity with no early stages (O9999 logged directly as Committed) | 2 | Kept; funnel counts the stages it reached |
+| Duplicate opportunity: O9998 and O9999 identical (same firm, fund, dates, stage, $25M) | 1 opp | Kept O9998, dropped O9999. Found in the independent audit; before the fix it added 1 opportunity and $25M to London's associated commitments |
+| Opportunity with no early stages (O9998 logged directly as Committed) | 1 | Kept; funnel counts the stages it reached |
 | Two meetings, same firm and day (F007) | 1 pair | Kept; different type and purpose |
 
 **As-of date.** 2026-09-23, the date the data extract was delivered. It is a parameter in `src/build.py`.
@@ -84,3 +85,5 @@ Event cost is not split by filter, so cost-per-opportunity under a filter is ful
 - Three events and 60 firms: every rate is directional.
 - Events differ in age at the as-of date (Berlin about 100 days, New York about 195), so commitments favor older events. Compare at equal windows (the 30, 60, and 90 day settings) before judging.
 - Registration is not attendance. A check-in field would sharpen every metric.
+- At the 180-day window, London's and Berlin's post-event windows run past the as-of date (only 125 and 99 days have elapsed), while the before-window is a full 180 days, so 180-day comparisons for those two events are lopsided. The 30, 60 and 90 day windows are complete for all three events.
+- Opportunities created on the event date count as event-associated (one case), even though some may have been opened before the event contact.

@@ -57,6 +57,24 @@ FROM raw_meetings;
 --  * is_future: stage dates after the as-of date are treated as projected, not actual.
 --  * Repeated rows for the same stage (e.g. IC / Documentation logged twice) are
 --    collapsed to the first date that stage was reached.
+-- Duplicate opportunity records: two IDs with the same firm, fund, created date, amount
+-- and identical stage history (O9998 / O9999) are one opportunity entered twice.
+-- Keep the lowest ID, drop the rest; logged in dq_log.
+CREATE OR REPLACE TABLE int_opp_signature AS
+SELECT opportunity_id,
+       firm_id || '|' || fund_name || '|' || created_date || '|' ||
+       STRING_AGG(stage_date || ':' || stage || ':' || CAST(CAST(opportunity_amount_usd AS DOUBLE) AS BIGINT), ',' ORDER BY stage_date, stage) AS signature
+FROM raw_opportunity_stage_history
+GROUP BY opportunity_id, firm_id, fund_name, created_date;
+
+CREATE OR REPLACE TABLE dup_opportunities AS
+SELECT opportunity_id, kept_opportunity_id FROM (
+    SELECT opportunity_id,
+           FIRST_VALUE(opportunity_id) OVER (PARTITION BY signature ORDER BY opportunity_id) AS kept_opportunity_id,
+           ROW_NUMBER() OVER (PARTITION BY signature ORDER BY opportunity_id) AS rn
+    FROM int_opp_signature)
+WHERE rn > 1;
+
 CREATE OR REPLACE TABLE stg_opp_stage_raw AS
 SELECT
     opportunity_id,
@@ -75,7 +93,8 @@ SELECT
         WHEN 'Committed'            THEN 5
         WHEN 'Declined'             THEN 0
     END                                                AS stage_rank
-FROM raw_opportunity_stage_history;
+FROM raw_opportunity_stage_history
+WHERE opportunity_id NOT IN (SELECT opportunity_id FROM dup_opportunities);
 
 CREATE OR REPLACE TABLE stg_opp_stage AS
 SELECT

@@ -8,7 +8,7 @@ Five CSV extracts, all synthetic. Every table joins on `firm_id`; attendance als
 | `firms.csv` | 60 | Investor firm | firm_id, segment, priority tier, region, historical commitments | Who the investor is and how important they are |
 | `event_attendees.csv` | 131 | Contact registered for an event | event_id, firm_id, title, status (Confirmed / Tentative) | Who we reached, how senior, and how firm the registration was |
 | `meetings.csv` | 112 | Meeting with a firm | firm_id, date, type, internal attendee, purpose | Engagement before and after each event |
-| `opportunity_stage_history.csv` | 358 (107 opportunities) | Stage change on an opportunity | opportunity_id, firm_id, fund, created date, stage date, stage, amount | Pipeline creation, progression, and commitments |
+| `opportunity_stage_history.csv` | 358 (107 opportunity IDs; 106 after removing one duplicate) | Stage change on an opportunity | opportunity_id, firm_id, fund, created date, stage date, stage, amount | Pipeline creation, progression, and commitments |
 
 **What is not in the data:** no field records which event (if any) produced an opportunity, and no check-in data (only registration status). Both limits shape the method below.
 

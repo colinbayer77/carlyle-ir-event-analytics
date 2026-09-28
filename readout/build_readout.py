@@ -25,12 +25,18 @@ t1 = fe[fe.tier == "Tier 1"]
 gap_t1 = firms[firms.has_unfollowed_event & (firms.tier == "Tier 1")]
 
 
+def _r(x: float, nd: int = 0) -> float:
+    """Round half up, like JavaScript's Math.round, so Python and the static page show the same figure."""
+    from decimal import ROUND_HALF_UP, Decimal
+    return float(Decimal(str(x)).quantize(Decimal(1).scaleb(-nd), rounding=ROUND_HALF_UP))
+
+
 def fm(v):
-    return f"${v / 1e9:.2f}B" if v >= 1e9 else f"${v / 1e6:,.0f}M"
+    return f"${_r(v / 1e9, 2):.2f}B" if v >= 1e9 else f"${_r(v / 1e6):,.0f}M"
 
 
 def fk(v):
-    return f"${v / 1e3:,.0f}K"
+    return f"${_r(v / 1e3):,.0f}K"
 
 
 N = dict(
@@ -151,7 +157,7 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
 <section class="slide">
   <img class="logo" src="{LOGO}" alt="Carlyle">
   <div class="kicker">What happened after each event</div>
-  <h1 >The $185K dinner produced opportunities at half the cost of NY and a sixth of Berlin</h1>
+  <h1 >The $185K dinner produced opportunities at about half the cost of NY and a fifth of Berlin</h1>
   <div class="grid">
     <div>
       <table>
@@ -175,7 +181,7 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
   <div class="recs">
     <div class="rec"><b><span class="num">1</span>Put a 10-day follow-up standard on Tier 1 attendees</b><p>Every Tier 1 attendee gets a named owner and a meeting within 10 business days. Start this week with the {N['gap_n']} Tier 1 firms ({fm(N['gap_pipe'])} pipeline) that attended and have not been met since. Faster follow-up did not by itself raise conversion in 2026 data, so treat this as a standard plus a test.</p><div class="who">Owner: coverage leads · Tracked weekly on the dashboard gap list</div></div>
     <div class="rec"><b><span class="num">2</span>Shift budget toward targeted hospitality</b><p>Run a second dinner-format event in 2027 and fund it from the conference line. Hold the Berlin renewal until its 180-day review (mid-December 2026); renew only if associated commitments appear.</p><div class="who">Owner: IR events · Decision: December 2026</div></div>
-    <div class="rec"><b><span class="num">3</span>Capture the data that would prove impact</b><p>Tag opportunities with a source event at creation, record check-in (not registration), and require firm mapping for every registrant. Today one registrant has no firm and nine firms are only "tentative".</p><div class="who">Owner: CRM / BI · Before the next event</div></div>
+    <div class="rec"><b><span class="num">3</span>Capture the data that would prove impact</b><p>Tag opportunities with a source event at creation, record check-in (not registration), and require firm mapping for every registrant. Today one registrant has no firm and nine firm registrations are only "tentative".</p><div class="who">Owner: CRM / BI · Before the next event</div></div>
     <div class="rec"><b><span class="num">4</span>Design the next events to measure lift</b><p>Hold back invitations to a small matched group of firms (same tier, segment, region) and compare 90-day outcomes. One event is too small to prove lift; four to six events with the same design can.</p><div class="who">Owner: IR + BI · Pilot on the first 2027 event</div></div>
   </div>
   <div class="caveat"><b>What this analysis cannot say:</b> that events caused the pipeline that followed them. With 19 to 26 attending firms per event, none of the three gaps is statistically significant*. The $650M commitment of the year came from a firm that attended no event, a reminder that most pipeline is built outside the event calendar.</div>

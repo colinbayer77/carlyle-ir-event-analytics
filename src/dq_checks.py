@@ -19,6 +19,12 @@ FINDINGS = [
         "Exact duplicate (A0011) collapsed to one row.",
     ),
     (
+        "Duplicate opportunity record",
+        "High",
+        "SELECT COUNT(*) FROM dup_opportunities",
+        "O9998 and O9999 are identical (same firm, fund, dates, stage, $25M). Kept O9998, dropped O9999.",
+    ),
+    (
         "Attendee with no firm_id",
         "Medium",
         "SELECT COUNT(*) FROM raw_event_attendees WHERE NULLIF(TRIM(firm_id), '') IS NULL",
@@ -58,7 +64,7 @@ FINDINGS = [
         "Opportunity starts past Initial Conversation",
         "Low",
         "SELECT COUNT(*) FROM fct_opportunity WHERE skipped_early_stages",
-        "Kept (e.g. O9999 logged directly as Committed). Funnel counts it at the stages it reached.",
+        "Kept (e.g. O9998 logged directly as Committed). Funnel counts it at the stages it reached.",
     ),
     (
         "Two meetings same firm same day",
@@ -80,7 +86,7 @@ ASSERTIONS = [
     ("60 firms, unique ids", "SELECT COUNT(*) = 60 AND COUNT(DISTINCT firm_id) = 60 FROM dim_firm"),
     (
         "Opportunity grain: one row per raw opportunity_id",
-        "SELECT (SELECT COUNT(*) FROM fct_opportunity) = (SELECT COUNT(DISTINCT opportunity_id) FROM raw_opportunity_stage_history)",
+        "SELECT (SELECT COUNT(*) FROM fct_opportunity) = (SELECT COUNT(DISTINCT opportunity_id) FROM raw_opportunity_stage_history) - (SELECT COUNT(*) FROM dup_opportunities)",
     ),
     ("One firm and one amount per opportunity", "SELECT COUNT(*) = 0 FROM (SELECT opportunity_id FROM stg_opp_stage GROUP BY 1 HAVING COUNT(DISTINCT firm_id) > 1 OR COUNT(DISTINCT amount_usd) > 1)"),
     ("No stage before created_date", "SELECT COUNT(*) = 0 FROM stg_opp_stage WHERE stage_date < created_date"),

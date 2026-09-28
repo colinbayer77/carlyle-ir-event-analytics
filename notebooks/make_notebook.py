@@ -49,6 +49,12 @@ print('opps created by month:'); print(osh.groupby('opportunity_id').created_dat
 att_c = att.drop_duplicates().dropna(subset=['firm_id'])
 conf = att_c[att_c.attendance_status == 'Confirmed'][['event_id', 'firm_id']].drop_duplicates().merge(ev[['event_id', 'event_date', 'cost_usd']])
 actual = osh[osh.stage_date <= AS_OF]
+# Same opportunity entered twice under two IDs (identical firm, fund, dates, stages, amount): keep the lowest ID
+sig = osh.sort_values(['stage_date', 'stage']).groupby('opportunity_id').apply(lambda g: (g.firm_id.iloc[0], g.fund_name.iloc[0], g.created_date.iloc[0], tuple(zip(g.stage_date, g.stage, g.amount))))
+dups = sig[sig.duplicated(keep='first')].index
+print('duplicate opportunity IDs dropped:', list(dups))
+osh = osh[~osh.opportunity_id.isin(dups)]
+actual = osh[osh.stage_date <= AS_OF]
 opp = osh.groupby('opportunity_id').agg(firm_id=('firm_id', 'first'), created=('created_date', 'first'), amount=('amount', 'first')).reset_index()
 committed = actual[actual.stage == 'Committed'].groupby('opportunity_id').stage_date.min()
 opp['committed'] = opp.opportunity_id.map(committed).notna()

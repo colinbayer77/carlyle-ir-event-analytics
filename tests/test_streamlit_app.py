@@ -32,15 +32,15 @@ def metric(at, label):
 
 def test_filters():
     base = run()
-    assert metric(base, "Associated opportunities") == "38"
+    assert metric(base, "Associated opportunities") == "37"
     cases = {"segment": multi("Investor segment", ["Pension"]), "fund": multi("Fund", ["Fund Beta"]),
              "senior": multi("Attendee seniority", ["senior"]), "outlier": tog("Exclude $650M outlier"),
              "both_senior": multi("Attendee seniority", ["senior", "non_senior"]),
              "two_segments": multi("Investor segment", ["Pension", "Insurance"]),
              "window": sel("Association window (days)", 30), "tentative": tog("Include tentative firm registrations as attendance")}
     got = {k: metric(run(f), "Associated opportunities") for k, f in cases.items()}
-    assert got == {"segment": "6", "fund": "13", "senior": "13", "outlier": "38", "both_senior": "38", "two_segments": got["two_segments"],
-                   "window": "21", "tentative": "41"}, got
+    assert got == {"segment": "6", "fund": "12", "senior": "12", "outlier": "37", "both_senior": "37", "two_segments": "12",
+                   "window": "20", "tentative": "40"}, got
     print("streamlit filter results:", got)
 
 

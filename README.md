@@ -11,12 +11,12 @@
 
 ## The answer in five points
 
-1. **Events reach most priority firms (13 of 17 Tier 1, 47 of 60 overall) for $1.2M.** 38 of 107 opportunities ($1.57B, 31% of 2026 pipeline, $278M committed) opened within 90 days of an event the firm attended.
+1. **Events reach most priority firms (13 of 17 Tier 1, 47 of 60 overall) for $1.2M.** 37 of 106 opportunities ($1.55B, 31% of 2026 pipeline, $253M committed) opened within 90 days of an event the firm attended.
 2. **That is association, not demonstrated lift.** Against firms that did not attend, over the same dates, attendees did not open opportunities faster (difference-in-differences: NY +12 pts, London -14, Berlin -3). None is statistically significant\*.
 
    \* Two-sided permutation test, 5,000 random reshuffles of which firms attended; significant only if p < 0.05. p = 0.61 (NY), 0.44 (London), 1.00 (Berlin).
 3. **Follow-up is the biggest controllable gap, worst at Tier 1.** 39% of attending firms had a meeting within 30 days; Tier 1 was 6 of 21. Ten Tier 1 firms with $808M of pipeline attended and were not met in the following 60 days.
-4. **The $185K London dinner was the most efficient event:** $13K per associated opportunity vs $26K for NY and $76K for Berlin, and the largest rise in post-event meetings.
+4. **The $185K London dinner was the most efficient event:** $14K per associated opportunity vs $26K for NY and $76K for Berlin, and the largest rise in post-event meetings.
 5. **Berlin ($610K) needs a case before renewal:** meetings with attendees fell after the event (19 to 11), no commitments yet. Recheck at 180 days.
 
 Recommendations (readout slide 3): a 10-day Tier 1 follow-up standard, shift budget toward hospitality formats, capture source-event and check-in data, and design the next events with a matched holdout so lift can be measured.
@@ -94,7 +94,8 @@ python readout/build_readout.py          # needs Google Chrome for the PDF step
 
 - **Attended** means at least one Confirmed contact; tentative-only registrations can be counted with the "Include tentative firm registrations as attendance" toggle.
 - **Associated** means the opportunity was created 0 to 90 days after an attended event; the most recent event gets credit. 30/60/180 days are available as sensitivities.
-- **As-of date is 2026-09-23** (the data delivery date). 19 stage entries dated later (up to 2026-11-19) are treated as projected, not achieved.
+- **As-of date is 2026-09-23** (the data delivery date). 19 stage entries dated later (up to 2026-10-28) are treated as projected, not achieved.
+- **One duplicate opportunity removed.** O9998 and O9999 are the same $25M Fund Beta commitment entered twice; O9998 is kept.
 - The $650M commitment (O0017) is kept and flagged; it is not linked to any event.
 - Every rate rests on 19 to 26 attending firms per event, so all findings are directional.
 

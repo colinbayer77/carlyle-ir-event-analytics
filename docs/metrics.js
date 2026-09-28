@@ -86,7 +86,7 @@
       const n = a.length, sum = (xs, fn) => xs.reduce((t, x) => t + fn(x), 0);
       const r = {event_id: ev.event_id, event_name: ev.event_name, event_date: ev.event_date, event_type: ev.event_type, location: ev.location,
         cost_usd: ev.cost_usd, days_since_event: ev.days_since_event, window_days: f.window, include_tentative: f.tentative};
-      r.firms_attended = n; r.tier1_firms = a.filter(x => x.tier === 'Tier 1').length; r.firms_with_senior = a.filter(x => x.has_confirmed_senior).length;
+      r.firms_attended = n; r.tier1_firms = a.filter(x => x.tier === 'Tier 1').length; r.firms_with_senior = a.filter(x => (f.tentative ? x.senior_contacts > 0 : x.has_confirmed_senior)).length;
       r.cost_per_firm = n ? ev.cost_usd / n : null;
       r.firms_followup_30 = a.filter(x => x.meetings_post_30 > 0).length; r.followup_rate_30 = n ? r.firms_followup_30 / n : null;
       r.median_days_to_followup = median(a.map(x => x.days_to_first_followup));

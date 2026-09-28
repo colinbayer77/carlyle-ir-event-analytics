@@ -130,16 +130,22 @@ kpi_all, fe, firms, opps, tl, seg, dq = (
 )
 
 
+def _r(x: float, nd: int = 0) -> float:
+    """Round half up, like JavaScript's Math.round, so Python and the static page show the same figure."""
+    from decimal import ROUND_HALF_UP, Decimal
+    return float(Decimal(str(x)).quantize(Decimal(1).scaleb(-nd), rounding=ROUND_HALF_UP))
+
+
 def fm(v: float) -> str:
     if pd.isna(v):
         return "-"
     if v == 0:
         return "$0M"
-    return f"${v / 1e9:.2f}B" if v >= 1e9 else f"${v / 1e6:,.1f}M" if v < 1e7 else f"${v / 1e6:,.0f}M"
+    return f"${_r(v / 1e9, 2):.2f}B" if v >= 1e9 else f"${_r(v / 1e6, 1):,.1f}M" if v < 1e7 else f"${_r(v / 1e6):,.0f}M"
 
 
 def fk(v: float) -> str:
-    return "-" if pd.isna(v) else f"${v / 1e3:,.0f}K"
+    return "-" if pd.isna(v) else f"${_r(v / 1e3):,.0f}K"
 
 
 def bar_fig(x, series, yfmt=None, horizontal=False, height=300):
@@ -160,7 +166,7 @@ brand_css()
 
 row = st.columns(4)
 window = row[0].selectbox("Association window (days)", [30, 60, 90, 180], index=2,
-                          help="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker.")
+                          help="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker. At 180 days, London and Berlin have not yet had the full window.")
 segment = tuple(row[1].multiselect("Investor segment", sorted(firms.segment.unique()), placeholder="All",
                                    help="Pick one or more investor segments. Keeps only firms in those segments: attendees, the non-attendee comparison group, and their opportunities."))
 fund = tuple(row[2].multiselect("Fund", sorted(opps.fund_name.unique()), placeholder="All",
@@ -265,7 +271,9 @@ with tab_s:
     }
     score = pd.DataFrame({k: list(v) for k, v in rows.items()}, index=[f"{n} ({l})" for n, l in zip(K.event_name, K.location)]).T
     st.subheader("Event scorecard")
-    st.dataframe(score, width="stretch")
+    score_tbl = score.rename_axis("Metric").reset_index()
+    st.dataframe(score_tbl, width="stretch", hide_index=True, height=35 * (len(score_tbl) + 1) + 3,
+                 column_config={"Metric": st.column_config.TextColumn("Metric", width="large", pinned=True)})
     footnote("* " + sig_note(K, f"Current settings ({describe(F)})"))
 
     a, b = st.columns(2)

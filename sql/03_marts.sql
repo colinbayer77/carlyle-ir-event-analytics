@@ -109,7 +109,7 @@ GROUP BY ALL;
 CREATE OR REPLACE TABLE mart_event_kpis AS
 WITH att AS (
     SELECT g.window_days, g.include_tentative, ar.event_id, ar.firm_id, ar.is_confirmed,
-           ar.has_confirmed_senior, f.tier
+           ar.has_confirmed_senior, ar.senior_contacts, f.tier
     FROM grid g
     JOIN int_attendance_rule ar ON ar.include_tentative = g.include_tentative
     JOIN dim_firm f USING (firm_id)
@@ -118,7 +118,8 @@ att_agg AS (
     SELECT window_days, include_tentative, event_id,
            COUNT(*)                                          AS firms_attended,
            COUNT(*) FILTER (WHERE tier = 'Tier 1')           AS tier1_firms,
-           COUNT(*) FILTER (WHERE has_confirmed_senior)      AS firms_with_senior
+           -- senior = a CIO/MD registered under the same attendance rule (confirmed only, or any status when tentative is included)
+           COUNT(*) FILTER (WHERE CASE WHEN include_tentative THEN senior_contacts > 0 ELSE has_confirmed_senior END) AS firms_with_senior
     FROM att GROUP BY ALL
 ),
 contacts AS (

@@ -131,7 +131,7 @@ def event_kpis(P: dict, f: Filters) -> pd.DataFrame:
         r = dict(event_id=ev.event_id, event_name=ev.event_name, event_date=ev.event_date.strftime("%Y-%m-%d"), event_type=ev.event_type,
                  location=ev.location, cost_usd=ev.cost_usd, days_since_event=ev.days_since_event, window_days=f.window, include_tentative=f.tentative)
         r.update(firms_attended=n, tier1_firms=int((a.tier == "Tier 1").sum()),
-                 firms_with_senior=int(a.has_confirmed_senior.sum()),
+                 firms_with_senior=int((a.senior_contacts.gt(0) if f.tentative else a.has_confirmed_senior).sum()),
                  cost_per_firm=ev.cost_usd / n if n else None,
                  firms_followup_30=int((a.meetings_post_30 > 0).sum()),
                  followup_rate_30=(a.meetings_post_30 > 0).mean() if n else None,

@@ -6,7 +6,7 @@ F004,Investor Firm 04,Pension,Tier 1,Americas,Existing $50M+,75000000.0,,,0,3,27
 F005,Investor Firm 05,Insurance,Tier 1,Americas,Existing $50M+,75000000.0,E002,,2,0,0,0,0,0,false
 F006,Investor Firm 06,Asset Manager,Tier 1,APAC,Existing < $50M,20000000.0,"E001, E003",E002,3,2,165000000,0,2,165000000,true
 F007,Investor Firm 07,Foundation,Tier 2,APAC,New relationship,0.0,"E001, E002",,6,2,76500000,0,2,76500000,false
-F008,Investor Firm 08,Asset Manager,Tier 2,Americas,Existing < $50M,20000000.0,E002,,1,2,50000000,50000000,2,50000000,false
+F008,Investor Firm 08,Asset Manager,Tier 2,Americas,Existing < $50M,20000000.0,E002,,1,1,25000000,25000000,1,25000000,false
 F009,Investor Firm 09,Asset Manager,Tier 3,EMEA,Existing < $50M,35000000.0,E002,,0,0,0,0,0,0,true
 F010,Investor Firm 10,Insurance,Tier 2,EMEA,Existing $50M+,250000000.0,E003,,3,3,21500000,1500000,0,0,false
 F011,Investor Firm 11,Asset Manager,Tier 3,Americas,Existing < $50M,10000000.0,,,0,6,406500000,0,0,0,false
