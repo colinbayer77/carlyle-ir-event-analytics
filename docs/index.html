@@ -18,24 +18,6 @@
   --s1: #2f6ea5; --s2: #c98a1b; --s3: #2a9d8f; --neutral: #b9b7b0;
   --good: #008300; --warn: #b36b00; --bad: #c23b3a;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg: #121211; --surface: #1a1a19; --surface-2: #242422; --border: #33332f;
-    --text: #ffffff; --text-2: #c3c2b7; --muted: #8f8e86; --grid: #2c2c29;
-    --accent: #8fb8d6; --brand: #0c374a; --brand-2: #164b63;
-    --s1: #4f86c6; --s2: #b98020; --s3: #23a07a; --neutral: #5a5954;
-    --good: #3fae3f; --warn: #e0a030; --bad: #e66767;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #121211; --surface: #1a1a19; --surface-2: #242422; --border: #33332f;
-  --text: #ffffff; --text-2: #c3c2b7; --muted: #8f8e86; --grid: #2c2c29;
-  --accent: #8fb8d6; --brand: #0c374a; --brand-2: #164b63;
-  --s1: #4f86c6; --s2: #b98020; --s3: #23a07a; --neutral: #5a5954;
-  --good: #3fae3f; --warn: #e0a030; --bad: #e66767;
-}
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 Inter, system-ui, sans-serif; }
 header { background: var(--brand); color: #fff; padding: 18px 24px 0; }
@@ -89,7 +71,6 @@ tr.sel { background: var(--surface-2); }
 .method h3 { font-size: 14px; margin: 16px 0 4px; }
 .method p, .method li { color: var(--text-2); }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--text-2); margin-bottom: 6px; }
-.theme-toggle { float: right; background: transparent; border: 1px solid rgba(255,255,255,.4); color: #fff; border-radius: 6px; padding: 4px 10px; font: inherit; font-size: 12px; cursor: pointer; }
 @media (max-width: 640px) {
   header, main { padding-left: 16px; padding-right: 16px; }
   .grid2 { grid-template-columns: 1fr; }
@@ -101,7 +82,6 @@ tr.sel { background: var(--surface-2); }
 </head>
 <body>
 <header>
-  <button class="theme-toggle" id="themeBtn">Toggle theme</button>
   <div class="brandrow"><img src="assets/carlyle_logo_white.png" alt="Carlyle"><span class="divider"></span><h1>Investor Relations · Event Outcomes</h1></div>
   <p id="subtitle">What happened after our 2026 investor events, what outcomes are associated with them, and what to change next time.</p>
   <nav id="nav">
@@ -387,15 +367,6 @@ const evShort = id => ({E001: 'NY Summit', E002: 'London Dinner', E003: 'Berlin 
 
 $('#asof').textContent = `Data as of ${D.meta.as_of_date}. Opportunity stages dated later are treated as projected.`;
 
-// theme toggle
-$('#themeBtn').onclick = () => {
-  const cur = document.documentElement.dataset.theme ||
-    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  document.documentElement.dataset.theme = cur === 'dark' ? 'light' : 'dark';
-  try { localStorage.setItem('theme', document.documentElement.dataset.theme); } catch (e) {}
-  renderAll();
-};
-try { const t = new URLSearchParams(location.search).get('theme') || localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
 const startView = new URLSearchParams(location.search).get('view');
 
 // tabs
