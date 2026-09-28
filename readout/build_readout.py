@@ -110,7 +110,7 @@ h2 {{ font-size: 14pt; margin: 0 0 8px; }}
 .foot .sig {{ font-size: 7pt; line-height: 1.3; display: block; margin-bottom: 2px; }}
 .foot .author {{ white-space: nowrap; color: #0c374a; font-weight: 600; }}
 .logo {{ position: absolute; top: 0.5in; right: 0.65in; height: 0.24in; }}
-h1 {{ color: #0c374a; padding-right: 2.2in; }}
+h1 {{ color: #0c374a; }}
 .grid {{ display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px; }}
 th {{ white-space: nowrap; }}
 table {{ width: 100%; border-collapse: collapse; font-size: 12.5pt; }}
@@ -157,7 +157,7 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
 <section class="slide">
   <img class="logo" src="{LOGO}" alt="Carlyle">
   <div class="kicker">What happened after each event</div>
-  <h1 >The $185K London dinner produced opportunities at about half the cost of NY and a fifth of Berlin</h1>
+  <h1 >The $185K London dinner produced opportunities at half the cost of NY and a fifth of Berlin</h1>
   <div class="grid">
     <div>
       <table>
