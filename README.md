@@ -2,7 +2,7 @@
 
 **Question from leadership:** What happened after our investor events, what business outcomes are associated with them, and what should we learn for future events?
 
-**Live Streamlit app (includes the Historical Analog tab):** https://carlyle-ir-event-analytics.streamlit.app/
+**Live Streamlit app (includes the Next Event Planner tab):** https://carlyle-ir-event-analytics.streamlit.app/
 **Static dashboard on GitHub Pages (no server, loads instantly):** https://colinbayer77.github.io/carlyle-ir-event-analytics/
 **Executive readout (3 slides):** [readout/exec_readout.pdf](readout/exec_readout.pdf)
 **How AI was used and checked:** [AI_USAGE.md](AI_USAGE.md)
@@ -37,7 +37,7 @@ app/metrics.py          filter-aware KPI engine (docs/metrics.js is the JS port)
 tests/                  engine-vs-SQL and Streamlit filter tests
 notebooks/analysis.ipynb  independent pandas recomputation vs SQL, sensitivity, permutation test
 docs/index.html         static dashboard (GitHub Pages)
-app/streamlit_app.py    same dashboard in Streamlit, reading the same marts, plus a Historical Analog tab
+app/streamlit_app.py    same dashboard in Streamlit, reading the same marts, plus a Next Event Planner tab
 readout/                3-slide executive readout (PDF + HTML source + generator)
 screenshots/            dashboard screenshots
 ```

@@ -115,7 +115,7 @@ Source: `mart_opportunity` (one row per opportunity) and `mart_stage_history`.
 | Associated event, +Nd | The credited event and days from it to `created_date`. | `assoc_event_id`, `days_after_event` |
 | Flags | outlier: amount at or above $500M (one opportunity, $650M). projected stages: has stage entries after the as-of date. no early stages: first logged stage is not Initial Conversation. float amount: the amount was stored as a decimal string in the source. | `is_amount_outlier`, `projected_stage_rows`, `skipped_early_stages`, `amount_float_format` |
 
-## Historical Analog (Streamlit only)
+## Next Event Planner (Streamlit only)
 
 | Element | Definition |
 |---|---|
