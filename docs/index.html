@@ -629,12 +629,18 @@ function renderOverview() {
     meetings: D.mart_meetings.filter(m => firmSet.has(m.firm_id) && m.meeting_date.slice(0, 7) === r.month.slice(0, 7)).length}));
   const mLabels = M.map(r => new Date(r.month + 'T00:00').toLocaleString('en-US', {month: 'short'}) + (r.month.startsWith('2026-09') ? '*' : ''));
   const line = (label, data, color, extra = {}) => Object.assign({label, data, borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 4, pointHoverRadius: 6, tension: 0.25}, extra);
-  chart('cMonthly', {type: 'line', plugins: [eventMarkers], data: {labels: mLabels, datasets: [
+  // Point labels: the higher of the two series at each month is labelled above its dot, the lower one below.
+  const mo = M.map(r => r.new_opps), mt = M.map(r => r.meetings);
+  const above = ctx => (ctx.datasetIndex === 0 ? mo[ctx.dataIndex] >= mt[ctx.dataIndex] : mt[ctx.dataIndex] > mo[ctx.dataIndex]);
+  chart('cMonthly', {type: 'line', plugins: [eventMarkers, ChartDataLabels], data: {labels: mLabels, datasets: [
       line('New opportunities', M.map(r => r.new_opps), css('--s1')),
       line('Meetings', M.map(r => r.meetings), css('--s2'))]},
-    options: {layout: {padding: {top: 6}}, plugins: {legend: {position: 'top', align: 'start', labels: {boxWidth: 10, boxHeight: 10}, padding: {bottom: 14}},
-        eventMarkers: {marks: M.map((r, i) => { const ev = (r.events_in_month || '').split(',').filter(e => e && C.events.some(x => x.event_id === e)); return ev.length ? {i, label: ev.map(evShort).join(' / ')} : null; }).filter(Boolean)}},
-      scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, beginAtZero: true, suggestedMax: 30}}}});
+    options: {plugins: {legend: {position: 'top', align: 'start', labels: {boxWidth: 10, boxHeight: 10}, padding: {bottom: 14}},
+        eventMarkers: {marks: M.map((r, i) => { const ev = (r.events_in_month || '').split(',').filter(e => e && C.events.some(x => x.event_id === e)); return ev.length ? {i, label: ev.map(evShort).join(' / ')} : null; }).filter(Boolean)},
+        datalabels: {align: ctx => (above(ctx) ? 'top' : 'bottom'), anchor: 'center', offset: 6, clamp: true, color: css('--text'),
+          font: ctx => ({size: ctx.chart.width < 420 ? 9 : 11, weight: 600}), formatter: v => v}},
+      layout: {padding: {top: 6, bottom: 4}},
+      scales: {x: {grid: {display: false}}, y: {display: false, beginAtZero: true, suggestedMax: Math.max(...mo, ...mt) * 1.3}}}});
   const srcV = C.buckets.map(b => C.opps.filter(o => o.bucket === b).reduce((a, o) => a + o.amount_usd, 0));
   donut('cSourceDonut', [`Opened within ${C.f.window}d of an attended event`, 'Attendee firm, outside window', C.noneLabel === 'No confirmed attendance' ? 'Firm with no confirmed attendance' : C.noneLabel], srcV,
     [css('--s1'), css('--s3'), css('--neutral')], {text: fmtM(srcV.reduce((a, b) => a + b, 0)), sub: '2026 pipeline'}, fmtM);
@@ -650,12 +656,14 @@ function renderFollowup() {
   const C = ctx(), fe = C.att;
   const conv = new Set(C.opps.filter(o => o.assoc_event_id).map(o => o.firm_id + '|' + o.assoc_event_id));
   const tiers = ['Tier 1', 'Tier 2', 'Tier 3'];
-  chart('cFuTier', {type: 'bar', data: {labels: tiers, datasets: C.events.map(e => {
+  chart('cFuTier', {type: 'bar', plugins: [ChartDataLabels], data: {labels: tiers, datasets: C.events.map(e => {
       const data = tiers.map(t => { const g = fe.filter(r => r.event_id === e.event_id && r.tier === t); return g.length ? g.filter(r => r.followed_up_30).length / g.length * 100 : null; });
       const n = tiers.map(t => fe.filter(r => r.event_id === e.event_id && r.tier === t).length);
       return bar(evShort(e.event_id), data, css(EV_COLOR[e.event_id]), {n});
     })},
-    options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label}: ${Math.round(c.raw)}% of ${c.dataset.n[c.dataIndex]} firms`}}}, scales: {x: {grid: {display: false}}, y: {grid: {color: css('--grid')}, border: {display: false}, max: 100, ticks: {callback: v => v + '%'}}}}});
+    options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label}: ${Math.round(c.raw)}% of ${c.dataset.n[c.dataIndex]} firms`}},
+        datalabels: barLabels(v => (v == null ? '' : Math.round(v) + '%'))},
+      scales: {x: {grid: {display: false}}, y: {display: false, beginAtZero: true, suggestedMax: 100}}}});
 
   const fuB = [['Met within 30 days', r => r.days_to_first_followup != null && r.days_to_first_followup <= 30],
                ['Met in 31-60 days', r => r.days_to_first_followup > 30 && r.days_to_first_followup <= 60],
@@ -673,11 +681,12 @@ function renderFollowup() {
   const seg = Object.keys(groups).sort().map(v => ({value: v, firm_events: groups[v].length,
     followup_rate_30: groups[v].filter(r => r.meetings_post_30 > 0).length / groups[v].length,
     conversion_rate: groups[v].filter(r => conv.has(r.firm_id + '|' + r.event_id)).length / groups[v].length}));
-  chart('cSeg', {type: 'bar', data: {labels: seg.map(r => r.value), datasets: [
+  chart('cSeg', {type: 'bar', plugins: [ChartDataLabels], data: {labels: seg.map(r => r.value), datasets: [
       bar(`Converted to opportunity (${C.f.window}d)`, seg.map(r => r.conversion_rate * 100), css('--s1'), {n: seg.map(r => r.firm_events)}),
       bar('Followed up in 30d', seg.map(r => r.followup_rate_30 * 100), css('--neutral'), {n: seg.map(r => r.firm_events)})]},
-    options: {indexAxis: 'y', plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label}: ${Math.round(c.raw)}% (n=${c.dataset.n[c.dataIndex]})`}}},
-      scales: {y: {grid: {display: false}}, x: {grid: {color: css('--grid')}, border: {display: false}, max: 100, ticks: {callback: v => v + '%'}}}}});
+    options: {indexAxis: 'y', plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label}: ${Math.round(c.raw)}% (n=${c.dataset.n[c.dataIndex]})`}},
+        datalabels: barLabels(v => (v == null ? '' : Math.round(v) + '%'))},
+      scales: {y: {grid: {display: false}}, x: {display: false, beginAtZero: true, suggestedMax: 100}}}});
 
   const leak = fe.filter(r => !(r.meetings_post_60 > 0))
     .map(r => ({...r, firm: D.mart_firm.find(f => f.firm_id === r.firm_id)}))

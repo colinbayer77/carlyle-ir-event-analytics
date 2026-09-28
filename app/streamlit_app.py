@@ -307,8 +307,12 @@ with tab_s:
     if monthly.month.iloc[-1].startswith("2026-09"):
         mlab[-1] += "*"
     fig = go.Figure()
-    fig.add_scatter(x=mlab, y=monthly.new_opps, name="New opportunities", mode="lines+markers", line=dict(color=BLUE, width=2.5, shape="spline"), marker=dict(size=8))
-    fig.add_scatter(x=mlab, y=monthly.meetings, name="Meetings", mode="lines+markers", line=dict(color=ORANGE, width=2.5, shape="spline"), marker=dict(size=8))
+    # point labels: the higher series at each month is labelled above its dot, the lower one below
+    op_hi = [o >= m for o, m in zip(monthly.new_opps, monthly.meetings)]
+    fig.add_scatter(x=mlab, y=monthly.new_opps, name="New opportunities", mode="lines+markers+text", line=dict(color=BLUE, width=2.5, shape="spline"), marker=dict(size=8),
+                    text=[str(v) for v in monthly.new_opps], textposition=["top center" if h else "bottom center" for h in op_hi], textfont=dict(size=11, color="#1b1f24"))
+    fig.add_scatter(x=mlab, y=monthly.meetings, name="Meetings", mode="lines+markers+text", line=dict(color=ORANGE, width=2.5, shape="spline"), marker=dict(size=8),
+                    text=[str(v) for v in monthly.meetings], textposition=["bottom center" if h else "top center" for h in op_hi], textfont=dict(size=11, color="#1b1f24"))
     n = 0
     for k, ev in enumerate(monthly.events_in_month):
         if isinstance(ev, str):
@@ -317,7 +321,9 @@ with tab_s:
                                text=" / ".join(EV_SHORT[e] for e in ev.split(",")), showarrow=False, font=dict(size=11, color="#5b6570"))
             n += 1
     fig.update_layout(legend=dict(orientation="h", y=-0.15, x=0))
-    a.plotly_chart(line_layout(fig, top=60).update_layout(legend=dict(orientation="h", y=-0.15, x=0)), width="stretch")
+    fig = line_layout(fig, top=60).update_layout(legend=dict(orientation="h", y=-0.15, x=0))
+    fig.update_yaxes(visible=False, range=[-3, max(monthly.new_opps.max(), monthly.meetings.max()) * 1.25])
+    a.plotly_chart(fig, width="stretch")
     chart_head(b, "Where 2026 pipeline came from", "Share of $ pipeline by source, under the current filters.")
     vals = [float(FOPPS.loc[FOPPS.bucket == o, "amount_usd"].sum()) for o in BUCKETS]
     b.plotly_chart(donut_fig([f"Opened within {window}d of an attended event", "Attendee firm, outside window",
@@ -368,7 +374,9 @@ with tab_f:
     a, b = st.columns(2)
     chart_head(a, "Follow-up within 30 days, by tier and event")
     g = conf.groupby(["tier", "event_id"]).followed_up_30.mean().unstack()
-    a.plotly_chart(bar_fig(list(g.index), [(EV_SHORT[e], g[e], EV_COLOR[e]) for e in g.columns], yfmt=".0%"), width="stretch")
+    fig = bar_fig(list(g.index), [(EV_SHORT[e], g[e], EV_COLOR[e]) for e in g.columns])
+    a.plotly_chart(label_bars(fig, [[pct(v) for v in g[e]] for e in g.columns], light=tuple(i for i, e in enumerate(g.columns) if e == "E002"),
+                              min_share=0.12, headroom=1.1), width="stretch")
     d = conf.days_to_first_followup
     fu_vals = [int((d <= 30).sum()), int(((d > 30) & (d <= 60)).sum()), int((d > 60).sum()), int(d.isna().sum())]
     chart_head(a, "Follow-up status of attending firms", "Attending firm-event pairs under the current filters: time from event to first meeting.")
@@ -382,9 +390,10 @@ with tab_f:
     dim = b.selectbox("Cut conversion by", list(cuts), index=0)
     s = (conf.assign(v=cuts[dim]).groupby("v")
          .agg(firm_events=("firm_id", "size"), conversion_rate=("converted", "mean"), followup_rate_30=("followed_up_30", "mean")).reset_index())
-    b.plotly_chart(bar_fig(list(s.v + " (n=" + s.firm_events.astype(str) + ")"),
-                           [(f"Converted to opp ({window}d)", s.conversion_rate, BLUE), ("Followed up in 30d", s.followup_rate_30, NEUTRAL)],
-                           yfmt=".0%", horizontal=True), width="stretch")
+    fig = bar_fig(list(s.v + " (n=" + s.firm_events.astype(str) + ")"),
+                  [(f"Converted to opp ({window}d)", s.conversion_rate, BLUE), ("Followed up in 30d", s.followup_rate_30, NEUTRAL)], horizontal=True)
+    b.plotly_chart(label_bars(fig, [[pct(v) for v in s.conversion_rate], [pct(v) for v in s.followup_rate_30]], light=(1,),
+                              min_share=0.08, horizontal=True, headroom=1.05), width="stretch")
     st.subheader("Follow-up gaps: attending firms with no meeting within 60 days")
     leak = conf[conf.meetings_post_60.fillna(0) == 0].merge(firms[["firm_id", "pipeline_usd"]], on="firm_id")
     leak = leak.sort_values(["tier", "pipeline_usd"], ascending=[True, False])
