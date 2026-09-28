@@ -1,0 +1,11 @@
+check_name,severity,rows_affected,handling
+Duplicate attendance row,Medium,1,Exact duplicate (A0011) collapsed to one row.
+Attendee with no firm_id,Medium,1,"Kept in contact counts, excluded from firm-level metrics. Process fix: enforce firm mapping at registration."
+Tentative-only firm attendance,Low,9,Excluded from default metrics; included via the 'include tentative' sensitivity toggle.
+Amount stored as float text,Low,61,"Cast to integer USD. Values (1.5M, 2.5M) read as whole dollars; treated as small tickets, not a unit error."
+Outlier ticket size,High,1,"O0017 ($650M, next largest $150M) kept as recorded; every pipeline metric is also shown ex-outlier."
+Stage dated after as-of date,Medium,19,"Treated as projected: excluded from current stage, commitments and conversion; shown in firm timelines."
+Repeated stage rows,Low,13,Collapsed to the first date each stage was reached.
+Opportunity starts past Initial Conversation,Low,2,Kept (e.g. O9999 logged directly as Committed). Funnel counts it at the stages it reached.
+Two meetings same firm same day,Low,1,"Kept: different type and purpose (F007, 2026-05-30), plausibly two sessions."
+Meeting before first event baseline,Info,4,Kept as history; only +/-60 day windows around events are used for engagement lift.

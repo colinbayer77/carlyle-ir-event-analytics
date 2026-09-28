@@ -1,0 +1,80 @@
+event_id,event_name,event_date,firm_id,firm_name,segment,tier,region,relationship_band,historical_commitments_usd,contacts,confirmed_contacts,senior_contacts,is_confirmed,has_confirmed_senior,days_to_first_followup,meetings_pre_60,meetings_post_30,meetings_post_60,followed_up_30,assoc_opps_90,assoc_pipeline_90_usd,assoc_committed_90_usd,assoc_opps_reached_dd_90
+E001,Global Alternatives Summit,2026-03-12,F001,Investor Firm 01,Family Office,Tier 3,APAC,Existing $50M+,75000000.0,1,1,1,true,true,46,0,0,1,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F002,Investor Firm 02,Pension,Tier 1,Americas,Existing $50M+,150000000.0,3,2,1,true,false,86,0,0,0,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F006,Investor Firm 06,Asset Manager,Tier 1,APAC,Existing < $50M,20000000.0,1,1,1,true,true,61,0,0,0,false,1,15000000,0,1
+E001,Global Alternatives Summit,2026-03-12,F007,Investor Firm 07,Foundation,Tier 2,APAC,New relationship,0.0,2,2,1,true,true,3,1,1,2,true,1,75000000,0,1
+E001,Global Alternatives Summit,2026-03-12,F013,Investor Firm 13,Pension,Tier 2,APAC,Existing < $50M,5000000.0,1,1,1,true,true,,2,0,0,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F014,Investor Firm 14,Pension,Tier 2,APAC,Existing $50M+,100000000.0,1,0,1,false,false,85,0,0,0,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F015,Investor Firm 15,Asset Manager,Tier 2,EMEA,Existing $50M+,50000000.0,1,0,1,false,false,52,0,0,1,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F017,Investor Firm 17,Insurance,Tier 3,Americas,Existing < $50M,20000000.0,2,1,0,true,false,25,1,1,1,true,2,50000000,0,1
+E001,Global Alternatives Summit,2026-03-12,F018,Investor Firm 18,Asset Manager,Tier 2,EMEA,Existing $50M+,100000000.0,1,1,0,true,false,5,0,1,2,true,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F022,Investor Firm 22,Foundation,Tier 1,APAC,Existing $50M+,150000000.0,2,1,1,true,false,,1,0,0,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F023,Investor Firm 23,Family Office,Tier 2,APAC,Existing $50M+,50000000.0,3,2,0,true,false,40,0,0,1,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F024,Investor Firm 24,Sovereign Wealth,Tier 2,Americas,Existing $50M+,100000000.0,1,1,0,true,false,25,0,1,1,true,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F027,Investor Firm 27,Asset Manager,Tier 3,EMEA,Existing $50M+,100000000.0,3,1,1,true,true,33,0,0,1,false,1,15000000,0,0
+E001,Global Alternatives Summit,2026-03-12,F029,Investor Firm 29,Sovereign Wealth,Tier 2,Americas,Existing $50M+,250000000.0,2,2,0,true,false,73,0,0,0,false,2,80000000,0,1
+E001,Global Alternatives Summit,2026-03-12,F031,Investor Firm 31,Foundation,Tier 1,EMEA,Existing $50M+,75000000.0,1,1,0,true,false,11,0,1,1,true,2,101500000,0,2
+E001,Global Alternatives Summit,2026-03-12,F032,Investor Firm 32,Pension,Tier 1,APAC,Existing $50M+,75000000.0,3,0,3,false,false,,0,0,0,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F036,Investor Firm 36,Insurance,Tier 1,Americas,Existing < $50M,20000000.0,1,1,0,true,false,75,0,0,0,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F039,Investor Firm 39,Family Office,Tier 2,Americas,Existing $50M+,50000000.0,2,2,1,true,true,34,0,0,1,false,1,75000000,0,0
+E001,Global Alternatives Summit,2026-03-12,F040,Investor Firm 40,Foundation,Tier 3,APAC,Existing $50M+,250000000.0,1,1,1,true,true,4,0,2,3,true,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F043,Investor Firm 43,Pension,Tier 2,Americas,Existing $50M+,75000000.0,2,1,0,true,false,6,0,1,1,true,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F044,Investor Firm 44,Insurance,Tier 1,EMEA,Existing < $50M,20000000.0,1,1,1,true,true,66,0,0,0,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F045,Investor Firm 45,Insurance,Tier 1,Americas,Existing $50M+,250000000.0,2,1,0,true,false,,0,0,0,false,1,75000000,0,0
+E001,Global Alternatives Summit,2026-03-12,F046,Investor Firm 46,Pension,Tier 1,APAC,Existing < $50M,10000000.0,2,1,1,true,true,58,1,0,2,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F047,Investor Firm 47,Pension,Tier 3,Americas,Existing $50M+,250000000.0,3,2,3,true,true,59,1,0,1,false,1,40000000,0,0
+E001,Global Alternatives Summit,2026-03-12,F048,Investor Firm 48,Pension,Tier 3,EMEA,Existing $50M+,250000000.0,1,0,0,false,false,12,2,1,1,true,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F051,Investor Firm 51,Sovereign Wealth,Tier 2,Americas,Existing < $50M,35000000.0,2,1,2,true,true,28,0,1,1,true,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F053,Investor Firm 53,Family Office,Tier 2,APAC,Existing < $50M,10000000.0,2,1,0,true,false,22,1,2,2,true,2,152500000,152500000,2
+E001,Global Alternatives Summit,2026-03-12,F055,Investor Firm 55,Insurance,Tier 2,APAC,New relationship,0.0,3,3,0,true,false,104,1,0,0,false,0,0,0,0
+E001,Global Alternatives Summit,2026-03-12,F057,Investor Firm 57,Family Office,Tier 2,EMEA,Existing < $50M,10000000.0,1,1,1,true,true,111,1,0,0,false,2,150000000,75000000,1
+E001,Global Alternatives Summit,2026-03-12,F059,Investor Firm 59,Foundation,Tier 1,Americas,Existing < $50M,20000000.0,2,2,2,true,true,82,0,0,0,false,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F002,Investor Firm 02,Pension,Tier 1,Americas,Existing $50M+,150000000.0,3,3,3,true,true,16,0,1,2,true,1,40000000,0,1
+E002,Investor Leadership Dinner,2026-05-21,F003,Investor Firm 03,Family Office,Tier 2,Americas,Existing $50M+,150000000.0,1,1,0,true,false,2,1,3,3,true,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F005,Investor Firm 05,Insurance,Tier 1,Americas,Existing $50M+,75000000.0,3,1,0,true,false,2,0,1,2,true,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F006,Investor Firm 06,Asset Manager,Tier 1,APAC,Existing < $50M,20000000.0,2,0,1,false,false,32,1,0,2,false,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F007,Investor Firm 07,Foundation,Tier 2,APAC,New relationship,0.0,1,1,1,true,true,9,1,2,3,true,1,1500000,0,1
+E002,Investor Leadership Dinner,2026-05-21,F008,Investor Firm 08,Asset Manager,Tier 2,Americas,Existing < $50M,20000000.0,3,2,2,true,true,31,0,0,1,false,2,50000000,50000000,2
+E002,Investor Leadership Dinner,2026-05-21,F009,Investor Firm 09,Asset Manager,Tier 3,EMEA,Existing < $50M,35000000.0,1,1,0,true,false,,0,0,0,false,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F012,Investor Firm 12,Asset Manager,Tier 2,EMEA,Existing < $50M,20000000.0,1,1,0,true,false,29,1,1,1,true,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F015,Investor Firm 15,Asset Manager,Tier 2,EMEA,Existing $50M+,50000000.0,1,1,1,true,true,5,1,1,1,true,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F017,Investor Firm 17,Insurance,Tier 3,Americas,Existing < $50M,20000000.0,2,2,0,true,false,1,1,3,3,true,1,100000000,0,1
+E002,Investor Leadership Dinner,2026-05-21,F018,Investor Firm 18,Asset Manager,Tier 2,EMEA,Existing $50M+,100000000.0,2,1,1,true,true,4,1,2,3,true,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F019,Investor Firm 19,Foundation,Tier 2,Americas,Existing $50M+,250000000.0,1,1,0,true,false,,0,0,0,false,2,50000000,0,1
+E002,Investor Leadership Dinner,2026-05-21,F022,Investor Firm 22,Foundation,Tier 1,APAC,Existing $50M+,150000000.0,1,1,0,true,false,,0,0,0,false,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F024,Investor Firm 24,Sovereign Wealth,Tier 2,Americas,Existing $50M+,100000000.0,1,1,0,true,false,37,1,0,1,false,1,1500000,0,1
+E002,Investor Leadership Dinner,2026-05-21,F025,Investor Firm 25,Pension,Tier 3,APAC,Existing $50M+,100000000.0,1,1,0,true,false,32,0,0,2,false,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F029,Investor Firm 29,Sovereign Wealth,Tier 2,Americas,Existing $50M+,250000000.0,1,1,0,true,false,3,0,1,2,true,1,150000000,0,1
+E002,Investor Leadership Dinner,2026-05-21,F030,Investor Firm 30,Sovereign Wealth,Tier 1,Americas,Existing < $50M,35000000.0,1,1,0,true,false,65,0,0,0,false,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F033,Investor Firm 33,Family Office,Tier 3,APAC,Existing $50M+,75000000.0,2,2,0,true,false,32,0,0,1,false,1,15000000,0,0
+E002,Investor Leadership Dinner,2026-05-21,F034,Investor Firm 34,Family Office,Tier 2,APAC,Existing $50M+,50000000.0,1,1,0,true,false,54,0,0,1,false,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F036,Investor Firm 36,Insurance,Tier 1,Americas,Existing < $50M,20000000.0,1,0,0,false,false,5,0,1,1,true,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F038,Investor Firm 38,Family Office,Tier 1,APAC,Existing $50M+,75000000.0,1,1,1,true,true,10,0,1,2,true,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F040,Investor Firm 40,Foundation,Tier 3,APAC,Existing $50M+,250000000.0,1,1,1,true,true,4,2,1,1,true,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F046,Investor Firm 46,Pension,Tier 1,APAC,Existing < $50M,10000000.0,1,1,1,true,true,33,2,0,1,false,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F047,Investor Firm 47,Pension,Tier 3,Americas,Existing $50M+,250000000.0,3,2,1,true,false,,1,0,0,false,3,10000000,0,1
+E002,Investor Leadership Dinner,2026-05-21,F056,Investor Firm 56,Family Office,Tier 3,APAC,Existing < $50M,5000000.0,1,1,0,true,false,,0,0,0,false,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F057,Investor Firm 57,Family Office,Tier 2,EMEA,Existing < $50M,10000000.0,1,1,1,true,true,41,0,0,1,false,0,0,0,0
+E002,Investor Leadership Dinner,2026-05-21,F060,Investor Firm 60,Sovereign Wealth,Tier 2,Americas,Existing < $50M,20000000.0,2,1,2,true,true,,0,0,0,false,1,5000000,0,0
+E003,Private Markets Forum,2026-06-16,F001,Investor Firm 01,Family Office,Tier 3,APAC,Existing $50M+,75000000.0,1,1,0,true,false,,2,0,0,false,2,25000000,0,1
+E003,Private Markets Forum,2026-06-16,F002,Investor Firm 02,Pension,Tier 1,Americas,Existing $50M+,150000000.0,1,0,1,false,false,17,1,1,1,true,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F003,Investor Firm 03,Family Office,Tier 2,Americas,Existing $50M+,150000000.0,3,3,1,true,true,50,4,0,1,false,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F006,Investor Firm 06,Asset Manager,Tier 1,APAC,Existing < $50M,20000000.0,1,1,0,true,false,6,1,1,2,true,1,150000000,0,1
+E003,Private Markets Forum,2026-06-16,F010,Investor Firm 10,Insurance,Tier 2,EMEA,Existing $50M+,250000000.0,1,1,0,true,false,60,1,0,1,false,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F013,Investor Firm 13,Pension,Tier 2,APAC,Existing < $50M,5000000.0,1,1,0,true,false,,0,0,0,false,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F016,Investor Firm 16,Asset Manager,Tier 3,EMEA,Existing $50M+,50000000.0,2,2,1,true,true,,0,0,0,false,1,25000000,0,1
+E003,Private Markets Forum,2026-06-16,F017,Investor Firm 17,Insurance,Tier 3,Americas,Existing < $50M,20000000.0,2,2,0,true,false,,3,0,0,false,2,4000000,0,2
+E003,Private Markets Forum,2026-06-16,F018,Investor Firm 18,Asset Manager,Tier 2,EMEA,Existing $50M+,100000000.0,1,0,0,false,false,2,2,2,2,true,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F020,Investor Firm 20,Pension,Tier 2,EMEA,Existing < $50M,10000000.0,1,0,0,false,false,69,0,0,0,false,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F022,Investor Firm 22,Foundation,Tier 1,APAC,Existing $50M+,150000000.0,1,1,1,true,true,,0,0,0,false,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F025,Investor Firm 25,Pension,Tier 3,APAC,Existing $50M+,100000000.0,2,1,0,true,false,6,0,2,2,true,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F026,Investor Firm 26,Foundation,Tier 1,APAC,Existing < $50M,35000000.0,2,1,1,true,false,,1,0,0,false,1,40000000,0,1
+E003,Private Markets Forum,2026-06-16,F031,Investor Firm 31,Foundation,Tier 1,EMEA,Existing $50M+,75000000.0,1,1,0,true,false,77,1,0,0,false,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F033,Investor Firm 33,Family Office,Tier 3,APAC,Existing $50M+,75000000.0,3,3,0,true,false,6,0,1,1,true,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F038,Investor Firm 38,Family Office,Tier 1,APAC,Existing $50M+,75000000.0,1,1,0,true,false,17,1,1,1,true,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F042,Investor Firm 42,Asset Manager,Tier 2,EMEA,Existing $50M+,75000000.0,1,1,1,true,true,25,1,1,1,true,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F044,Investor Firm 44,Insurance,Tier 1,EMEA,Existing < $50M,20000000.0,2,1,1,true,true,,1,0,0,false,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F048,Investor Firm 48,Pension,Tier 3,EMEA,Existing $50M+,250000000.0,1,1,0,true,false,26,0,1,1,true,1,75000000,0,1
+E003,Private Markets Forum,2026-06-16,F050,Investor Firm 50,Family Office,Tier 2,EMEA,Existing < $50M,5000000.0,3,3,0,true,false,,3,0,0,false,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F055,Investor Firm 55,Insurance,Tier 2,APAC,New relationship,0.0,2,2,0,true,false,8,0,1,1,true,0,0,0,0
+E003,Private Markets Forum,2026-06-16,F058,Investor Firm 58,Insurance,Tier 2,EMEA,Existing $50M+,150000000.0,3,2,1,true,true,70,0,0,0,false,0,0,0,0

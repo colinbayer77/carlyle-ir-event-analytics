@@ -1,0 +1,4 @@
+event_id,event_name,event_date,event_type,location,cost_usd
+E001,Global Alternatives Summit,2026-03-12,Conference,New York,420000
+E002,Investor Leadership Dinner,2026-05-21,Hospitality,London,185000
+E003,Private Markets Forum,2026-06-16,Conference,Berlin,610000

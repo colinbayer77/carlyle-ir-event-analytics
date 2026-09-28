@@ -1,0 +1,132 @@
+attendance_id,event_id,firm_id,contact_name,contact_title,attendance_status
+A0001,E001,F032,Contact 001,CIO,Tentative
+A0002,E001,F032,Contact 002,Managing Director,Tentative
+A0003,E001,F032,Contact 003,Managing Director,Tentative
+A0004,E001,F023,Contact 004,Director,Confirmed
+A0005,E001,F023,Contact 005,Principal,Tentative
+A0006,E001,F023,Contact 006,Principal,Confirmed
+A0007,E001,F047,Contact 007,Managing Director,Confirmed
+A0008,E001,F047,Contact 008,Managing Director,Confirmed
+A0009,E001,F047,Contact 009,Managing Director,Tentative
+A0010,E001,F002,Contact 010,Managing Director,Tentative
+A0011,E001,F002,Contact 011,Director,Confirmed
+A0012,E001,F002,Contact 012,Investment Manager,Confirmed
+A0013,E001,F057,Contact 013,CIO,Confirmed
+A0014,E001,F051,Contact 014,Managing Director,Tentative
+A0015,E001,F051,Contact 015,Managing Director,Confirmed
+A0016,E001,F018,Contact 016,Director,Confirmed
+A0017,E001,F031,Contact 017,Investment Manager,Confirmed
+A0018,E001,F017,Contact 018,Director,Confirmed
+A0019,E001,F017,Contact 019,Investment Manager,Tentative
+A0020,E001,F013,Contact 020,CIO,Confirmed
+A0021,E001,F045,Contact 021,Investment Manager,Tentative
+A0022,E001,F045,Contact 022,Investment Manager,Confirmed
+A0023,E001,F039,Contact 023,Managing Director,Confirmed
+A0024,E001,F039,Contact 024,Principal,Confirmed
+A0025,E001,F059,Contact 025,CIO,Confirmed
+A0026,E001,F059,Contact 026,Managing Director,Confirmed
+A0027,E001,F029,Contact 027,Investment Manager,Confirmed
+A0028,E001,F029,Contact 028,Investment Manager,Confirmed
+A0029,E001,F048,Contact 029,Investment Manager,Tentative
+A0030,E001,F024,Contact 030,Investment Manager,Confirmed
+A0031,E001,F006,Contact 031,Managing Director,Confirmed
+A0032,E001,F015,Contact 032,CIO,Tentative
+A0033,E001,F007,Contact 033,CIO,Confirmed
+A0034,E001,F007,Contact 034,Principal,Confirmed
+A0035,E001,F043,Contact 035,Investment Manager,Confirmed
+A0036,E001,F043,Contact 036,Director,Tentative
+A0037,E001,F053,Contact 037,Investment Manager,Tentative
+A0038,E001,F053,Contact 038,Investment Manager,Confirmed
+A0039,E001,F055,Contact 039,Investment Manager,Confirmed
+A0040,E001,F055,Contact 040,Investment Manager,Confirmed
+A0041,E001,F055,Contact 041,Principal,Confirmed
+A0042,E001,F022,Contact 042,CIO,Tentative
+A0043,E001,F022,Contact 043,Principal,Confirmed
+A0044,E001,F014,Contact 044,Managing Director,Tentative
+A0045,E001,F040,Contact 045,Managing Director,Confirmed
+A0046,E001,F001,Contact 046,Managing Director,Confirmed
+A0047,E001,F036,Contact 047,Director,Confirmed
+A0048,E001,F046,Contact 048,Managing Director,Confirmed
+A0049,E001,F046,Contact 049,Principal,Tentative
+A0050,E001,F044,Contact 050,Managing Director,Confirmed
+A0051,E001,F027,Contact 051,Principal,Tentative
+A0052,E001,F027,Contact 052,Director,Tentative
+A0053,E001,F027,Contact 053,Managing Director,Confirmed
+A0054,E002,F006,Contact 054,Director,Tentative
+A0055,E002,F006,Contact 055,Managing Director,Tentative
+A0056,E002,F047,Contact 056,Director,Confirmed
+A0057,E002,F047,Contact 057,Director,Confirmed
+A0058,E002,F047,Contact 058,Managing Director,Tentative
+A0059,E002,F024,Contact 059,Director,Confirmed
+A0060,E002,F002,Contact 060,CIO,Confirmed
+A0061,E002,F002,Contact 061,CIO,Confirmed
+A0062,E002,F002,Contact 062,CIO,Confirmed
+A0063,E002,F022,Contact 063,Principal,Confirmed
+A0064,E002,F036,Contact 064,Investment Manager,Tentative
+A0065,E002,F030,Contact 065,Investment Manager,Confirmed
+A0066,E002,F029,Contact 066,Investment Manager,Confirmed
+A0067,E002,F046,Contact 067,Managing Director,Confirmed
+A0068,E002,F057,Contact 068,Managing Director,Confirmed
+A0069,E002,F025,Contact 069,Director,Confirmed
+A0070,E002,F056,Contact 070,Principal,Confirmed
+A0071,E002,F034,Contact 071,Director,Confirmed
+A0072,E002,F040,Contact 072,CIO,Confirmed
+A0073,E002,F019,Contact 073,Investment Manager,Confirmed
+A0074,E002,F033,Contact 074,Principal,Confirmed
+A0075,E002,F033,Contact 075,Principal,Confirmed
+A0076,E002,F005,Contact 076,Principal,Tentative
+A0077,E002,F005,Contact 077,Investment Manager,Tentative
+A0078,E002,F005,Contact 078,Investment Manager,Confirmed
+A0079,E002,F008,Contact 079,Managing Director,Confirmed
+A0080,E002,F008,Contact 080,Director,Confirmed
+A0081,E002,F008,Contact 081,Managing Director,Tentative
+A0082,E002,F015,Contact 082,CIO,Confirmed
+A0083,E002,F007,Contact 083,CIO,Confirmed
+A0084,E002,F060,Contact 084,Managing Director,Confirmed
+A0085,E002,F060,Contact 085,CIO,Tentative
+A0086,E002,F017,Contact 086,Director,Confirmed
+A0087,E002,F017,Contact 087,Director,Confirmed
+A0088,E002,F018,Contact 088,Managing Director,Confirmed
+A0089,E002,F018,Contact 089,Director,Tentative
+A0090,E002,F003,Contact 090,Director,Confirmed
+A0091,E002,F012,Contact 091,Investment Manager,Confirmed
+A0092,E002,F038,Contact 092,CIO,Confirmed
+A0093,E002,F009,Contact 093,Director,Confirmed
+A0094,E003,F022,Contact 094,Managing Director,Confirmed
+A0095,E003,F025,Contact 095,Investment Manager,Confirmed
+A0096,E003,F025,Contact 096,Investment Manager,Tentative
+A0097,E003,F006,Contact 097,Principal,Confirmed
+A0098,E003,F031,Contact 098,Investment Manager,Confirmed
+A0099,E003,F018,Contact 099,Investment Manager,Tentative
+A0100,E003,F033,Contact 100,Investment Manager,Confirmed
+A0101,E003,F033,Contact 101,Investment Manager,Confirmed
+A0102,E003,F033,Contact 102,Investment Manager,Confirmed
+A0103,E003,F042,Contact 103,CIO,Confirmed
+A0104,E003,F013,Contact 104,Director,Confirmed
+A0105,E003,F016,Contact 105,Principal,Confirmed
+A0106,E003,F016,Contact 106,CIO,Confirmed
+A0107,E003,F055,Contact 107,Director,Confirmed
+A0108,E003,F055,Contact 108,Principal,Confirmed
+A0109,E003,F050,Contact 109,Investment Manager,Confirmed
+A0110,E003,F050,Contact 110,Investment Manager,Confirmed
+A0111,E003,F050,Contact 111,Principal,Confirmed
+A0112,E003,F001,Contact 112,Director,Confirmed
+A0113,E003,F058,Contact 113,Managing Director,Confirmed
+A0114,E003,F058,Contact 114,Principal,Tentative
+A0115,E003,F058,Contact 115,Principal,Confirmed
+A0116,E003,F017,Contact 116,Director,Confirmed
+A0117,E003,F017,Contact 117,Investment Manager,Confirmed
+A0118,E003,F048,Contact 118,Investment Manager,Confirmed
+A0119,E003,F010,Contact 119,Director,Confirmed
+A0120,E003,F026,Contact 120,Investment Manager,Confirmed
+A0121,E003,F026,Contact 121,CIO,Tentative
+A0122,E003,F038,Contact 122,Principal,Confirmed
+A0123,E003,F003,Contact 123,CIO,Confirmed
+A0124,E003,F003,Contact 124,Principal,Confirmed
+A0125,E003,F003,Contact 125,Investment Manager,Confirmed
+A0126,E003,F044,Contact 126,Principal,Tentative
+A0127,E003,F044,Contact 127,CIO,Confirmed
+A0128,E003,F002,Contact 128,CIO,Tentative
+A0129,E003,F020,Contact 129,Director,Tentative
+A9998,E003,,Unmapped Contact,Director,Confirmed
+A0011,E001,F002,Contact 011,Director,Confirmed

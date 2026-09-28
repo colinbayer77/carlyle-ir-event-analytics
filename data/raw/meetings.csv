@@ -1,0 +1,113 @@
+meeting_id,firm_id,meeting_date,meeting_type,internal_attendee,purpose
+M0001,F023,2026-04-21,Video,Senior Partner,Relationship
+M0002,F047,2026-02-18,In Person,Coverage A,Relationship
+M0003,F047,2026-05-10,Video,Coverage C,Relationship
+M0004,F002,2026-06-06,Phone,Coverage C,Fundraising
+M0005,F057,2026-02-24,Video,Senior Partner,Due diligence
+M0006,F057,2026-01-02,In Person,Coverage A,Due diligence
+M0007,F051,2026-04-09,Video,Coverage B,Due diligence
+M0008,F018,2026-03-17,In Person,Coverage C,Fundraising
+M0009,F031,2026-03-23,Video,Coverage A,Relationship
+M0010,F017,2026-03-11,Video,Coverage C,Fundraising
+M0011,F017,2026-04-06,Video,Coverage A,Follow-up
+M0012,F013,2026-03-07,In Person,Coverage C,Fundraising
+M0013,F013,2026-01-09,Phone,Coverage C,Relationship
+M0014,F013,2026-02-28,Video,Senior Partner,Follow-up
+M0015,F039,2026-04-15,In Person,Senior Partner,Relationship
+M0016,F059,2026-01-08,Phone,Senior Partner,Due diligence
+M0017,F059,2026-06-02,In Person,Coverage C,Due diligence
+M0018,F048,2026-01-28,In Person,Senior Partner,Due diligence
+M0019,F048,2026-03-24,Video,Coverage C,Follow-up
+M0020,F048,2026-03-03,Video,Coverage B,Follow-up
+M0021,F024,2026-04-06,In Person,Coverage B,Relationship
+M0022,F015,2026-05-03,Phone,Coverage B,Due diligence
+M0023,F007,2026-04-21,Video,Coverage B,Relationship
+M0024,F007,2026-02-27,In Person,Coverage B,Follow-up
+M0025,F043,2026-03-18,In Person,Coverage C,Follow-up
+M0026,F053,2026-02-16,In Person,Senior Partner,Due diligence
+M0027,F053,2026-04-11,Phone,Coverage B,Due diligence
+M0028,F055,2026-01-11,Video,Coverage C,Follow-up
+M0029,F014,2026-06-06,In Person,Coverage A,Follow-up
+M0030,F040,2026-04-04,Video,Senior Partner,Due diligence
+M0031,F040,2026-03-16,In Person,Coverage B,Fundraising
+M0032,F001,2026-04-27,Phone,Senior Partner,Fundraising
+M0033,F046,2026-05-11,Video,Senior Partner,Relationship
+M0034,F046,2026-01-23,In Person,Coverage B,Relationship
+M0035,F046,2026-05-09,Phone,Coverage A,Due diligence
+M0036,F027,2025-12-27,In Person,Coverage B,Fundraising
+M0037,F027,2026-06-10,Phone,Coverage C,Relationship
+M0038,F006,2026-07-20,Phone,Senior Partner,Fundraising
+M0039,F024,2026-08-03,In Person,Senior Partner,Follow-up
+M0040,F022,2026-03-09,Phone,Coverage C,Due diligence
+M0041,F036,2026-05-26,Phone,Coverage B,Due diligence
+M0042,F030,2026-07-25,In Person,Coverage A,Due diligence
+M0043,F029,2026-05-24,In Person,Coverage A,Relationship
+M0044,F029,2026-07-12,Phone,Senior Partner,Fundraising
+M0045,F046,2026-06-23,Video,Coverage B,Due diligence
+M0046,F025,2026-06-22,Video,Senior Partner,Relationship
+M0047,F034,2026-07-14,In Person,Coverage B,Due diligence
+M0048,F040,2026-05-25,In Person,Coverage B,Due diligence
+M0049,F040,2026-05-02,Video,Coverage C,Fundraising
+M0050,F040,2026-08-13,Video,Coverage B,Relationship
+M0051,F019,2026-03-21,Phone,Coverage B,Due diligence
+M0052,F008,2026-06-21,In Person,Coverage A,Relationship
+M0053,F015,2026-05-26,Phone,Coverage A,Fundraising
+M0054,F007,2026-05-30,In Person,Coverage B,Due diligence
+M0055,F007,2026-03-15,Video,Senior Partner,Follow-up
+M0056,F007,2026-05-30,Video,Coverage B,Fundraising
+M0057,F017,2026-06-04,Video,Coverage A,Relationship
+M0058,F018,2026-05-25,Video,Coverage A,Fundraising
+M0059,F003,2026-04-26,Video,Senior Partner,Relationship
+M0060,F003,2026-05-28,Video,Senior Partner,Fundraising
+M0061,F012,2026-05-09,Phone,Senior Partner,Fundraising
+M0062,F038,2026-07-03,In Person,Coverage A,Follow-up
+M0063,F025,2026-07-03,Video,Coverage C,Fundraising
+M0064,F006,2026-06-22,Video,Coverage C,Fundraising
+M0065,F031,2026-09-01,Phone,Coverage A,Fundraising
+M0066,F031,2026-05-31,In Person,Senior Partner,Due diligence
+M0067,F018,2026-07-09,Video,Senior Partner,Due diligence
+M0068,F018,2026-05-05,Video,Coverage B,Fundraising
+M0069,F018,2026-06-18,Phone,Coverage B,Relationship
+M0070,F033,2026-06-22,Video,Coverage C,Fundraising
+M0071,F042,2026-07-11,In Person,Coverage B,Due diligence
+M0072,F055,2026-06-24,In Person,Senior Partner,Fundraising
+M0073,F050,2026-06-08,Phone,Coverage A,Relationship
+M0074,F050,2026-04-26,Video,Senior Partner,Due diligence
+M0075,F050,2026-05-16,In Person,Coverage B,Due diligence
+M0076,F001,2026-06-01,Phone,Coverage A,Follow-up
+M0077,F058,2026-08-25,Video,Coverage C,Follow-up
+M0078,F017,2026-05-22,Video,Coverage B,Relationship
+M0079,F017,2026-06-03,In Person,Coverage B,Follow-up
+M0080,F048,2026-08-28,In Person,Coverage C,Fundraising
+M0081,F048,2026-07-12,Video,Coverage B,Relationship
+M0082,F010,2026-04-27,Phone,Senior Partner,Fundraising
+M0083,F038,2026-05-31,Video,Coverage C,Fundraising
+M0084,F003,2026-05-31,In Person,Coverage A,Relationship
+M0085,F003,2026-09-02,Phone,Coverage B,Fundraising
+M0086,F044,2026-05-17,Video,Coverage C,Fundraising
+M0087,F020,2026-09-07,Video,Coverage B,Fundraising
+M0088,F024,2026-06-27,Video,Coverage B,Relationship
+M0089,F010,2026-04-12,Video,Coverage B,Relationship
+M0090,F014,2026-06-05,Video,Coverage B,Relationship
+M0091,F003,2026-05-23,Video,Coverage B,Relationship
+M0092,F053,2026-04-03,Video,Coverage B,Relationship
+M0093,F053,2026-06-23,Video,Coverage B,Relationship
+M0094,F027,2026-07-05,Video,Coverage B,Relationship
+M0095,F012,2026-06-19,Video,Coverage B,Relationship
+M0096,F005,2026-05-23,Video,Coverage B,Relationship
+M0097,F003,2026-08-05,Video,Coverage B,Relationship
+M0098,F036,2026-08-02,Video,Coverage B,Relationship
+M0099,F005,2026-07-14,Video,Coverage B,Relationship
+M0100,F007,2026-07-11,Video,Coverage B,Relationship
+M0101,F043,2026-08-19,Video,Coverage B,Relationship
+M0102,F010,2026-08-15,Video,Coverage B,Relationship
+M0103,F006,2026-05-12,Video,Coverage B,Relationship
+M0104,F026,2026-06-09,Video,Coverage B,Relationship
+M0105,F027,2026-06-12,Video,Coverage B,Relationship
+M0106,F043,2026-06-18,Video,Coverage B,Relationship
+M0107,F027,2026-04-14,Video,Coverage B,Relationship
+M0108,F020,2026-08-24,Video,Coverage B,Relationship
+M0109,F057,2026-07-01,Video,Coverage B,Relationship
+M0110,F027,2026-07-16,Video,Coverage B,Relationship
+M0111,F002,2026-07-03,Video,Coverage B,Relationship
+M0112,F042,2026-05-21,Video,Coverage B,Relationship

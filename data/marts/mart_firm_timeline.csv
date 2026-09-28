@@ -1,0 +1,537 @@
+firm_id,dt,kind,detail,is_projected
+F001,2026-03-12,Event,"Global Alternatives Summit (confirmed, 1 contacts)",false
+F001,2026-04-27,Meeting,Fundraising | Phone | Senior Partner,false
+F001,2026-06-01,Meeting,Follow-up | Phone | Coverage A,false
+F001,2026-06-16,Event,"Private Markets Forum (confirmed, 1 contacts)",false
+F001,2026-08-01,Opportunity,O0060 Credit Strategy: Initial Conversation ($10.0M),false
+F001,2026-08-09,Opportunity,O0074 Fund Gamma: Initial Conversation ($15.0M),false
+F001,2026-08-24,Opportunity,O0074 Fund Gamma: Follow-up / VDR ($15.0M),false
+F001,2026-08-29,Opportunity,O0060 Credit Strategy: Follow-up / VDR ($10.0M),false
+F001,2026-09-23,Opportunity,O0060 Credit Strategy: Due Diligence ($10.0M),false
+F001,2026-10-11,Opportunity,O0060 Credit Strategy: IC / Documentation ($10.0M),true
+F002,2026-03-12,Event,"Global Alternatives Summit (confirmed, 3 contacts)",false
+F002,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 3 contacts)",false
+F002,2026-06-06,Meeting,Fundraising | Phone | Coverage C,false
+F002,2026-06-16,Event,"Private Markets Forum (tentative, 1 contacts)",false
+F002,2026-07-03,Meeting,Relationship | Video | Coverage B,false
+F002,2026-08-19,Opportunity,O0044 Fund Alpha: Initial Conversation ($40.0M),false
+F002,2026-08-27,Opportunity,O0044 Fund Alpha: Follow-up / VDR ($40.0M),false
+F002,2026-09-12,Opportunity,O0044 Fund Alpha: Due Diligence ($40.0M),false
+F003,2026-01-17,Opportunity,O0038 Fund Alpha: Initial Conversation ($2.5M),false
+F003,2026-02-02,Opportunity,O0038 Fund Alpha: Follow-up / VDR ($2.5M),false
+F003,2026-02-11,Opportunity,O0038 Fund Alpha: Due Diligence ($2.5M),false
+F003,2026-03-10,Opportunity,O0038 Fund Alpha: IC / Documentation ($2.5M),false
+F003,2026-03-16,Opportunity,O0038 Fund Alpha: Committed ($2.5M),false
+F003,2026-04-19,Opportunity,O0090 Credit Strategy: Initial Conversation ($100.0M),false
+F003,2026-04-26,Meeting,Relationship | Video | Senior Partner,false
+F003,2026-05-06,Opportunity,O0090 Credit Strategy: Follow-up / VDR ($100.0M),false
+F003,2026-05-20,Opportunity,O0090 Credit Strategy: Due Diligence ($100.0M),false
+F003,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F003,2026-05-23,Meeting,Relationship | Video | Coverage B,false
+F003,2026-05-26,Opportunity,O0090 Credit Strategy: Committed ($100.0M),false
+F003,2026-05-28,Meeting,Fundraising | Video | Senior Partner,false
+F003,2026-05-31,Meeting,Relationship | In Person | Coverage A,false
+F003,2026-06-16,Event,"Private Markets Forum (confirmed, 3 contacts)",false
+F003,2026-08-05,Meeting,Relationship | Video | Coverage B,false
+F003,2026-09-02,Meeting,Fundraising | Phone | Coverage B,false
+F004,2026-05-25,Opportunity,O0045 Fund Beta: Initial Conversation ($150.0M),false
+F004,2026-06-17,Opportunity,O0045 Fund Beta: Follow-up / VDR ($150.0M),false
+F004,2026-07-01,Opportunity,O0045 Fund Beta: Due Diligence ($150.0M),false
+F004,2026-07-11,Opportunity,O0045 Fund Beta: IC / Documentation ($150.0M),false
+F004,2026-07-27,Opportunity,O0043 Fund Gamma: Initial Conversation ($25.0M),false
+F004,2026-08-11,Opportunity,O0012 Credit Strategy: Initial Conversation ($100.0M),false
+F004,2026-08-17,Opportunity,O0043 Fund Gamma: Follow-up / VDR ($25.0M),false
+F004,2026-08-20,Opportunity,O0012 Credit Strategy: Follow-up / VDR ($100.0M),false
+F004,2026-08-25,Opportunity,O0012 Credit Strategy: Due Diligence ($100.0M),false
+F004,2026-09-01,Opportunity,O0012 Credit Strategy: IC / Documentation ($100.0M),false
+F004,2026-09-06,Opportunity,O0043 Fund Gamma: Due Diligence ($25.0M),false
+F004,2026-09-20,Opportunity,O0043 Fund Gamma: IC / Documentation ($25.0M),false
+F005,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 3 contacts)",false
+F005,2026-05-23,Meeting,Relationship | Video | Coverage B,false
+F005,2026-07-14,Meeting,Relationship | Video | Coverage B,false
+F006,2026-03-12,Event,"Global Alternatives Summit (confirmed, 1 contacts)",false
+F006,2026-04-20,Opportunity,O0103 Fund Gamma: Initial Conversation ($15.0M),false
+F006,2026-05-10,Opportunity,O0103 Fund Gamma: Follow-up / VDR ($15.0M),false
+F006,2026-05-12,Meeting,Relationship | Video | Coverage B,false
+F006,2026-05-21,Event,"Investor Leadership Dinner (tentative, 2 contacts)",false
+F006,2026-06-03,Opportunity,O0103 Fund Gamma: Due Diligence ($15.0M),false
+F006,2026-06-09,Opportunity,O0103 Fund Gamma: IC / Documentation ($15.0M),false
+F006,2026-06-16,Event,"Private Markets Forum (confirmed, 1 contacts)",false
+F006,2026-06-22,Meeting,Fundraising | Video | Coverage C,false
+F006,2026-07-14,Opportunity,O0005 Fund Beta: Initial Conversation ($150.0M),false
+F006,2026-07-20,Meeting,Fundraising | Phone | Senior Partner,false
+F006,2026-08-07,Opportunity,O0005 Fund Beta: Follow-up / VDR ($150.0M),false
+F006,2026-08-24,Opportunity,O0005 Fund Beta: Due Diligence ($150.0M),false
+F006,2026-09-17,Opportunity,O0005 Fund Beta: IC / Documentation ($150.0M),false
+F007,2026-02-27,Meeting,Follow-up | In Person | Coverage B,false
+F007,2026-03-12,Event,"Global Alternatives Summit (confirmed, 2 contacts)",false
+F007,2026-03-15,Meeting,Follow-up | Video | Senior Partner,false
+F007,2026-04-15,Opportunity,O0004 Fund Beta: Initial Conversation ($75.0M),false
+F007,2026-04-21,Meeting,Relationship | Video | Coverage B,false
+F007,2026-05-05,Opportunity,O0004 Fund Beta: Follow-up / VDR ($75.0M),false
+F007,2026-05-20,Opportunity,O0004 Fund Beta: Due Diligence ($75.0M),false
+F007,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F007,2026-05-30,Meeting,Fundraising | Video | Coverage B,false
+F007,2026-05-30,Meeting,Due diligence | In Person | Coverage B,false
+F007,2026-06-14,Opportunity,O0004 Fund Beta: Declined ($75.0M),false
+F007,2026-06-26,Opportunity,O0093 Fund Gamma: Initial Conversation ($1.5M),false
+F007,2026-07-11,Meeting,Relationship | Video | Coverage B,false
+F007,2026-07-26,Opportunity,O0093 Fund Gamma: Follow-up / VDR ($1.5M),false
+F007,2026-08-09,Opportunity,O0093 Fund Gamma: Due Diligence ($1.5M),false
+F007,2026-08-31,Opportunity,O0093 Fund Gamma: IC / Documentation ($1.5M),false
+F008,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 3 contacts)",false
+F008,2026-06-21,Meeting,Relationship | In Person | Coverage A,false
+F008,2026-06-28,Opportunity,O9998 Fund Beta: Committed ($25.0M),false
+F008,2026-06-28,Opportunity,O9999 Fund Beta: Committed ($25.0M),false
+F009,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F010,2026-04-03,Opportunity,O0007 Fund Alpha: Initial Conversation ($10.0M),false
+F010,2026-04-12,Meeting,Relationship | Video | Coverage B,false
+F010,2026-04-27,Meeting,Fundraising | Phone | Senior Partner,false
+F010,2026-04-29,Opportunity,O0007 Fund Alpha: Follow-up / VDR ($10.0M),false
+F010,2026-05-05,Opportunity,O0007 Fund Alpha: Due Diligence ($10.0M),false
+F010,2026-05-07,Opportunity,O0029 Secondaries Strategy: Initial Conversation ($10.0M),false
+F010,2026-05-31,Opportunity,O0007 Fund Alpha: IC / Documentation ($10.0M),false
+F010,2026-06-01,Opportunity,O0029 Secondaries Strategy: Follow-up / VDR ($10.0M),false
+F010,2026-06-16,Event,"Private Markets Forum (confirmed, 1 contacts)",false
+F010,2026-06-26,Opportunity,O0029 Secondaries Strategy: Due Diligence ($10.0M),false
+F010,2026-07-06,Opportunity,O0098 Credit Strategy: Initial Conversation ($1.5M),false
+F010,2026-07-09,Opportunity,O0007 Fund Alpha: Declined ($10.0M),false
+F010,2026-07-14,Opportunity,O0029 Secondaries Strategy: IC / Documentation ($10.0M),false
+F010,2026-08-01,Opportunity,O0098 Credit Strategy: Follow-up / VDR ($1.5M),false
+F010,2026-08-08,Opportunity,O0098 Credit Strategy: Committed ($1.5M),false
+F010,2026-08-15,Meeting,Relationship | Video | Coverage B,false
+F011,2026-02-23,Opportunity,O0025 Fund Beta: Initial Conversation ($1.5M),false
+F011,2026-03-03,Opportunity,O0025 Fund Beta: Follow-up / VDR ($1.5M),false
+F011,2026-03-10,Opportunity,O0025 Fund Beta: Due Diligence ($1.5M),false
+F011,2026-03-30,Opportunity,O0063 Credit Strategy: Initial Conversation ($40.0M),false
+F011,2026-04-04,Opportunity,O0025 Fund Beta: IC / Documentation ($1.5M),false
+F011,2026-04-12,Opportunity,O0015 Fund Gamma: Initial Conversation ($150.0M),false
+F011,2026-04-17,Opportunity,O0063 Credit Strategy: Follow-up / VDR ($40.0M),false
+F011,2026-04-17,Opportunity,O0025 Fund Beta: Declined ($1.5M),false
+F011,2026-04-21,Opportunity,O0015 Fund Gamma: Follow-up / VDR ($150.0M),false
+F011,2026-05-04,Opportunity,O0015 Fund Gamma: Due Diligence ($150.0M),false
+F011,2026-05-08,Opportunity,O0063 Credit Strategy: Due Diligence ($40.0M),false
+F011,2026-05-25,Opportunity,O0015 Fund Gamma: IC / Documentation ($150.0M),false
+F011,2026-06-03,Opportunity,O0082 Fund Alpha: Initial Conversation ($150.0M),false
+F011,2026-06-22,Opportunity,O0082 Fund Alpha: Follow-up / VDR ($150.0M),false
+F011,2026-07-11,Opportunity,O0105 Credit Strategy: Initial Conversation ($40.0M),false
+F011,2026-07-26,Opportunity,O0035 Fund Beta: Initial Conversation ($25.0M),false
+F011,2026-07-30,Opportunity,O0105 Credit Strategy: Follow-up / VDR ($40.0M),false
+F011,2026-08-12,Opportunity,O0105 Credit Strategy: Due Diligence ($40.0M),false
+F011,2026-08-19,Opportunity,O0035 Fund Beta: Follow-up / VDR ($25.0M),false
+F011,2026-08-31,Opportunity,O0035 Fund Beta: Due Diligence ($25.0M),false
+F011,2026-09-17,Opportunity,O0035 Fund Beta: IC / Documentation ($25.0M),false
+F012,2026-03-10,Opportunity,O0028 Fund Alpha: Initial Conversation ($5.0M),false
+F012,2026-03-15,Opportunity,O0028 Fund Alpha: Follow-up / VDR ($5.0M),false
+F012,2026-04-08,Opportunity,O0028 Fund Alpha: Due Diligence ($5.0M),false
+F012,2026-04-30,Opportunity,O0028 Fund Alpha: IC / Documentation ($5.0M),false
+F012,2026-05-09,Meeting,Fundraising | Phone | Senior Partner,false
+F012,2026-05-17,Opportunity,O0030 Fund Alpha: Initial Conversation ($15.0M),false
+F012,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F012,2026-06-14,Opportunity,O0030 Fund Alpha: Follow-up / VDR ($15.0M),false
+F012,2026-06-19,Meeting,Relationship | Video | Coverage B,false
+F012,2026-07-14,Opportunity,O0030 Fund Alpha: Due Diligence ($15.0M),false
+F013,2026-01-09,Meeting,Relationship | Phone | Coverage C,false
+F013,2026-02-28,Meeting,Follow-up | Video | Senior Partner,false
+F013,2026-03-07,Meeting,Fundraising | In Person | Coverage C,false
+F013,2026-03-12,Event,"Global Alternatives Summit (confirmed, 1 contacts)",false
+F013,2026-06-16,Event,"Private Markets Forum (confirmed, 1 contacts)",false
+F014,2026-01-21,Opportunity,O0092 Fund Beta: Initial Conversation ($75.0M),false
+F014,2026-01-27,Opportunity,O0092 Fund Beta: Follow-up / VDR ($75.0M),false
+F014,2026-03-06,Opportunity,O0065 Secondaries Strategy: Initial Conversation ($10.0M),false
+F014,2026-03-12,Event,"Global Alternatives Summit (tentative, 1 contacts)",false
+F014,2026-03-22,Opportunity,O0042 Fund Gamma: Initial Conversation ($25.0M),false
+F014,2026-03-25,Opportunity,O0065 Secondaries Strategy: Follow-up / VDR ($10.0M),false
+F014,2026-04-07,Opportunity,O0042 Fund Gamma: Follow-up / VDR ($25.0M),false
+F014,2026-04-16,Opportunity,O0065 Secondaries Strategy: Due Diligence ($10.0M),false
+F014,2026-04-20,Opportunity,O0042 Fund Gamma: Due Diligence ($25.0M),false
+F014,2026-06-05,Meeting,Relationship | Video | Coverage B,false
+F014,2026-06-06,Meeting,Follow-up | In Person | Coverage A,false
+F015,2026-02-04,Opportunity,O0032 Fund Beta: Initial Conversation ($15.0M),false
+F015,2026-02-19,Opportunity,O0032 Fund Beta: Follow-up / VDR ($15.0M),false
+F015,2026-03-12,Event,"Global Alternatives Summit (tentative, 1 contacts)",false
+F015,2026-03-19,Opportunity,O0032 Fund Beta: Due Diligence ($15.0M),false
+F015,2026-04-15,Opportunity,O0032 Fund Beta: IC / Documentation ($15.0M),false
+F015,2026-05-03,Meeting,Due diligence | Phone | Coverage B,false
+F015,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F015,2026-05-26,Meeting,Fundraising | Phone | Coverage A,false
+F016,2026-06-06,Opportunity,O0054 Fund Gamma: Initial Conversation ($10.0M),false
+F016,2026-06-16,Event,"Private Markets Forum (confirmed, 2 contacts)",false
+F016,2026-06-30,Opportunity,O0054 Fund Gamma: Follow-up / VDR ($10.0M),false
+F016,2026-07-09,Opportunity,O0054 Fund Gamma: Due Diligence ($10.0M),false
+F016,2026-07-15,Opportunity,O0055 Secondaries Strategy: Initial Conversation ($25.0M),false
+F016,2026-07-27,Opportunity,O0055 Secondaries Strategy: Follow-up / VDR ($25.0M),false
+F016,2026-08-11,Opportunity,O0055 Secondaries Strategy: Due Diligence ($25.0M),false
+F017,2026-02-08,Opportunity,O0102 Fund Alpha: Initial Conversation ($1.5M),false
+F017,2026-03-06,Opportunity,O0102 Fund Alpha: Follow-up / VDR ($1.5M),false
+F017,2026-03-11,Meeting,Fundraising | Video | Coverage C,false
+F017,2026-03-12,Event,"Global Alternatives Summit (confirmed, 2 contacts)",false
+F017,2026-03-19,Opportunity,O0068 Credit Strategy: Initial Conversation ($40.0M),false
+F017,2026-03-22,Opportunity,O0034 Fund Alpha: Initial Conversation ($10.0M),false
+F017,2026-04-01,Opportunity,O0034 Fund Alpha: Follow-up / VDR ($10.0M),false
+F017,2026-04-06,Meeting,Follow-up | Video | Coverage A,false
+F017,2026-04-06,Opportunity,O0068 Credit Strategy: Follow-up / VDR ($40.0M),false
+F017,2026-04-14,Opportunity,O0034 Fund Alpha: Due Diligence ($10.0M),false
+F017,2026-04-26,Opportunity,O0034 Fund Alpha: IC / Documentation ($10.0M),false
+F017,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 2 contacts)",false
+F017,2026-05-22,Meeting,Relationship | Video | Coverage B,false
+F017,2026-06-03,Meeting,Follow-up | In Person | Coverage B,false
+F017,2026-06-04,Meeting,Relationship | Video | Coverage A,false
+F017,2026-06-13,Opportunity,O0016 Fund Beta: Initial Conversation ($100.0M),false
+F017,2026-06-16,Event,"Private Markets Forum (confirmed, 2 contacts)",false
+F017,2026-06-24,Opportunity,O0016 Fund Beta: Follow-up / VDR ($100.0M),false
+F017,2026-07-04,Opportunity,O0016 Fund Beta: Due Diligence ($100.0M),false
+F017,2026-07-14,Opportunity,O0056 Fund Beta: Initial Conversation ($2.5M),false
+F017,2026-07-25,Opportunity,O0056 Fund Beta: Follow-up / VDR ($2.5M),false
+F017,2026-07-28,Opportunity,O0033 Fund Gamma: Initial Conversation ($1.5M),false
+F017,2026-08-11,Opportunity,O0056 Fund Beta: Due Diligence ($2.5M),false
+F017,2026-08-15,Opportunity,O0033 Fund Gamma: Follow-up / VDR ($1.5M),false
+F017,2026-08-20,Opportunity,O0056 Fund Beta: IC / Documentation ($2.5M),false
+F017,2026-09-10,Opportunity,O0033 Fund Gamma: Due Diligence ($1.5M),false
+F017,2026-10-10,Opportunity,O0033 Fund Gamma: IC / Documentation ($1.5M),true
+F018,2026-03-12,Event,"Global Alternatives Summit (confirmed, 1 contacts)",false
+F018,2026-03-17,Meeting,Fundraising | In Person | Coverage C,false
+F018,2026-05-05,Meeting,Fundraising | Video | Coverage B,false
+F018,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 2 contacts)",false
+F018,2026-05-25,Meeting,Fundraising | Video | Coverage A,false
+F018,2026-06-16,Event,"Private Markets Forum (tentative, 1 contacts)",false
+F018,2026-06-18,Meeting,Relationship | Phone | Coverage B,false
+F018,2026-07-09,Meeting,Due diligence | Video | Senior Partner,false
+F019,2026-03-21,Meeting,Due diligence | Phone | Coverage B,false
+F019,2026-04-28,Opportunity,O0087 Credit Strategy: Initial Conversation ($25.0M),false
+F019,2026-05-12,Opportunity,O0087 Credit Strategy: Follow-up / VDR ($25.0M),false
+F019,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F019,2026-05-26,Opportunity,O0087 Credit Strategy: Due Diligence ($25.0M),false
+F019,2026-06-13,Opportunity,O0022 Credit Strategy: Initial Conversation ($40.0M),false
+F019,2026-06-22,Opportunity,O0022 Credit Strategy: Follow-up / VDR ($40.0M),false
+F019,2026-07-12,Opportunity,O0022 Credit Strategy: Due Diligence ($40.0M),false
+F019,2026-08-05,Opportunity,O0048 Fund Beta: Initial Conversation ($10.0M),false
+F019,2026-08-30,Opportunity,O0048 Fund Beta: Follow-up / VDR ($10.0M),false
+F019,2026-09-28,Opportunity,O0048 Fund Beta: Due Diligence ($10.0M),true
+F019,2026-10-20,Opportunity,O0048 Fund Beta: Committed ($10.0M),true
+F020,2026-03-07,Opportunity,O0094 Fund Alpha: Initial Conversation ($40.0M),false
+F020,2026-03-30,Opportunity,O0094 Fund Alpha: Follow-up / VDR ($40.0M),false
+F020,2026-04-24,Opportunity,O0094 Fund Alpha: Due Diligence ($40.0M),false
+F020,2026-06-16,Event,"Private Markets Forum (tentative, 1 contacts)",false
+F020,2026-08-24,Meeting,Relationship | Video | Coverage B,false
+F020,2026-09-07,Meeting,Fundraising | Video | Coverage B,false
+F021,2026-06-11,Opportunity,O0052 Credit Strategy: Initial Conversation ($5.0M),false
+F021,2026-06-26,Opportunity,O0052 Credit Strategy: Follow-up / VDR ($5.0M),false
+F021,2026-07-06,Opportunity,O0052 Credit Strategy: Due Diligence ($5.0M),false
+F021,2026-07-25,Opportunity,O0052 Credit Strategy: IC / Documentation ($5.0M),false
+F022,2026-02-15,Opportunity,O0086 Fund Gamma: Initial Conversation ($25.0M),false
+F022,2026-03-09,Meeting,Due diligence | Phone | Coverage C,false
+F022,2026-03-09,Opportunity,O0086 Fund Gamma: Follow-up / VDR ($25.0M),false
+F022,2026-03-12,Event,"Global Alternatives Summit (confirmed, 2 contacts)",false
+F022,2026-03-16,Opportunity,O0089 Fund Gamma: Initial Conversation ($25.0M),false
+F022,2026-03-23,Opportunity,O0089 Fund Gamma: Follow-up / VDR ($25.0M),false
+F022,2026-04-07,Opportunity,O0086 Fund Gamma: Due Diligence ($25.0M),false
+F022,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F022,2026-06-16,Event,"Private Markets Forum (confirmed, 1 contacts)",false
+F023,2026-03-12,Event,"Global Alternatives Summit (confirmed, 3 contacts)",false
+F023,2026-04-21,Meeting,Relationship | Video | Senior Partner,false
+F023,2026-08-15,Opportunity,O0073 Fund Gamma: Initial Conversation ($10.0M),false
+F023,2026-08-28,Opportunity,O0073 Fund Gamma: Follow-up / VDR ($10.0M),false
+F023,2026-09-15,Opportunity,O0073 Fund Gamma: Due Diligence ($10.0M),false
+F023,2026-10-11,Opportunity,O0073 Fund Gamma: IC / Documentation ($10.0M),true
+F024,2026-01-30,Opportunity,O0011 Secondaries Strategy: Initial Conversation ($75.0M),false
+F024,2026-02-05,Opportunity,O0011 Secondaries Strategy: Follow-up / VDR ($75.0M),false
+F024,2026-03-02,Opportunity,O0011 Secondaries Strategy: Due Diligence ($75.0M),false
+F024,2026-03-12,Event,"Global Alternatives Summit (confirmed, 1 contacts)",false
+F024,2026-03-17,Opportunity,O0011 Secondaries Strategy: Committed ($75.0M),false
+F024,2026-04-06,Meeting,Relationship | In Person | Coverage B,false
+F024,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F024,2026-06-27,Meeting,Relationship | Video | Coverage B,false
+F024,2026-07-08,Opportunity,O0084 Fund Alpha: Initial Conversation ($1.5M),false
+F024,2026-08-03,Meeting,Follow-up | In Person | Senior Partner,false
+F024,2026-08-05,Opportunity,O0084 Fund Alpha: Follow-up / VDR ($1.5M),false
+F024,2026-08-20,Opportunity,O0084 Fund Alpha: Due Diligence ($1.5M),false
+F024,2026-09-19,Opportunity,O0084 Fund Alpha: IC / Documentation ($1.5M),false
+F025,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F025,2026-06-16,Event,"Private Markets Forum (confirmed, 2 contacts)",false
+F025,2026-06-22,Meeting,Relationship | Video | Senior Partner,false
+F025,2026-07-03,Meeting,Fundraising | Video | Coverage C,false
+F026,2026-06-09,Meeting,Relationship | Video | Coverage B,false
+F026,2026-06-16,Event,"Private Markets Forum (confirmed, 2 contacts)",false
+F026,2026-07-24,Opportunity,O0001 Fund Beta: Initial Conversation ($40.0M),false
+F026,2026-08-03,Opportunity,O0001 Fund Beta: Follow-up / VDR ($40.0M),false
+F026,2026-08-21,Opportunity,O0001 Fund Beta: Due Diligence ($40.0M),false
+F026,2026-08-29,Opportunity,O0001 Fund Beta: IC / Documentation ($40.0M),false
+F027,2025-12-27,Meeting,Fundraising | In Person | Coverage B,false
+F027,2026-03-12,Event,"Global Alternatives Summit (confirmed, 3 contacts)",false
+F027,2026-04-14,Meeting,Relationship | Video | Coverage B,false
+F027,2026-06-10,Meeting,Relationship | Phone | Coverage C,false
+F027,2026-06-12,Meeting,Relationship | Video | Coverage B,false
+F027,2026-06-15,Opportunity,O0024 Secondaries Strategy: Initial Conversation ($15.0M),false
+F027,2026-07-05,Meeting,Relationship | Video | Coverage B,false
+F027,2026-07-09,Opportunity,O0024 Secondaries Strategy: Follow-up / VDR ($15.0M),false
+F027,2026-07-16,Meeting,Relationship | Video | Coverage B,false
+F028,2026-06-23,Opportunity,O0075 Fund Gamma: Initial Conversation ($2.5M),false
+F028,2026-07-10,Opportunity,O0075 Fund Gamma: Follow-up / VDR ($2.5M),false
+F028,2026-08-02,Opportunity,O0075 Fund Gamma: Declined ($2.5M),false
+F028,2026-08-04,Opportunity,O0037 Secondaries Strategy: Initial Conversation ($10.0M),false
+F028,2026-08-15,Opportunity,O0037 Secondaries Strategy: Follow-up / VDR ($10.0M),false
+F028,2026-09-01,Opportunity,O0037 Secondaries Strategy: Due Diligence ($10.0M),false
+F028,2026-09-25,Opportunity,O0037 Secondaries Strategy: IC / Documentation ($10.0M),true
+F028,2026-10-28,Opportunity,O0037 Secondaries Strategy: Committed ($10.0M),true
+F029,2026-03-12,Event,"Global Alternatives Summit (confirmed, 2 contacts)",false
+F029,2026-04-29,Opportunity,O0078 Fund Beta: Initial Conversation ($5.0M),false
+F029,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F029,2026-05-21,Opportunity,O0078 Fund Beta: Follow-up / VDR ($5.0M),false
+F029,2026-05-24,Meeting,Relationship | In Person | Coverage A,false
+F029,2026-05-31,Opportunity,O0078 Fund Beta: Due Diligence ($5.0M),false
+F029,2026-06-02,Opportunity,O0009 Fund Beta: Initial Conversation ($75.0M),false
+F029,2026-06-22,Opportunity,O0009 Fund Beta: Follow-up / VDR ($75.0M),false
+F029,2026-06-24,Opportunity,O0078 Fund Beta: IC / Documentation ($5.0M),false
+F029,2026-07-12,Meeting,Fundraising | Phone | Senior Partner,false
+F029,2026-08-14,Opportunity,O0010 Credit Strategy: Initial Conversation ($150.0M),false
+F029,2026-09-03,Opportunity,O0010 Credit Strategy: Follow-up / VDR ($150.0M),false
+F029,2026-09-20,Opportunity,O0010 Credit Strategy: Due Diligence ($150.0M),false
+F029,2026-09-28,Opportunity,O0010 Credit Strategy: IC / Documentation ($150.0M),true
+F029,2026-10-14,Opportunity,O0010 Credit Strategy: Declined ($150.0M),true
+F030,2026-03-03,Opportunity,O0051 Secondaries Strategy: Initial Conversation ($100.0M),false
+F030,2026-03-27,Opportunity,O0051 Secondaries Strategy: Follow-up / VDR ($100.0M),false
+F030,2026-04-21,Opportunity,O0051 Secondaries Strategy: Due Diligence ($100.0M),false
+F030,2026-04-27,Opportunity,O0051 Secondaries Strategy: IC / Documentation ($100.0M),false
+F030,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F030,2026-07-25,Meeting,Due diligence | In Person | Coverage A,false
+F031,2026-03-12,Event,"Global Alternatives Summit (confirmed, 1 contacts)",false
+F031,2026-03-23,Meeting,Relationship | Video | Coverage A,false
+F031,2026-05-16,Opportunity,O0081 Fund Alpha: Initial Conversation ($100.0M),false
+F031,2026-05-30,Opportunity,O0066 Fund Gamma: Initial Conversation ($1.5M),false
+F031,2026-05-31,Meeting,Due diligence | In Person | Senior Partner,false
+F031,2026-06-12,Opportunity,O0081 Fund Alpha: Follow-up / VDR ($100.0M),false
+F031,2026-06-16,Event,"Private Markets Forum (confirmed, 1 contacts)",false
+F031,2026-06-23,Opportunity,O0071 Fund Beta: Initial Conversation ($100.0M),false
+F031,2026-06-27,Opportunity,O0066 Fund Gamma: Follow-up / VDR ($1.5M),false
+F031,2026-07-02,Opportunity,O0081 Fund Alpha: Due Diligence ($100.0M),false
+F031,2026-07-09,Opportunity,O0071 Fund Beta: Follow-up / VDR ($100.0M),false
+F031,2026-07-16,Opportunity,O0066 Fund Gamma: Due Diligence ($1.5M),false
+F031,2026-08-04,Opportunity,O0071 Fund Beta: Due Diligence ($100.0M),false
+F031,2026-08-29,Opportunity,O0071 Fund Beta: IC / Documentation ($100.0M),false
+F031,2026-09-01,Meeting,Fundraising | Phone | Coverage A,false
+F032,2026-03-12,Event,"Global Alternatives Summit (tentative, 3 contacts)",false
+F032,2026-05-05,Opportunity,O0088 Secondaries Strategy: Initial Conversation ($25.0M),false
+F032,2026-05-21,Opportunity,O0088 Secondaries Strategy: Follow-up / VDR ($25.0M),false
+F032,2026-06-01,Opportunity,O0088 Secondaries Strategy: Due Diligence ($25.0M),false
+F032,2026-06-26,Opportunity,O0088 Secondaries Strategy: IC / Documentation ($25.0M),false
+F032,2026-07-08,Opportunity,O0083 Credit Strategy: Initial Conversation ($15.0M),false
+F032,2026-08-03,Opportunity,O0083 Credit Strategy: Follow-up / VDR ($15.0M),false
+F032,2026-08-10,Opportunity,O0083 Credit Strategy: Due Diligence ($15.0M),false
+F033,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 2 contacts)",false
+F033,2026-05-31,Opportunity,O0085 Fund Beta: Initial Conversation ($75.0M),false
+F033,2026-06-16,Event,"Private Markets Forum (confirmed, 3 contacts)",false
+F033,2026-06-18,Opportunity,O0085 Fund Beta: Follow-up / VDR ($75.0M),false
+F033,2026-06-22,Meeting,Fundraising | Video | Coverage C,false
+F033,2026-06-24,Opportunity,O0059 Credit Strategy: Initial Conversation ($15.0M),false
+F033,2026-07-18,Opportunity,O0059 Credit Strategy: Follow-up / VDR ($15.0M),false
+F034,2026-03-07,Opportunity,O0070 Credit Strategy: Initial Conversation ($40.0M),false
+F034,2026-03-13,Opportunity,O0046 Fund Alpha: Initial Conversation ($15.0M),false
+F034,2026-03-21,Opportunity,O0046 Fund Alpha: Follow-up / VDR ($15.0M),false
+F034,2026-03-21,Opportunity,O0021 Secondaries Strategy: Initial Conversation ($15.0M),false
+F034,2026-04-05,Opportunity,O0070 Credit Strategy: Follow-up / VDR ($40.0M),false
+F034,2026-04-18,Opportunity,O0021 Secondaries Strategy: Follow-up / VDR ($15.0M),false
+F034,2026-04-23,Opportunity,O0021 Secondaries Strategy: Due Diligence ($15.0M),false
+F034,2026-04-30,Opportunity,O0070 Credit Strategy: Committed ($40.0M),false
+F034,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F034,2026-05-21,Opportunity,O0021 Secondaries Strategy: IC / Documentation ($15.0M),false
+F034,2026-07-14,Meeting,Due diligence | In Person | Coverage B,false
+F035,2026-01-21,Opportunity,O0031 Credit Strategy: Initial Conversation ($40.0M),false
+F035,2026-01-28,Opportunity,O0031 Credit Strategy: Follow-up / VDR ($40.0M),false
+F035,2026-02-25,Opportunity,O0031 Credit Strategy: Due Diligence ($40.0M),false
+F035,2026-03-22,Opportunity,O0031 Credit Strategy: IC / Documentation ($40.0M),false
+F035,2026-06-27,Opportunity,O0019 Fund Gamma: Initial Conversation ($40.0M),false
+F035,2026-07-20,Opportunity,O0019 Fund Gamma: Follow-up / VDR ($40.0M),false
+F035,2026-07-29,Opportunity,O0019 Fund Gamma: Due Diligence ($40.0M),false
+F036,2026-03-12,Event,"Global Alternatives Summit (confirmed, 1 contacts)",false
+F036,2026-05-21,Event,"Investor Leadership Dinner (tentative, 1 contacts)",false
+F036,2026-05-26,Meeting,Due diligence | Phone | Coverage B,false
+F036,2026-08-02,Meeting,Relationship | Video | Coverage B,false
+F036,2026-08-18,Opportunity,O0008 Credit Strategy: Initial Conversation ($15.0M),false
+F036,2026-09-05,Opportunity,O0008 Credit Strategy: Follow-up / VDR ($15.0M),false
+F036,2026-09-22,Opportunity,O0008 Credit Strategy: Due Diligence ($15.0M),false
+F037,2026-06-25,Opportunity,O0003 Secondaries Strategy: Initial Conversation ($25.0M),false
+F037,2026-07-09,Opportunity,O0003 Secondaries Strategy: Follow-up / VDR ($25.0M),false
+F037,2026-07-15,Opportunity,O0104 Credit Strategy: Initial Conversation ($75.0M),false
+F037,2026-07-19,Opportunity,O0003 Secondaries Strategy: Committed ($25.0M),false
+F037,2026-08-14,Opportunity,O0104 Credit Strategy: Follow-up / VDR ($75.0M),false
+F037,2026-08-22,Opportunity,O0104 Credit Strategy: Due Diligence ($75.0M),false
+F037,2026-09-07,Opportunity,O0104 Credit Strategy: IC / Documentation ($75.0M),false
+F038,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F038,2026-05-31,Meeting,Fundraising | Video | Coverage C,false
+F038,2026-06-16,Event,"Private Markets Forum (confirmed, 1 contacts)",false
+F038,2026-07-03,Meeting,Follow-up | In Person | Coverage A,false
+F039,2026-03-12,Event,"Global Alternatives Summit (confirmed, 2 contacts)",false
+F039,2026-04-15,Meeting,Relationship | In Person | Senior Partner,false
+F039,2026-05-18,Opportunity,O0027 Fund Beta: Initial Conversation ($75.0M),false
+F039,2026-05-24,Opportunity,O0027 Fund Beta: Follow-up / VDR ($75.0M),false
+F039,2026-05-29,Opportunity,O0027 Fund Beta: Declined ($75.0M),false
+F040,2026-03-12,Event,"Global Alternatives Summit (confirmed, 1 contacts)",false
+F040,2026-03-16,Meeting,Fundraising | In Person | Coverage B,false
+F040,2026-04-04,Meeting,Due diligence | Video | Senior Partner,false
+F040,2026-05-02,Meeting,Fundraising | Video | Coverage C,false
+F040,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F040,2026-05-25,Meeting,Due diligence | In Person | Coverage B,false
+F040,2026-08-13,Meeting,Relationship | Video | Coverage B,false
+F041,2026-04-11,Opportunity,O0049 Fund Alpha: Initial Conversation ($25.0M),false
+F041,2026-04-12,Opportunity,O0017 Credit Strategy: Initial Conversation ($650.0M),false
+F041,2026-04-25,Opportunity,O0017 Credit Strategy: Follow-up / VDR ($650.0M),false
+F041,2026-05-09,Opportunity,O0049 Fund Alpha: Follow-up / VDR ($25.0M),false
+F041,2026-05-16,Opportunity,O0017 Credit Strategy: Committed ($650.0M),false
+F041,2026-05-16,Opportunity,O0049 Fund Alpha: Due Diligence ($25.0M),false
+F041,2026-07-10,Opportunity,O0069 Secondaries Strategy: Initial Conversation ($25.0M),false
+F041,2026-07-16,Opportunity,O0062 Credit Strategy: Initial Conversation ($2.5M),false
+F041,2026-07-24,Opportunity,O0069 Secondaries Strategy: Follow-up / VDR ($25.0M),false
+F041,2026-08-12,Opportunity,O0062 Credit Strategy: Follow-up / VDR ($2.5M),false
+F041,2026-08-21,Opportunity,O0069 Secondaries Strategy: Due Diligence ($25.0M),false
+F041,2026-08-31,Opportunity,O0018 Credit Strategy: Initial Conversation ($25.0M),false
+F041,2026-09-27,Opportunity,O0018 Credit Strategy: Follow-up / VDR ($25.0M),true
+F041,2026-10-05,Opportunity,O0018 Credit Strategy: Due Diligence ($25.0M),true
+F042,2026-01-25,Opportunity,O0050 Fund Beta: Initial Conversation ($25.0M),false
+F042,2026-01-28,Opportunity,O0023 Fund Alpha: Initial Conversation ($1.5M),false
+F042,2026-02-11,Opportunity,O0023 Fund Alpha: Follow-up / VDR ($1.5M),false
+F042,2026-02-16,Opportunity,O0050 Fund Beta: Follow-up / VDR ($25.0M),false
+F042,2026-02-27,Opportunity,O0023 Fund Alpha: Committed ($1.5M),false
+F042,2026-03-09,Opportunity,O0050 Fund Beta: Due Diligence ($25.0M),false
+F042,2026-03-26,Opportunity,O0077 Secondaries Strategy: Initial Conversation ($15.0M),false
+F042,2026-04-03,Opportunity,O0050 Fund Beta: Committed ($25.0M),false
+F042,2026-04-07,Opportunity,O0077 Secondaries Strategy: Follow-up / VDR ($15.0M),false
+F042,2026-05-21,Meeting,Relationship | Video | Coverage B,false
+F042,2026-06-16,Event,"Private Markets Forum (confirmed, 1 contacts)",false
+F042,2026-07-11,Meeting,Due diligence | In Person | Coverage B,false
+F043,2026-02-16,Opportunity,O0097 Credit Strategy: Initial Conversation ($75.0M),false
+F043,2026-03-12,Event,"Global Alternatives Summit (confirmed, 2 contacts)",false
+F043,2026-03-13,Opportunity,O0097 Credit Strategy: Follow-up / VDR ($75.0M),false
+F043,2026-03-18,Meeting,Follow-up | In Person | Coverage C,false
+F043,2026-04-02,Opportunity,O0097 Credit Strategy: Due Diligence ($75.0M),false
+F043,2026-06-18,Meeting,Relationship | Video | Coverage B,false
+F043,2026-07-29,Opportunity,O0061 Fund Beta: Initial Conversation ($150.0M),false
+F043,2026-08-06,Opportunity,O0061 Fund Beta: Follow-up / VDR ($150.0M),false
+F043,2026-08-19,Meeting,Relationship | Video | Coverage B,false
+F043,2026-08-25,Opportunity,O0061 Fund Beta: Due Diligence ($150.0M),false
+F043,2026-08-25,Opportunity,O0036 Credit Strategy: Initial Conversation ($100.0M),false
+F043,2026-09-12,Opportunity,O0061 Fund Beta: IC / Documentation ($150.0M),false
+F043,2026-09-21,Opportunity,O0036 Credit Strategy: Follow-up / VDR ($100.0M),false
+F043,2026-09-26,Opportunity,O0036 Credit Strategy: Due Diligence ($100.0M),true
+F044,2026-02-25,Opportunity,O0067 Secondaries Strategy: Initial Conversation ($40.0M),false
+F044,2026-03-12,Event,"Global Alternatives Summit (confirmed, 1 contacts)",false
+F044,2026-03-25,Opportunity,O0067 Secondaries Strategy: Follow-up / VDR ($40.0M),false
+F044,2026-04-18,Opportunity,O0067 Secondaries Strategy: Due Diligence ($40.0M),false
+F044,2026-05-04,Opportunity,O0067 Secondaries Strategy: IC / Documentation ($40.0M),false
+F044,2026-05-17,Meeting,Fundraising | Video | Coverage C,false
+F044,2026-06-16,Event,"Private Markets Forum (confirmed, 2 contacts)",false
+F045,2026-03-12,Event,"Global Alternatives Summit (confirmed, 2 contacts)",false
+F045,2026-05-01,Opportunity,O0096 Fund Alpha: Initial Conversation ($75.0M),false
+F045,2026-05-25,Opportunity,O0096 Fund Alpha: Follow-up / VDR ($75.0M),false
+F045,2026-06-21,Opportunity,O0039 Fund Alpha: Initial Conversation ($1.5M),false
+F045,2026-07-14,Opportunity,O0039 Fund Alpha: Follow-up / VDR ($1.5M),false
+F045,2026-08-12,Opportunity,O0039 Fund Alpha: Due Diligence ($1.5M),false
+F045,2026-08-28,Opportunity,O0039 Fund Alpha: IC / Documentation ($1.5M),false
+F046,2026-01-23,Meeting,Relationship | In Person | Coverage B,false
+F046,2026-03-12,Event,"Global Alternatives Summit (confirmed, 2 contacts)",false
+F046,2026-05-09,Meeting,Due diligence | Phone | Coverage A,false
+F046,2026-05-11,Meeting,Relationship | Video | Senior Partner,false
+F046,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F046,2026-06-23,Meeting,Due diligence | Video | Coverage B,false
+F047,2026-02-18,Meeting,Relationship | In Person | Coverage A,false
+F047,2026-03-12,Event,"Global Alternatives Summit (confirmed, 3 contacts)",false
+F047,2026-04-12,Opportunity,O0057 Fund Gamma: Initial Conversation ($40.0M),false
+F047,2026-04-20,Opportunity,O0057 Fund Gamma: Follow-up / VDR ($40.0M),false
+F047,2026-05-10,Meeting,Relationship | Video | Coverage C,false
+F047,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 3 contacts)",false
+F047,2026-07-17,Opportunity,O0013 Fund Beta: Initial Conversation ($2.5M),false
+F047,2026-07-31,Opportunity,O0013 Fund Beta: Follow-up / VDR ($2.5M),false
+F047,2026-08-07,Opportunity,O0100 Fund Alpha: Initial Conversation ($5.0M),false
+F047,2026-08-10,Opportunity,O0101 Fund Gamma: Initial Conversation ($2.5M),false
+F047,2026-08-30,Opportunity,O0101 Fund Gamma: Follow-up / VDR ($2.5M),false
+F047,2026-09-03,Opportunity,O0100 Fund Alpha: Follow-up / VDR ($5.0M),false
+F047,2026-09-18,Opportunity,O0101 Fund Gamma: Due Diligence ($2.5M),false
+F047,2026-09-30,Opportunity,O0100 Fund Alpha: Due Diligence ($5.0M),true
+F047,2026-10-14,Opportunity,O0101 Fund Gamma: IC / Documentation ($2.5M),true
+F048,2026-01-28,Meeting,Due diligence | In Person | Senior Partner,false
+F048,2026-03-03,Meeting,Follow-up | Video | Coverage B,false
+F048,2026-03-12,Event,"Global Alternatives Summit (tentative, 1 contacts)",false
+F048,2026-03-24,Meeting,Follow-up | Video | Coverage C,false
+F048,2026-06-16,Event,"Private Markets Forum (confirmed, 1 contacts)",false
+F048,2026-07-12,Meeting,Relationship | Video | Coverage B,false
+F048,2026-08-16,Opportunity,O0080 Fund Alpha: Initial Conversation ($75.0M),false
+F048,2026-08-28,Meeting,Fundraising | In Person | Coverage C,false
+F048,2026-09-03,Opportunity,O0080 Fund Alpha: Follow-up / VDR ($75.0M),false
+F048,2026-09-15,Opportunity,O0080 Fund Alpha: Due Diligence ($75.0M),false
+F049,2026-02-18,Opportunity,O0020 Fund Beta: Initial Conversation ($75.0M),false
+F049,2026-02-24,Opportunity,O0020 Fund Beta: Follow-up / VDR ($75.0M),false
+F050,2026-03-26,Opportunity,O0053 Fund Beta: Initial Conversation ($150.0M),false
+F050,2026-04-20,Opportunity,O0053 Fund Beta: Follow-up / VDR ($150.0M),false
+F050,2026-04-26,Meeting,Due diligence | Video | Senior Partner,false
+F050,2026-05-16,Meeting,Due diligence | In Person | Coverage B,false
+F050,2026-06-08,Meeting,Relationship | Phone | Coverage A,false
+F050,2026-06-16,Event,"Private Markets Forum (confirmed, 3 contacts)",false
+F051,2026-02-10,Opportunity,O0076 Fund Gamma: Initial Conversation ($100.0M),false
+F051,2026-02-20,Opportunity,O0079 Fund Gamma: Initial Conversation ($100.0M),false
+F051,2026-03-03,Opportunity,O0079 Fund Gamma: Follow-up / VDR ($100.0M),false
+F051,2026-03-08,Opportunity,O0076 Fund Gamma: Follow-up / VDR ($100.0M),false
+F051,2026-03-12,Event,"Global Alternatives Summit (confirmed, 2 contacts)",false
+F051,2026-03-13,Opportunity,O0076 Fund Gamma: Due Diligence ($100.0M),false
+F051,2026-03-24,Opportunity,O0076 Fund Gamma: IC / Documentation ($100.0M),false
+F051,2026-04-09,Meeting,Due diligence | Video | Coverage B,false
+F051,2026-08-21,Opportunity,O0047 Credit Strategy: Initial Conversation ($5.0M),false
+F051,2026-08-26,Opportunity,O0072 Credit Strategy: Initial Conversation ($40.0M),false
+F051,2026-09-03,Opportunity,O0047 Credit Strategy: Follow-up / VDR ($5.0M),false
+F051,2026-09-17,Opportunity,O0072 Credit Strategy: Follow-up / VDR ($40.0M),false
+F051,2026-09-26,Opportunity,O0047 Credit Strategy: Due Diligence ($5.0M),true
+F051,2026-10-12,Opportunity,O0072 Credit Strategy: Due Diligence ($40.0M),true
+F051,2026-10-21,Opportunity,O0072 Credit Strategy: IC / Documentation ($40.0M),true
+F052,2026-03-31,Opportunity,O0026 Fund Alpha: Initial Conversation ($1.5M),false
+F052,2026-04-16,Opportunity,O0026 Fund Alpha: Follow-up / VDR ($1.5M),false
+F052,2026-05-10,Opportunity,O0026 Fund Alpha: Due Diligence ($1.5M),false
+F052,2026-06-04,Opportunity,O0026 Fund Alpha: IC / Documentation ($1.5M),false
+F053,2026-02-16,Meeting,Due diligence | In Person | Senior Partner,false
+F053,2026-03-12,Event,"Global Alternatives Summit (confirmed, 2 contacts)",false
+F053,2026-04-03,Meeting,Relationship | Video | Coverage B,false
+F053,2026-04-11,Meeting,Due diligence | Phone | Coverage B,false
+F053,2026-05-24,Opportunity,O0091 Fund Alpha: Initial Conversation ($150.0M),false
+F053,2026-05-28,Opportunity,O0040 Credit Strategy: Initial Conversation ($2.5M),false
+F053,2026-06-08,Opportunity,O0040 Credit Strategy: Follow-up / VDR ($2.5M),false
+F053,2026-06-14,Opportunity,O0040 Credit Strategy: Committed ($2.5M),false
+F053,2026-06-17,Opportunity,O0091 Fund Alpha: Follow-up / VDR ($150.0M),false
+F053,2026-06-23,Meeting,Relationship | Video | Coverage B,false
+F053,2026-07-04,Opportunity,O0091 Fund Alpha: Due Diligence ($150.0M),false
+F053,2026-07-20,Opportunity,O0041 Credit Strategy: Initial Conversation ($15.0M),false
+F053,2026-07-28,Opportunity,O0091 Fund Alpha: IC / Documentation ($150.0M),false
+F053,2026-08-19,Opportunity,O0041 Credit Strategy: Follow-up / VDR ($15.0M),false
+F053,2026-08-21,Opportunity,O0091 Fund Alpha: Committed ($150.0M),false
+F054,2026-05-19,Opportunity,O0006 Secondaries Strategy: Initial Conversation ($5.0M),false
+F054,2026-06-09,Opportunity,O0006 Secondaries Strategy: Follow-up / VDR ($5.0M),false
+F054,2026-06-25,Opportunity,O0006 Secondaries Strategy: Committed ($5.0M),false
+F055,2026-01-11,Meeting,Follow-up | Video | Coverage C,false
+F055,2026-03-12,Event,"Global Alternatives Summit (confirmed, 3 contacts)",false
+F055,2026-06-16,Event,"Private Markets Forum (confirmed, 2 contacts)",false
+F055,2026-06-24,Meeting,Fundraising | In Person | Senior Partner,false
+F056,2026-03-01,Opportunity,O0099 Credit Strategy: Initial Conversation ($5.0M),false
+F056,2026-03-24,Opportunity,O0099 Credit Strategy: Follow-up / VDR ($5.0M),false
+F056,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F057,2026-01-02,Meeting,Due diligence | In Person | Coverage A,false
+F057,2026-02-24,Meeting,Due diligence | Video | Senior Partner,false
+F057,2026-03-12,Event,"Global Alternatives Summit (confirmed, 1 contacts)",false
+F057,2026-04-10,Opportunity,O0002 Fund Beta: Initial Conversation ($75.0M),false
+F057,2026-05-02,Opportunity,O0002 Fund Beta: Follow-up / VDR ($75.0M),false
+F057,2026-05-10,Opportunity,O0058 Fund Alpha: Initial Conversation ($75.0M),false
+F057,2026-05-19,Opportunity,O0002 Fund Beta: Committed ($75.0M),false
+F057,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 1 contacts)",false
+F057,2026-05-28,Opportunity,O0058 Fund Alpha: Follow-up / VDR ($75.0M),false
+F057,2026-07-01,Meeting,Relationship | Video | Coverage B,false
+F058,2026-06-16,Event,"Private Markets Forum (confirmed, 3 contacts)",false
+F058,2026-08-25,Meeting,Follow-up | Video | Coverage C,false
+F059,2026-01-08,Meeting,Due diligence | Phone | Senior Partner,false
+F059,2026-01-22,Opportunity,O0095 Secondaries Strategy: Initial Conversation ($75.0M),false
+F059,2026-02-20,Opportunity,O0095 Secondaries Strategy: Follow-up / VDR ($75.0M),false
+F059,2026-03-12,Event,"Global Alternatives Summit (confirmed, 2 contacts)",false
+F059,2026-03-22,Opportunity,O0095 Secondaries Strategy: Due Diligence ($75.0M),false
+F059,2026-06-02,Meeting,Due diligence | In Person | Coverage C,false
+F059,2026-08-08,Opportunity,O0014 Fund Beta: Initial Conversation ($5.0M),false
+F059,2026-09-01,Opportunity,O0014 Fund Beta: Follow-up / VDR ($5.0M),false
+F060,2026-05-21,Event,"Investor Leadership Dinner (confirmed, 2 contacts)",false
+F060,2026-08-29,Opportunity,O0064 Fund Gamma: Initial Conversation ($5.0M),false
+F060,2026-09-18,Opportunity,O0064 Fund Gamma: Follow-up / VDR ($5.0M),false
+F060,2026-09-26,Opportunity,O0064 Fund Gamma: Due Diligence ($5.0M),true
+F060,2026-10-02,Opportunity,O0064 Fund Gamma: IC / Documentation ($5.0M),true

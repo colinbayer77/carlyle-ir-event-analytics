@@ -1,0 +1,61 @@
+firm_id,firm_name,segment,priority,historical_commitments_usd,coverage_region
+F001,Investor Firm 01,Family Office,Tier 3,75000000,APAC
+F002,Investor Firm 02,Pension,Tier 1,150000000,Americas
+F003,Investor Firm 03,Family Office,Tier 2,150000000,Americas
+F004,Investor Firm 04,Pension,Tier 1,75000000,Americas
+F005,Investor Firm 05,Insurance,Tier 1,75000000,Americas
+F006,Investor Firm 06,Asset Manager,Tier 1,20000000,APAC
+F007,Investor Firm 07,Foundation,Tier 2,0,APAC
+F008,Investor Firm 08,Asset Manager,Tier 2,20000000,Americas
+F009,Investor Firm 09,Asset Manager,Tier 3,35000000,EMEA
+F010,Investor Firm 10,Insurance,Tier 2,250000000,EMEA
+F011,Investor Firm 11,Asset Manager,Tier 3,10000000,Americas
+F012,Investor Firm 12,Asset Manager,Tier 2,20000000,EMEA
+F013,Investor Firm 13,Pension,Tier 2,5000000,APAC
+F014,Investor Firm 14,Pension,Tier 2,100000000,APAC
+F015,Investor Firm 15,Asset Manager,Tier 2,50000000,EMEA
+F016,Investor Firm 16,Asset Manager,Tier 3,50000000,EMEA
+F017,Investor Firm 17,Insurance,Tier 3,20000000,Americas
+F018,Investor Firm 18,Asset Manager,Tier 2,100000000,EMEA
+F019,Investor Firm 19,Foundation,Tier 2,250000000,Americas
+F020,Investor Firm 20,Pension,Tier 2,10000000,EMEA
+F021,Investor Firm 21,Insurance,Tier 3,75000000,Americas
+F022,Investor Firm 22,Foundation,Tier 1,150000000,APAC
+F023,Investor Firm 23,Family Office,Tier 2,50000000,APAC
+F024,Investor Firm 24,Sovereign Wealth,Tier 2,100000000,Americas
+F025,Investor Firm 25,Pension,Tier 3,100000000,APAC
+F026,Investor Firm 26,Foundation,Tier 1,35000000,APAC
+F027,Investor Firm 27,Asset Manager,Tier 3,100000000,EMEA
+F028,Investor Firm 08 Holdings,Foundation,Tier 2,50000000,Americas
+F029,Investor Firm 29,Sovereign Wealth,Tier 2,250000000,Americas
+F030,Investor Firm 30,Sovereign Wealth,Tier 1,35000000,Americas
+F031,Investor Firm 31,Foundation,Tier 1,75000000,EMEA
+F032,Investor Firm 32,Pension,Tier 1,75000000,APAC
+F033,Investor Firm 33,Family Office,Tier 3,75000000,APAC
+F034,Investor Firm 34,Family Office,Tier 2,50000000,APAC
+F035,Investor Firm 35,Sovereign Wealth,Tier 3,10000000,Americas
+F036,Investor Firm 36,Insurance,Tier 1,20000000,Americas
+F037,Investor Firm 37,Sovereign Wealth,Tier 3,10000000,EMEA
+F038,Investor Firm 38,Family Office,Tier 1,75000000,APAC
+F039,Investor Firm 39,Family Office,Tier 2,50000000,Americas
+F040,Investor Firm 40,Foundation,Tier 3,250000000,APAC
+F041,Investor Firm 41,Foundation,Tier 2,100000000,APAC
+F042,Investor Firm 42,Asset Manager,Tier 2,75000000,EMEA
+F043,Investor Firm 43,Pension,Tier 2,75000000,Americas
+F044,Investor Firm 44,Insurance,Tier 1,20000000,EMEA
+F045,Investor Firm 45,Insurance,Tier 1,250000000,Americas
+F046,Investor Firm 46,Pension,Tier 1,10000000,APAC
+F047,Investor Firm 47,Pension,Tier 3,250000000,Americas
+F048,Investor Firm 48,Pension,Tier 3,250000000,EMEA
+F049,Investor Firm 49,Insurance,Tier 2,50000000,APAC
+F050,Investor Firm 50,Family Office,Tier 2,5000000,EMEA
+F051,Investor Firm 51,Sovereign Wealth,Tier 2,35000000,Americas
+F052,Investor Firm 52,Insurance,Tier 1,50000000,APAC
+F053,Investor Firm 53,Family Office,Tier 2,10000000,APAC
+F054,Investor Firm 54,Pension,Tier 1,150000000,EMEA
+F055,Investor Firm 55,Insurance,Tier 2,0,APAC
+F056,Investor Firm 56,Family Office,Tier 3,5000000,APAC
+F057,Investor Firm 57,Family Office,Tier 2,10000000,EMEA
+F058,Investor Firm 58,Insurance,Tier 2,150000000,EMEA
+F059,Investor Firm 59,Foundation,Tier 1,20000000,Americas
+F060,Investor Firm 60,Sovereign Wealth,Tier 2,20000000,Americas
