@@ -9,4 +9,6 @@ Stage dated after as-of date,Medium,19,"Treated as projected: excluded from curr
 Repeated stage rows,Low,13,Collapsed to the first date each stage was reached.
 Opportunity starts past Initial Conversation,Low,1,Kept (e.g. O9998 logged directly as Committed). Funnel counts it at the stages it reached.
 Two meetings same firm same day,Low,1,"Kept: different type and purpose (F007, 2026-05-30), plausibly two sessions."
+Meeting on a weekend,Info,38,"34% of meetings fall on Saturday or Sunday, so dates were likely generated without a business-day calendar. Kept; no metric depends on weekday."
+First stage logged well after created_date,Info,106,"Every opportunity's first stage is 5 to 30 days after created_date (median 17), so created_date looks like a CRM entry date, not first contact. Association keys off created_date as documented."
 Meeting before first event baseline,Info,4,Kept as history; only +/-60 day windows around events are used for engagement lift.

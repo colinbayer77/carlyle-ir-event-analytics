@@ -72,6 +72,8 @@ The planner applies 2026 outcomes to a planned event: format, budget and attendi
 | Duplicate opportunity: O9998 and O9999 identical (same firm, fund, dates, stage, $25M) | 1 opp | Kept O9998, dropped O9999. Found in the independent audit; before the fix it added 1 opportunity and $25M to London's associated commitments |
 | Opportunity with no early stages (O9998 logged directly as Committed) | 1 | Kept; funnel counts the stages it reached |
 | Two meetings, same firm and day (F007) | 1 pair | Kept; different type and purpose |
+| Meetings on a weekend | 38 of 112 | Kept. A third of meetings fall on Saturday or Sunday, which points to generated dates; no metric depends on the weekday |
+| First stage logged 5 to 30 days after created_date | all 106 | Kept. created_date reads as the CRM entry date rather than first contact, so the true start of an opportunity may be up to a month later than the date the association window uses |
 
 **As-of date.** 2026-09-23, the date the data extract was delivered. It is a parameter in `src/build.py`.
 

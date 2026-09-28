@@ -73,6 +73,18 @@ FINDINGS = [
         "Kept: different type and purpose (F007, 2026-05-30), plausibly two sessions.",
     ),
     (
+        "Meeting on a weekend",
+        "Info",
+        "SELECT COUNT(*) FROM stg_meetings WHERE dayofweek(meeting_date) IN (0, 6)",
+        "34% of meetings fall on Saturday or Sunday, so dates were likely generated without a business-day calendar. Kept; no metric depends on weekday.",
+    ),
+    (
+        "First stage logged well after created_date",
+        "Info",
+        "SELECT COUNT(*) FROM (SELECT opportunity_id FROM stg_opp_stage GROUP BY 1 HAVING DATE_DIFF('day', ANY_VALUE(created_date), MIN(stage_date)) >= 5)",
+        "Every opportunity's first stage is 5 to 30 days after created_date (median 17), so created_date looks like a CRM entry date, not first contact. Association keys off created_date as documented.",
+    ),
+    (
         "Meeting before first event baseline",
         "Info",
         "SELECT COUNT(*) FROM stg_meetings WHERE meeting_date < (SELECT MIN(event_date) FROM dim_event) - 60",
