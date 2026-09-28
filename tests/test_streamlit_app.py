@@ -45,5 +45,13 @@ def test_filters():
     print("streamlit filter results:", got)
 
 
+def test_planner_reproduces_london():
+    """Default dinner scenario (London's budget and tier mix) should land on London's actual 2026 result."""
+    at = run()
+    assert metric(at, "Associated opportunities (90d)") == "13"
+    assert metric(at, "Cost per associated opp") == "$14K"
+
+
 if __name__ == "__main__":
+    test_planner_reproduces_london()
     test_filters(); print("streamlit app tests passed")

@@ -36,6 +36,10 @@ The window and tentative controls read precomputed SQL results. Five more filter
 
 Event cost is not split by filter, so cost-per-opportunity under a filter is full event cost over the filtered opportunities. With no filters, both engines reproduce the SQL results exactly for all 24 window and attendance settings (`tests/test_metrics.py`, and a self-test the static page runs on load). Under filters, p-values are recomputed with a fresh set of 5,000 reshuffles, so the two dashboards can differ in the second decimal place. Filtered groups are small: read rates as directional.
 
+## Next event planner (Streamlit)
+
+The planner applies 2026 outcomes to a planned event: format, budget and attending firms by tier. It resamples the 2026 firm-level results for each tier 4,000 times (bootstrap, 90-day window, confirmed attendance) and reports the middle estimate with a 10th to 90th percentile range for associated opportunities, pipeline and cost per opportunity. "All 2026 events" pools 70 firm-attendances; "Same format only" uses only that format's events and rests on fewer firms. With London's budget and tier mix it returns London's actual result (13 opportunities, $14K each). It is a planning aid: 2026 showed no significant lift from attending, and faster follow-up did not convert better, so the planner adds no pipeline for follow-up targets.
+
 ## Metric definitions
 
 | Metric | Definition |

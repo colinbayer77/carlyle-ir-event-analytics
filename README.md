@@ -35,7 +35,7 @@ app/metrics.py          filter-aware KPI engine (docs/metrics.js is the JS port)
 tests/                  engine-vs-SQL and Streamlit filter tests
 notebooks/analysis.ipynb  independent pandas recomputation vs SQL, sensitivity, permutation test
 docs/index.html         static dashboard (GitHub Pages)
-app/streamlit_app.py    same dashboard in Streamlit, reading the same marts
+app/streamlit_app.py    same dashboard in Streamlit, reading the same marts, plus a Next Event Planner tab
 readout/                3-slide executive readout (PDF + HTML source + generator)
 screenshots/            dashboard screenshots
 ```

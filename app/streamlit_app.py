@@ -242,7 +242,7 @@ if not F.is_default_extra or events:
     footnote(f"<b>Filters on:</b> {describe(F)} · {len(ATT)} attending firm-events, {len(FOPPS)} opportunities. "
              "Event cost is not split by filter. Small groups: read rates as directional.")
 
-tab_o, tab_s, tab_f, tab_x, tab_p, tab_m = st.tabs(["Executive summary", "Event Scorecard", "Follow-up & segments", "Firm explorer", "Opportunities", "Underlying Data Model and Data Quality"])
+tab_o, tab_s, tab_f, tab_x, tab_p, tab_n, tab_m = st.tabs(["Executive summary", "Event Scorecard", "Follow-up & segments", "Firm explorer", "Opportunities", "Next Event Planner", "Underlying Data Model and Data Quality"])
 
 with tab_o:
     reached = len(ATT_FIRMS)
@@ -556,6 +556,120 @@ with tab_p:
                  ["opportunity_id", "firm_name", "tier", "fund_name", "created_date", "amount_usd", "current_stage", "outcome",
                   "assoc_event_id", "days_after_event", "is_amount_outlier", "projected_stage_rows"]],
                  width="stretch", hide_index=True)
+
+
+# ---------------------------------------------------------------------------
+# Next event planner: 2026 benchmarks applied to a planned event.
+# Estimates resample 2026 firm-level outcomes (bootstrap), so they carry the
+# spread of what actually happened; they are planning ranges, not forecasts.
+# ---------------------------------------------------------------------------
+@st.cache_data
+def planner_pool() -> pd.DataFrame:
+    fe_ = D["mart_firm_event"].query("is_confirmed")
+    k_ = D["mart_event_kpis"].query("window_days == 90 and not include_tentative")[["event_id", "event_type"]]
+    return fe_.merge(k_, on="event_id")[["event_id", "event_type", "tier", "assoc_opps_90", "assoc_pipeline_90_usd", "meetings_post_30"]]
+
+
+def plan_estimate(tier_counts: dict, fmt: str | None, n_boot: int = 4000, seed: int = 7):
+    """Bootstrap total associated opportunities and pipeline for a planned attendee mix.
+    fmt=None pools all three 2026 events (more stable); otherwise uses that format's events only."""
+    import numpy as np
+    pool = planner_pool()
+    if fmt:
+        pool = pool[pool.event_type == fmt]
+    rng = np.random.default_rng(seed)
+    opps = np.zeros(n_boot)
+    pipe = np.zeros(n_boot)
+    for tier, n in tier_counts.items():
+        g = pool[pool.tier == tier]
+        if n <= 0 or g.empty:
+            continue
+        idx = rng.integers(0, len(g), size=(n_boot, n))
+        opps += g.assoc_opps_90.to_numpy()[idx].sum(axis=1)
+        pipe += g.assoc_pipeline_90_usd.to_numpy()[idx].sum(axis=1)
+    return opps, pipe
+
+
+with tab_n:
+    st.markdown(
+        '<div class="chart-sub" style="font-size:14px;margin-bottom:6px">Size up a future event against what 2026 events delivered. '
+        'Estimates resample the 2026 outcomes of firms in each tier (90-day window, confirmed attendance), so they show a <b>range</b> of plausible results. '
+        'This is a planning aid, not a forecast: 2026 showed no statistically significant lift from attending, so these are outcomes that '
+        '<i>followed</i> similar events, not outcomes an event will cause. The filters at the top of the page do not apply here.</div>',
+        unsafe_allow_html=True)
+    fmt_defaults = {"Hospitality (dinner)": ("Hospitality", 185, 6, 12, 7), "Conference": ("Conference", 515, 8, 10, 6)}
+    c = st.columns(5)
+    fmt_label = c[0].selectbox("Event format", list(fmt_defaults), key="pl_fmt",
+                               help="Defaults are 2026 averages: the London dinner, or the mean of the NY and Berlin conferences.")
+    fmt, d_cost, d1, d2, d3 = fmt_defaults[fmt_label]
+    budget = c[1].number_input("Budget ($K)", min_value=10, max_value=5000, value=d_cost, step=5, key=f"pl_budget_{fmt}")
+    t1 = c[2].number_input("Tier 1 firms", min_value=0, max_value=60, value=d1, key=f"pl_t1_{fmt}")
+    t2 = c[3].number_input("Tier 2 firms", min_value=0, max_value=60, value=d2, key=f"pl_t2_{fmt}")
+    t3 = c[4].number_input("Tier 3 firms", min_value=0, max_value=60, value=d3, key=f"pl_t3_{fmt}")
+    c = st.columns([2, 2, 3])
+    fu_target = c[0].slider("Target: firms met within 30 days", 0, 100, 80, step=5, format="%d%%", key="pl_fu",
+                            help="2026 actual: 39% of attending firms (Tier 1: 29%).")
+    basis = c[1].radio("Benchmark basis", ["All 2026 events", "Same format only"], key="pl_basis", horizontal=False,
+                       help="All events pools 70 firm-attendances and is more stable. Same format uses only NY and Berlin (conference) or only London (dinner), so ranges are wider and rest on fewer firms.")
+    firms_n = int(t1 + t2 + t3)
+    if firms_n == 0:
+        st.warning("Add at least one attending firm.")
+    else:
+        opps_b, pipe_b = plan_estimate({"Tier 1": int(t1), "Tier 2": int(t2), "Tier 3": int(t3)}, fmt if basis == "Same format only" else None)
+        import numpy as np
+        lo, mid, hi_ = (np.percentile(opps_b, q) for q in (10, 50, 90))
+        plo, pmid, phi = (np.percentile(pipe_b, q) for q in (10, 50, 90))
+        cost = budget * 1e3
+        cpo = lambda x: cost / x if x > 0 else float("nan")
+        m = st.columns(3) + st.columns(3)
+        m[0].metric("Firms reached", firms_n, help=f"Tier 1 {int(t1)} · Tier 2 {int(t2)} · Tier 3 {int(t3)}")
+        m[1].metric("Cost per firm", fk(cost / firms_n))
+        m[2].metric("Associated opportunities (90d)", f"{mid:.0f}", help=f"10th to 90th percentile of resampled outcomes: {lo:.0f} to {hi_:.0f}")
+        m[3].metric("Associated pipeline", fm(pmid), help=f"Range {fm(plo)} to {fm(phi)}")
+        m[4].metric("Cost per associated opp", fk(cpo(mid)), help=f"Range {fk(cpo(hi_))} to {fk(cpo(lo))}")
+        m[5].metric("Firms met within 30 days", f"{round(firms_n * fu_target / 100)} of {firms_n}",
+                    help=f"At the 2026 rate (39%) it would be about {round(firms_n * 0.39)}.")
+        footnote(f"Ranges (10th to 90th percentile): {lo:.0f} to {hi_:.0f} opportunities, {fm(plo)} to {fm(phi)} pipeline, "
+                 f"{fk(cpo(hi_))} to {fk(cpo(lo))} per opportunity. Basis: {basis.lower()}, 4,000 resamples.")
+
+        a, b = st.columns(2)
+        chart_head(a, "Cost per associated opportunity: plan vs 2026",
+                   "Plan shows the middle estimate with its 10th to 90th percentile range. Lower is better.")
+        k90 = kpi_all.query("window_days == 90 and not include_tentative").sort_values("event_id")
+        names = ["Plan"] + [EV_SHORT[e] for e in k90.event_id]
+        vals = [cpo(mid)] + list(k90.cost_per_assoc_opp)
+        fig = go.Figure(go.Bar(x=names, y=vals, marker_color=[NAVY] + [EV_COLOR[e] for e in k90.event_id], width=0.6,
+                               error_y=dict(type="data", symmetric=False, array=[cpo(lo) - cpo(mid)] + [0] * 3,
+                                            arrayminus=[cpo(mid) - cpo(hi_)] + [0] * 3, color="#1b1f24", thickness=1.5, width=8),
+                               text=[f"<b>{fk(v)}</b>" for v in vals], textposition="inside", insidetextanchor="middle", textfont=dict(color="#ffffff", size=11)))
+        fig.update_layout(height=320, margin=dict(l=10, r=10, t=20, b=10), plot_bgcolor="rgba(0,0,0,0)",
+                          font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"), uniformtext_minsize=10, uniformtext_mode="show")
+        fig.update_yaxes(visible=False, range=[0, max(v for v in vals + [cpo(lo)] if v == v) * 1.12])
+        a.plotly_chart(fig, width="stretch")
+
+        chart_head(b, "Where the associated opportunities come from, by tier",
+                   "Middle estimate per tier from the same resampling. 2026 opportunities per attending firm: Tier 1 0.33, Tier 2 0.48, Tier 3 0.83.")
+        per_tier = []
+        for tier, n in [("Tier 1", t1), ("Tier 2", t2), ("Tier 3", t3)]:
+            o_t, _ = plan_estimate({tier: int(n)}, fmt if basis == "Same format only" else None)
+            per_tier.append(float(np.percentile(o_t, 50)) if n else 0.0)
+        fig = bar_fig(["Tier 1", "Tier 2", "Tier 3"], [("Expected opportunities", per_tier, BLUE)])
+        b.plotly_chart(label_bars(fig, [[f"{v:.0f}" for v in per_tier]], min_share=0.1), width="stretch")
+
+        st.subheader("2026 benchmarks")
+        bench = k90.assign(event=k90.event_id.map(EV_SHORT))[
+            ["event", "event_type", "cost_usd", "firms_attended", "tier1_firms", "cost_per_firm", "assoc_opps", "cost_per_assoc_opp", "followup_rate_30"]]
+        bench = bench.assign(opps_per_firm=bench.assoc_opps / bench.firms_attended)
+        st.dataframe(bench.assign(cost_usd=bench.cost_usd.map(fk), cost_per_firm=bench.cost_per_firm.map(fk), cost_per_assoc_opp=bench.cost_per_assoc_opp.map(fk),
+                                  followup_rate_30=bench.followup_rate_30.map(pct), opps_per_firm=bench.opps_per_firm.map("{:.2f}".format))
+                     .rename(columns={"event": "Event", "event_type": "Format", "cost_usd": "Cost", "firms_attended": "Firms", "tier1_firms": "Tier 1 firms",
+                                      "cost_per_firm": "Cost per firm", "assoc_opps": "Associated opps (90d)", "cost_per_assoc_opp": "Cost per opp",
+                                      "followup_rate_30": "Met within 30d", "opps_per_firm": "Opps per firm"}),
+                     width="stretch", hide_index=True)
+        st.info("**How to use this.** Compare formats at the same budget, or see how many more Tier 3 firms it takes to match a Tier 1-heavy list. "
+                "The follow-up target is shown as a count only: in 2026, firms met within 30 days did not convert at a higher rate (37% vs 40%), "
+                "so the planner does not add pipeline for faster follow-up. Treat that as something to test, not assume.")
+
 
 def md_doc(name: str) -> str:
     """Read a docs/ markdown file, demote headings under the tab's subheader, escape $ (Streamlit treats $..$ as LaTeX)."""
