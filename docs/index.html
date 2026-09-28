@@ -240,12 +240,14 @@ tr.sel { background: var(--surface-2); }
     <div class="grid2">
       <div class="card">
         <h2>Firms <span class="note" id="firmCount"></span></h2>
-        <p class="sub">Click a row to see the firm's full timeline. Column headers sort.</p>
+        <p class="sub">Click a row to see that firm's timeline on the right. Column headers sort.</p>
         <div class="scroll"><table id="firmTable"></table></div>
       </div>
       <div class="card">
+        <div class="note" style="text-transform:uppercase;letter-spacing:.06em;font-size:11px">Firm timeline</div>
         <h2 id="tlTitle">Firm timeline</h2>
         <p class="sub" id="tlSub">Select a firm.</p>
+        <p class="note" style="margin:-6px 0 10px">Every event, meeting and opportunity stage for the firm selected in the table, in date order. Click any row to switch firms.</p>
         <ul class="tl" id="timeline"></ul>
       </div>
     </div>
@@ -716,7 +718,12 @@ function renderFirms() {
     rows.map(r => `<tr data-f="${r.firm_id}" class="${r.firm_id === selFirm ? 'sel' : ''}" style="cursor:pointer"><td>${esc(r.firm_name)}${r.has_unfollowed_event ? ' <span class="pill bad" title="Confirmed at an event with no meeting in the next 60 days">gap</span>' : ''}</td><td>${r.tier}</td><td class="hide-sm">${esc(r.segment)}</td><td>${r.events_confirmed ? r.events_confirmed.split(', ').map(evShort).join(', ') : '<span class="note">none</span>'}${r.events_tentative_only ? ' <span class="note">(tent. ' + r.events_tentative_only.split(', ').map(evShort).join(', ') + ')</span>' : ''}</td><td class="n">${r.meetings}</td><td class="n">${r.opps}</td><td class="n">${fmtM(r.pipeline_usd)}</td><td class="n hide-sm">${fmtM(r.assoc_pipeline_90_usd)}</td><td class="n">${fmtM(r.committed_usd)}</td></tr>`).join('') + '</tbody>';
   $('#firmTable').querySelectorAll('th').forEach(th => th.onclick = () => { firmSort = {k: th.dataset.k, dir: firmSort.k === th.dataset.k ? -firmSort.dir : -1}; renderFirms(); });
   $('#firmTable').querySelectorAll('tbody tr').forEach(tr => tr.onclick = () => { selFirm = tr.dataset.f; renderFirms(); renderTimeline(); });
-  if (!selFirm && rows.length) { selFirm = rows[0].firm_id; renderTimeline(); }
+  // keep the timeline in sync with the table: if the selected firm is filtered out, show the first firm still listed
+  if (!rows.some(r => r.firm_id === selFirm)) {
+    selFirm = rows.length ? rows[0].firm_id : null;
+    if (selFirm) { $('#firmTable tbody tr')?.classList.add('sel'); renderTimeline(); }
+    else { $('#tlTitle').textContent = 'Firm timeline'; $('#tlSub').textContent = 'No firms match the filters.'; $('#timeline').innerHTML = ''; }
+  }
 }
 function renderTimeline() {
   const f = D.mart_firm.find(r => r.firm_id === selFirm); if (!f) return;
