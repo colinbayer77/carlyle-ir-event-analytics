@@ -30,6 +30,15 @@ def metric(at, label):
     return next(m for m in at.metric if m.label == label).value
 
 
+def test_filters_survive_a_visit_to_the_planner():
+    at = AppTest.from_file(APP, default_timeout=120)
+    at.run()
+    next(s for s in at.multiselect if s.label == "Investor segment").set_value(["Pension"]); at.run()
+    at.radio(key="nav").set_value("Next Event Planner"); at.run()
+    at.radio(key="nav").set_value("Executive summary"); at.run()
+    assert not at.exception and metric(at, "Associated opportunities") == "6"
+
+
 def test_filters():
     base = run()
     assert metric(base, "Associated opportunities") == "37"
@@ -47,11 +56,13 @@ def test_filters():
 
 def test_planner_reproduces_london():
     """Default dinner scenario (London's budget and tier mix) should land on London's actual 2026 result."""
-    at = run()
+    at = run(lambda a: a.radio(key="nav").set_value("Next Event Planner"))
+    assert not at.multiselect, "page filters should be hidden on the planner tab"
     assert metric(at, "Associated opportunities (90d)") == "13"
     assert metric(at, "Cost per associated opp") == "$14K"
 
 
 if __name__ == "__main__":
     test_planner_reproduces_london()
+    test_filters_survive_a_visit_to_the_planner()
     test_filters(); print("streamlit app tests passed")

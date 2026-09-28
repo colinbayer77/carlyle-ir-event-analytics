@@ -40,19 +40,34 @@ def brand_css() -> None:
 @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap');
 html, body, [class*="css"], .stMarkdown, .stDataFrame {{ font-family: 'Inter', system-ui, sans-serif; }}
 header[data-testid="stHeader"] {{ display: none; }}
-.block-container {{ padding-top: 1.2rem; max-width: 1320px; }}
-.brand-bar {{ background: {NAVY}; border-radius: 10px; padding: 22px 28px 18px; margin-bottom: 18px; color: #fff; }}
+.block-container {{ padding-top: 0.6rem; padding-bottom: 1rem; max-width: 1320px; }}
+.brand-bar {{ background: {NAVY}; border-radius: 10px; padding: 14px 24px 12px; margin-bottom: 12px; color: #fff; }}
 .brand-bar .row {{ display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }}
 .brand-bar img {{ height: 24px; }}
 .brand-bar .div {{ width: 1px; height: 28px; background: rgba(255,255,255,.35); }}
-.brand-bar h1 {{ font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 28px; margin: 0; padding: 0; color: #fff; }}
-.brand-bar p {{ margin: 10px 0 0; color: #c9d7df; font-size: 14px; }}
+.brand-bar h1 {{ font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 26px; margin: 0; padding: 0; color: #fff; }}
+.brand-bar p {{ margin: 6px 0 0; color: #c9d7df; font-size: 13px; }}
 h2, h3, .stSubheader {{ font-family: 'EB Garamond', Georgia, serif !important; color: {NAVY} !important; font-weight: 600 !important; }}
 .chart-title {{ font-family: 'EB Garamond', Georgia, serif; font-size: 20px; font-weight: 600; color: {NAVY}; margin: 6px 0 0; }}
 .chart-sub {{ color: #5b6570; font-size: 13px; margin: 2px 0 4px; }}
-div[data-testid="stMetric"] {{ background: #f2f5f7; border: 1px solid #e1e7eb; border-radius: 10px; padding: 12px 16px; }}
-div[data-testid="stMetricValue"] {{ color: {NAVY}; font-weight: 700; }}
+div[data-testid="stMetric"] {{ background: #f2f5f7; border: 1px solid #e1e7eb; border-radius: 10px; padding: 10px 12px; text-align: center; }}
+[data-testid="stMetric"] {{ min-height: 108px; display: flex; flex-direction: column; justify-content: center; }}
+[data-testid="stMetricLabel"] {{ display: flex !important; justify-content: center !important; align-items: center; gap: 4px; width: 100%; }}
+[data-testid="stMetricLabel"] > div {{ width: auto !important; justify-content: center; }}
+[data-testid="stMetricLabel"] p, [data-testid="stMetricLabel"] div {{ white-space: normal !important; overflow: visible !important; text-overflow: clip !important; text-align: center; }}
+div[data-testid="stMetricValue"] {{ color: {NAVY}; font-weight: 700; justify-content: center; text-align: center; font-size: 1.9rem; }}
+div[data-testid="stMetricValue"] > div {{ text-align: center; width: 100%; }}
+div[data-testid="stAlert"] p, div[data-testid="stAlert"] li {{ font-size: 14px; line-height: 1.45; margin-bottom: 2px; }}
+div[data-testid="stElementContainer"]:has(> div > div[data-testid="stAlert"]) {{ margin-bottom: -6px; }}
 .stTabs [data-baseweb="tab-list"] {{ gap: 6px; border-bottom: 1px solid #e1e7eb; }}
+.st-key-nav {{ border-bottom: 1px solid #e1e7eb; margin-bottom: 6px; }}
+.st-key-nav [role="radiogroup"] {{ gap: 2px 20px; flex-wrap: wrap; }}
+.st-key-nav [data-testid="stRadioOption"] > div > div:first-child {{ display: none; }}
+.st-key-nav [data-testid="stRadioOption"] {{ padding: 6px 2px 8px; margin: 0; border-bottom: 3px solid transparent; cursor: pointer; }}
+.st-key-nav [data-testid="stRadioOption"][data-selected="true"] {{ border-bottom-color: {NAVY}; }}
+.st-key-nav [data-testid="stRadioOption"][data-selected="true"] p {{ color: {NAVY}; font-weight: 600; }}
+.st-key-nav [data-testid="stRadioOption"] p {{ font-size: 14px; color: #3b4450; }}
+.st-key-nav [data-testid="stRadioOption"]:hover p {{ color: {NAVY}; }}
 .stTabs [data-baseweb="tab"] {{ font-weight: 500; }}
 .stTabs [aria-selected="true"] {{ color: {NAVY} !important; }}
 .stTabs [data-baseweb="tab-highlight"] {{ background-color: {NAVY} !important; }}
@@ -176,23 +191,36 @@ def bar_fig(x, series, yfmt=None, horizontal=False, height=300):
 
 brand_css()
 
-row = st.columns(5)
-window = row[0].selectbox("Association window (days)", [30, 60, 90, 180], index=2,
-                          help="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker. At 180 days, London and Berlin have not yet had the full window.")
-events = tuple(row[1].multiselect("Event", list(EV_SHORT), format_func=EV_SHORT.get, placeholder="All",
-                                  help="Show only the selected events. Credit for each opportunity is still assigned across all three events (most recent attended event within the window), so nothing moves between events when you filter."))
-segment = tuple(row[2].multiselect("Investor segment", sorted(firms.segment.unique()), placeholder="All",
-                                   help="Pick one or more investor segments. Keeps only firms in those segments: attendees, the non-attendee comparison group, and their opportunities."))
-fund = tuple(row[3].multiselect("Fund", sorted(opps.fund_name.unique()), placeholder="All",
-                                help="Pick one or more funds. Keeps only opportunities for those funds. Attendance, meetings and follow-up are not affected."))
-seniority = tuple(row[4].multiselect("Attendee seniority", ["senior", "non_senior"], placeholder="All",
-                             format_func={"senior": "CIO or MD registered", "non_senior": "No CIO or MD"}.get,
-                             help="Count attendance only where a CIO or Managing Director was registered (or only where none was). Selecting both options is the same as All. Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees."))
-row = st.columns([2.2, 1.3, 2.5])
-tent = row[0].toggle("Include tentative firm registrations as attendance", value=False,
-                     help="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended.")
-excl = row[1].toggle("Exclude $650M outlier",
-                     help="Removes O0017, a $650M commitment (next largest ticket is $150M). The firm attended no event, so event metrics do not change; totals, the pipeline donut and opportunity charts do.")
+TAB_NAMES = ["Executive summary", "Event Scorecard", "Follow-up & segments", "Firm explorer", "Opportunities",
+             "Next Event Planner", "Underlying Data Model and Data Quality"]
+# A tab bar that knows which tab is open, so page-level filters can be hidden where they don't apply (the planner).
+PAGE = st.radio("View", TAB_NAMES, horizontal=True, key="nav", label_visibility="collapsed")
+SHOW_FILTERS = PAGE != "Next Event Planner"
+# Remember filter choices across tabs: a widget that isn't drawn on a run loses its state, so keep a copy.
+SAVED = st.session_state.setdefault("_filters", {"window": 90, "events": [], "segment": [], "fund": [], "seniority": [], "tent": False, "excl": False})
+
+if SHOW_FILTERS:
+    row = st.columns(5)
+    window = row[0].selectbox("Association window (days)", [30, 60, 90, 180], index=[30, 60, 90, 180].index(SAVED["window"]),
+                              help="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker. At 180 days, London and Berlin have not yet had the full window.")
+    events = tuple(row[1].multiselect("Event", list(EV_SHORT), default=SAVED["events"], format_func=EV_SHORT.get, placeholder="All",
+                                      help="Show only the selected events. Credit for each opportunity is still assigned across all three events (most recent attended event within the window), so nothing moves between events when you filter."))
+    segment = tuple(row[2].multiselect("Investor segment", sorted(firms.segment.unique()), default=SAVED["segment"], placeholder="All",
+                                       help="Pick one or more investor segments. Keeps only firms in those segments: attendees, the non-attendee comparison group, and their opportunities."))
+    fund = tuple(row[3].multiselect("Fund", sorted(opps.fund_name.unique()), default=SAVED["fund"], placeholder="All",
+                                    help="Pick one or more funds. Keeps only opportunities for those funds. Attendance, meetings and follow-up are not affected."))
+    seniority = tuple(row[4].multiselect("Attendee seniority", ["senior", "non_senior"], default=SAVED["seniority"], placeholder="All",
+                                 format_func={"senior": "CIO or MD registered", "non_senior": "No CIO or MD"}.get,
+                                 help="Count attendance only where a CIO or Managing Director was registered (or only where none was). Selecting both options is the same as All. Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees."))
+    row = st.columns([2.2, 1.3, 2.5])
+    tent = row[0].toggle("Include tentative firm registrations as attendance", value=SAVED["tent"],
+                         help="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended.")
+    excl = row[1].toggle("Exclude $650M outlier", value=SAVED["excl"],
+                         help="Removes O0017, a $650M commitment (next largest ticket is $150M). The firm attended no event, so event metrics do not change; totals, the pipeline donut and opportunity charts do.")
+    SAVED.update(window=window, events=list(events), segment=list(segment), fund=list(fund), seniority=list(seniority), tent=tent, excl=excl)
+else:
+    window, events, segment, fund, seniority = SAVED["window"], tuple(SAVED["events"]), tuple(SAVED["segment"]), tuple(SAVED["fund"]), tuple(SAVED["seniority"])
+    tent, excl = SAVED["tent"], SAVED["excl"]
 F = Filters(window=window, tentative=tent, segment=segment, fund=fund, seniority=seniority, exclude_outlier=excl, events=events)
 P = prepare(D)
 
@@ -238,15 +266,27 @@ def pct(v) -> str:
     return "-" if v is None or pd.isna(v) else f"{v:.0%}"
 
 
-if not F.is_default_extra or events:
+if SHOW_FILTERS and (not F.is_default_extra or events):
     footnote(f"<b>Filters on:</b> {describe(F)} · {len(ATT)} attending firm-events, {len(FOPPS)} opportunities. "
              "Event cost is not split by filter. Small groups: read rates as directional.")
 
-tab_o, tab_s, tab_f, tab_x, tab_p, tab_n, tab_m = st.tabs(["Executive summary", "Event Scorecard", "Follow-up & segments", "Firm explorer", "Opportunities", "Next Event Planner", "Underlying Data Model and Data Quality"])
+# Only the open tab stays on the page; the others are drawn into placeholders that are cleared at the end.
+_hidden = []
+
+
+def _tab(name):
+    if name == PAGE:
+        return st.container()
+    ph = st.empty()
+    _hidden.append(ph)
+    return ph.container()
+
+
+tab_o, tab_s, tab_f, tab_x, tab_p, tab_n, tab_m = (_tab(n) for n in TAB_NAMES)
 
 with tab_o:
     reached = len(ATT_FIRMS)
-    cols = st.columns(3) + st.columns(3)
+    cols = st.columns(6)
     cols[0].metric("Event spend", fk(K.cost_usd.sum()) if K.cost_usd.sum() < 1e6 else fm(K.cost_usd.sum()), help=f"{len(K)} event{'' if len(K) == 1 else 's'}, 2026")
     cols[1].metric("Firms reached", reached, help=f"of {len(FIRMS_IN)} covered firms" + (" in selected segments" if segment else ""))
     cols[2].metric("Associated opportunities", int(K.assoc_opps.sum()), help=f"of {len(FOPPS)} opened this year" + ("" if F.is_default_extra else " (filtered)"))
@@ -595,7 +635,7 @@ with tab_n:
         '<div class="chart-sub" style="font-size:14px;margin-bottom:6px">Size up a future event against what 2026 events delivered. '
         'Estimates resample the 2026 outcomes of firms in each tier (90-day window, confirmed attendance), so they show a <b>range</b> of plausible results. '
         'This is a planning aid, not a forecast: 2026 showed no statistically significant lift from attending, so these are outcomes that '
-        '<i>followed</i> similar events, not outcomes an event will cause. The filters at the top of the page do not apply here.</div>',
+        '<i>followed</i> similar events, not outcomes an event will cause. It uses fixed 2026 benchmarks, so the page filters are not shown on this tab.</div>',
         unsafe_allow_html=True)
     fmt_defaults = {"Hospitality (dinner)": ("Hospitality", 185, 6, 12, 7), "Conference": ("Conference", 515, 8, 10, 6)}
     c = st.columns(5)
@@ -711,3 +751,7 @@ with tab_m:
     st.dataframe(dq, width="stretch", hide_index=True)
 
 st.markdown('<div class="foot">Synthetic assessment data, as of 2026-09-23. Built by Colin Bayer for the Carlyle BI &amp; Analytics Lead take-home.</div>', unsafe_allow_html=True)
+
+
+for _ph in _hidden:
+    _ph.empty()
