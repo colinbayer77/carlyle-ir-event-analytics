@@ -101,6 +101,7 @@ h2 {{ font-size: 14pt; margin: 0 0 8px; }}
 .foot {{ position: absolute; bottom: 0.25in; left: 0.65in; right: 0.65in; font-size: 9pt; color: #8a95a3; display: flex; justify-content: space-between; gap: 24px; align-items: flex-end; }}
 .msg span.num {{ color: #fff; font-size: 12pt; }}
 .foot .note {{ max-width: 8.2in; }}
+.foot .sig {{ font-size: 7pt; line-height: 1.3; display: block; margin-bottom: 2px; }}
 .foot .author {{ white-space: nowrap; color: #0c374a; font-weight: 600; }}
 .logo {{ position: absolute; top: 0.5in; right: 0.65in; height: 0.24in; }}
 h1 {{ color: #0c374a; padding-right: 2.2in; }}
@@ -144,7 +145,7 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
     <div class="msg"><b><span class="num">3</span>The dinner was the most efficient format.</b><span>London ({fk(k.loc['E002','cost_usd'])}): {fk(k.loc['E002','cost_per_assoc_opp'])} per associated opportunity and the most post-event meetings, vs {fk(k.loc['E001','cost_per_assoc_opp'])} NY and {fk(k.loc['E003','cost_per_assoc_opp'])} Berlin.</span></div>
     <div class="msg"><b><span class="num">4</span>Berlin needs a case before renewal.</b><span>Our most expensive event ({fk(k.loc['E003','cost_usd'])}): meetings with attendees fell ({k.loc['E003','meetings_pre_60']:.0f} → {k.loc['E003','meetings_post_60']:.0f}) and nothing has committed yet. Recheck at 180 days.</span></div>
   </div>
-  <div class="foot"><span class="note">* {SIG}<br>Data as of 2026-09-23 (synthetic assessment data). Association window: opportunity created 0-90 days after an event the firm confirmed for; most recent event gets credit.</span><span class="author">{AUTHOR}</span></div>
+  <div class="foot"><span class="note"><span class="sig">* {SIG}</span>Data as of 2026-09-23 (synthetic assessment data). Association window: opportunity created 0-90 days after an event the firm confirmed for; most recent event gets credit.</span><span class="author">{AUTHOR}</span></div>
 </section>
 
 <section class="slide">
@@ -164,7 +165,7 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
       <div class="callout"><b>How to read this.</b> "Associated" means the opportunity opened within 90 days of an event the firm attended. That shows what followed each event, not what it caused: we invite firms already likely to invest, and new opportunities peaked for everyone in June and July. The diff-in-diff row compares against firms that did not attend over the same dates.</div>
     </div>
   </div>
-  <div class="foot"><span class="note">* {SIG}<br>Committed counts only stages dated on or before 2026-09-23; later-dated stages are treated as projected.</span><span class="author">{AUTHOR}</span></div>
+  <div class="foot"><span class="note"><span class="sig">* {SIG}</span>Committed counts only stages dated on or before 2026-09-23; later-dated stages are treated as projected.</span><span class="author">{AUTHOR}</span></div>
 </section>
 
 <section class="slide">
@@ -178,7 +179,7 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
     <div class="rec"><b><span class="num">4</span>Design the next events to measure lift</b><p>Hold back invitations to a small matched group of firms (same tier, segment, region) and compare 90-day outcomes. One event is too small to prove lift; four to six events with the same design can.</p><div class="who">Owner: IR + BI · Pilot on the first 2027 event</div></div>
   </div>
   <div class="caveat"><b>What this analysis cannot say:</b> that events caused the pipeline that followed them. With 19 to 26 attending firms per event, none of the three gaps is statistically significant*. The $650M commitment of the year came from a firm that attended no event, a reminder that most pipeline is built outside the event calendar.</div>
-  <div class="foot"><span class="note">* {SIG}</span><span class="author">{AUTHOR}</span></div>
+  <div class="foot"><span class="note"><span class="sig">* {SIG}</span></span><span class="author">{AUTHOR}</span></div>
 </section>
 </body></html>"""
 

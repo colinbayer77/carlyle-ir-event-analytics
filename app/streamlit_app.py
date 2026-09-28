@@ -53,6 +53,7 @@ div[data-testid="stMetricValue"] {{ color: {NAVY}; font-weight: 700; }}
 .stTabs [data-baseweb="tab-highlight"] {{ background-color: {NAVY} !important; }}
 div[data-testid="stAlert"] {{ background: #eef3f6 !important; border: 1px solid #d6e0e6; }}
 div[data-testid="stAlert"] * {{ color: #1b1f24 !important; }}
+.footnote {{ font-size: 10.5px; line-height: 1.35; color: #7a848e; margin: 2px 0 14px; }}
 .foot {{ color: #7a848e; font-size: 12px; margin-top: 30px; border-top: 1px solid #e1e7eb; padding-top: 10px; }}
 </style>
 <div class="brand-bar"><div class="row"><img src="data:image/png;base64,{logo}" alt="Carlyle"><span class="div"></span>
@@ -83,6 +84,10 @@ def line_layout(fig, height=320, top=40):
                       legend=dict(orientation="h", y=1.12, x=0), font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"))
     fig.update_yaxes(gridcolor="#e6eaed", zeroline=False, rangemode="tozero")
     return fig
+
+
+def footnote(text: str) -> None:
+    st.markdown(f'<div class="footnote">{text}</div>', unsafe_allow_html=True)
 
 
 def sig_note(rows: pd.DataFrame, label: str) -> str:
@@ -170,11 +175,10 @@ with tab_o:
 2. **No consistent lift versus non-attendees.** Difference-in-differences in new-opportunity rate: NY {d.loc['E001','diff_in_diff_opp_rate']*100:+.0f} pts, London {d.loc['E002','diff_in_diff_opp_rate']*100:+.0f} pts, Berlin {d.loc['E003','diff_in_diff_opp_rate']*100:+.0f} pts; none statistically significant\\*.
 3. **Follow-up is the controllable gap.** {d.firms_followup_30.sum() / d.firms_attended.sum():.0%} of attending firms met within 30 days; Tier 1 only {int(t1.followed_up_30.sum())} of {len(t1)}.
 4. **London dinner ($185K) was most efficient:** {fk(d.loc['E002','cost_per_assoc_opp'])} per associated opp vs {fk(d.loc['E001','cost_per_assoc_opp'])} NY and {fk(d.loc['E003','cost_per_assoc_opp'])} Berlin.
-5. **Berlin ($610K) needs a case before renewal:** attendee meetings fell {int(d.loc['E003','meetings_pre_60'])} → {int(d.loc['E003','meetings_post_60'])}, no commitments yet (recheck at 180 days).
-
-\\* {sig_note(d.reset_index(), "Default rule (90 days, confirmed)")}"""
+5. **Berlin ($610K) needs a case before renewal:** attendee meetings fell {int(d.loc['E003','meetings_pre_60'])} → {int(d.loc['E003','meetings_post_60'])}, no commitments yet (recheck at 180 days)."""
         .replace("$", "\\$")  # stop Streamlit markdown reading $...$ as LaTeX
     )
+    footnote("* " + sig_note(d.reset_index(), "Default rule (90 days, confirmed)"))
 
     rows = {
         "Date / type": K.event_date + " · " + K.event_type,
@@ -197,7 +201,7 @@ with tab_o:
     score = pd.DataFrame({k: list(v) for k, v in rows.items()}, index=[f"{n} ({l})" for n, l in zip(K.event_name, K.location)]).T
     st.subheader("Event scorecard")
     st.dataframe(score, width="stretch")
-    st.caption("\\* " + sig_note(K, f"Current settings ({window} days{', incl. tentative' if tent else ''})"))
+    footnote("* " + sig_note(K, f"Current settings ({window} days{', incl. tentative' if tent else ''})"))
 
     a, b = st.columns(2)
     chart_head(a, "New opportunities and meetings by month, 2026",
