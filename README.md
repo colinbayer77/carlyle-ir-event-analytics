@@ -22,6 +22,7 @@ Recommendations (readout slide 3): a 10-day Tier 1 follow-up standard, shift bud
 ## What is in the repo
 
 ```
+assets/                 Carlyle logo (navy and white)
 data/raw/               source CSVs, untouched
 sql/01_staging.sql      type casting, dedupe, DQ flags
 sql/02_core.sql         dimensions and facts (event, firm, firm x event, meeting, opportunity)

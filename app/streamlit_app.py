@@ -16,10 +16,56 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[1]
 MARTS = ROOT / "data" / "marts"
 EV_SHORT = {"E001": "NY Summit", "E002": "London Dinner", "E003": "Berlin Forum"}
-EV_COLOR = {"E001": "#2a78d6", "E002": "#eb6834", "E003": "#1baf7a"}
-NEUTRAL, BLUE, AQUA, ORANGE = "#b9b7b0", "#2a78d6", "#1baf7a", "#eb6834"
+# Carlyle navy for chrome; validated categorical palette (dataviz validator, all-pairs, light mode) for data.
+NAVY = "#0c374a"
+EV_COLOR = {"E001": "#2f6ea5", "E002": "#c98a1b", "E003": "#2a9d8f"}
+NEUTRAL, BLUE, AQUA, ORANGE = "#b9b7b0", "#2f6ea5", "#2a9d8f", "#c98a1b"
+LOGO_WHITE = ROOT / "assets" / "carlyle_logo_white.png"
 
-st.set_page_config(page_title="IR Event Outcomes", layout="wide")
+st.set_page_config(page_title="Carlyle | IR Event Outcomes", page_icon=str(ROOT / "assets" / "carlyle_logo.png"), layout="wide")
+
+
+def brand_css() -> None:
+    import base64
+
+    logo = base64.b64encode(LOGO_WHITE.read_bytes()).decode()
+    st.markdown(
+        f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap');
+html, body, [class*="css"], .stMarkdown, .stDataFrame {{ font-family: 'Inter', system-ui, sans-serif; }}
+header[data-testid="stHeader"] {{ display: none; }}
+.block-container {{ padding-top: 1.2rem; max-width: 1320px; }}
+.brand-bar {{ background: {NAVY}; border-radius: 10px; padding: 22px 28px 18px; margin-bottom: 18px; color: #fff; }}
+.brand-bar .row {{ display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }}
+.brand-bar img {{ height: 24px; }}
+.brand-bar .div {{ width: 1px; height: 28px; background: rgba(255,255,255,.35); }}
+.brand-bar h1 {{ font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 28px; margin: 0; padding: 0; color: #fff; }}
+.brand-bar p {{ margin: 10px 0 0; color: #c9d7df; font-size: 14px; }}
+h2, h3, .stSubheader {{ font-family: 'EB Garamond', Georgia, serif !important; color: {NAVY} !important; font-weight: 600 !important; }}
+.chart-title {{ font-family: 'EB Garamond', Georgia, serif; font-size: 20px; font-weight: 600; color: {NAVY}; margin: 6px 0 0; }}
+.chart-sub {{ color: #5b6570; font-size: 13px; margin: 2px 0 4px; }}
+div[data-testid="stMetric"] {{ background: #f2f5f7; border: 1px solid #e1e7eb; border-radius: 10px; padding: 12px 16px; }}
+div[data-testid="stMetricValue"] {{ color: {NAVY}; font-weight: 700; }}
+.stTabs [data-baseweb="tab-list"] {{ gap: 6px; border-bottom: 1px solid #e1e7eb; }}
+.stTabs [data-baseweb="tab"] {{ font-weight: 500; }}
+.stTabs [aria-selected="true"] {{ color: {NAVY} !important; }}
+.stTabs [data-baseweb="tab-highlight"] {{ background-color: {NAVY} !important; }}
+div[data-testid="stAlert"] {{ background: #eef3f6 !important; border: 1px solid #d6e0e6; }}
+div[data-testid="stAlert"] * {{ color: #1b1f24 !important; }}
+.foot {{ color: #7a848e; font-size: 12px; margin-top: 30px; border-top: 1px solid #e1e7eb; padding-top: 10px; }}
+</style>
+<div class="brand-bar"><div class="row"><img src="data:image/png;base64,{logo}" alt="Carlyle"><span class="div"></span>
+<h1>Investor Relations · Event Outcomes</h1></div>
+<p>What happened after our 2026 investor events, what outcomes are associated with them, and what to change next time.
+Association, not causation: see the Method tab.</p></div>
+""",
+        unsafe_allow_html=True,
+    )
+
+
+def chart_head(col, title: str, sub: str = "") -> None:
+    col.markdown(f'<div class="chart-title">{title}</div>' + (f'<div class="chart-sub">{sub}</div>' if sub else ""), unsafe_allow_html=True)
 
 
 @st.cache_data
@@ -54,15 +100,15 @@ def bar_fig(x, series, yfmt=None, horizontal=False, height=300):
         fig.add_bar(name=name, x=vals if horizontal else x, y=x if horizontal else vals,
                     marker_color=color, orientation="h" if horizontal else "v")
     fig.update_layout(barmode="group", height=height, margin=dict(l=10, r=10, t=30, b=10),
-                      legend=dict(orientation="h", y=1.12, x=0), plot_bgcolor="rgba(0,0,0,0)")
+                      legend=dict(orientation="h", y=1.12, x=0), plot_bgcolor="rgba(0,0,0,0)",
+                      font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"))
+    fig.update_yaxes(gridcolor="#e6eaed", zeroline=False)
     if yfmt:
         (fig.update_xaxes if horizontal else fig.update_yaxes)(tickformat=yfmt)
     return fig
 
 
-st.title("Investor Event Outcomes")
-st.caption("What happened after our 2026 investor events, what outcomes are associated with them, and what to change next time. "
-           "Association, not causation: see the Method tab.")
+brand_css()
 
 c1, c2 = st.columns([1, 3])
 window = c1.selectbox("Association window (days)", [30, 60, 90, 180], index=2)
@@ -74,13 +120,13 @@ tab_o, tab_f, tab_x, tab_p, tab_m = st.tabs(["Overview", "Follow-up & segments",
 
 with tab_o:
     reached = fe[fe.is_confirmed | tent].firm_id.nunique()
-    cols = st.columns(6)
-    cols[0].metric("Event spend", fm(K.cost_usd.sum()))
+    cols = st.columns(3) + st.columns(3)
+    cols[0].metric("Event spend", fm(K.cost_usd.sum()), help="3 events, 2026")
     cols[1].metric("Firms reached", reached, help=f"of {len(firms)} covered firms")
-    cols[2].metric("Associated opps", int(K.assoc_opps.sum()), help=f"of {len(opps)} opened this year")
+    cols[2].metric("Associated opportunities", int(K.assoc_opps.sum()), help=f"of {len(opps)} opened this year")
     cols[3].metric("Associated pipeline", fm(K.assoc_pipeline_usd.sum()))
     cols[4].metric("Associated commitments", fm(K.assoc_committed_usd.sum()))
-    cols[5].metric("Follow-up within 30d", f"{K.firms_followup_30.sum() / K.firms_attended.sum():.0%}")
+    cols[5].metric("Follow-up within 30 days", f"{K.firms_followup_30.sum() / K.firms_attended.sum():.0%}")
 
     d = kpi_all[(kpi_all.window_days == 90) & (~kpi_all.include_tentative)].set_index("event_id")
     t1 = fe[fe.is_confirmed & (fe.tier == "Tier 1")]
@@ -101,7 +147,7 @@ with tab_o:
         "Firms attended (Tier 1)": K.firms_attended.astype(str) + " (" + K.tier1_firms.astype(str) + ")",
         "Cost per firm": K.cost_per_firm.map(fk),
         "Follow-up within 30d": K.followup_rate_30.map("{:.0%}".format),
-        "Median days to first follow-up": K.median_days_to_followup.astype(str),
+        "Median days to first follow-up": K.median_days_to_followup.map(lambda v: "-" if pd.isna(v) else f"{v:.0f}"),
         "Meetings 60d before → after": K.meetings_pre_60.astype(int).astype(str) + " → " + K.meetings_post_60.astype(int).astype(str),
         "Associated opportunities": K.assoc_opps.astype(str),
         "Associated pipeline": K.assoc_pipeline_usd.map(fm),
@@ -117,24 +163,40 @@ with tab_o:
     st.dataframe(score, width="stretch")
 
     a, b = st.columns(2)
-    a.markdown("**Cost per associated opportunity**")
-    fig = go.Figure(go.Bar(x=labels, y=K.cost_per_assoc_opp, marker_color=[EV_COLOR[e] for e in K.event_id]))
-    fig.update_layout(height=300, margin=dict(l=10, r=10, t=10, b=10), yaxis_tickprefix="$", plot_bgcolor="rgba(0,0,0,0)")
+    chart_head(a, "Cost per associated opportunity",
+               "Event cost / opportunities created in window (lower is better). Label shows the share of attending firms that converted.")
+    fig = go.Figure(go.Bar(
+        x=labels, y=K.cost_per_assoc_opp, marker_color=[EV_COLOR[e] for e in K.event_id],
+        text=[f"<b>{fk(c)}</b><br>{r:.0%} converted" for c, r in zip(K.cost_per_assoc_opp, K.firm_conversion_rate)],
+        textposition="outside", cliponaxis=False))
+    fig.update_layout(height=340, margin=dict(l=10, r=10, t=30, b=10), yaxis_tickprefix="$", plot_bgcolor="rgba(0,0,0,0)",
+                      font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"),
+                      yaxis=dict(range=[0, K.cost_per_assoc_opp.max() * 1.3], gridcolor="#e6eaed"))
+    fig.update_layout(uniformtext_minsize=11, uniformtext_mode="show")
     a.plotly_chart(fig, width="stretch")
-    b.markdown("**Associated pipeline and commitments ($M)**")
-    b.plotly_chart(bar_fig(labels, [("Pipeline", K.assoc_pipeline_usd / 1e6, BLUE), ("Committed", K.assoc_committed_usd / 1e6, AQUA)]), width="stretch")
+    chart_head(b, "Associated pipeline and commitments",
+               "Percentage on Committed bars is commitment conversion: committed $ / associated pipeline $.")
+    conv = (K.assoc_committed_usd / K.assoc_pipeline_usd.where(K.assoc_pipeline_usd > 0)).fillna(0)
+    fig = bar_fig(labels, [("Associated pipeline", K.assoc_pipeline_usd / 1e6, BLUE), ("Committed", K.assoc_committed_usd / 1e6, AQUA)], height=340)
+    fig.data[0].update(text=[f"<b>{fm(v)}</b>" for v in K.assoc_pipeline_usd], textposition="outside", cliponaxis=False)
+    fig.data[1].update(text=[f"<b>{fm(v) if v else '$0M'}</b><br>{c:.0%}" for v, c in zip(K.assoc_committed_usd, conv)],
+                       hovertemplate="%{x}<br>Committed: $%{y:.0f}M<extra></extra>",
+                       textposition="outside", cliponaxis=False)
+    fig.update_yaxes(tickprefix="$", ticksuffix="M", range=[0, K.assoc_pipeline_usd.max() / 1e6 * 1.25])
+    fig.update_layout(uniformtext_minsize=11, uniformtext_mode="show", legend=dict(y=1.18))
+    b.plotly_chart(fig, width="stretch")
     a, b = st.columns(2)
-    a.markdown("**New-opportunity rate before vs after the event**")
+    chart_head(a, "New-opportunity rate before vs after the event")
     a.plotly_chart(bar_fig(labels, [
         ("Attendees, before", K.attendee_prior_opp_rate, NEUTRAL), ("Attendees, after", K.attendee_new_opp_rate, BLUE),
         ("Non-attendees, before", K.non_attendee_prior_opp_rate, "#dcdad4"), ("Non-attendees, after", K.non_attendee_new_opp_rate, ORANGE)], yfmt=".0%"), width="stretch")
-    b.markdown("**Meetings with attending firms, 60 days before vs after**")
+    chart_head(b, "Meetings with attending firms, 60 days before vs after")
     b.plotly_chart(bar_fig(labels, [("Before", K.meetings_pre_60, NEUTRAL), ("After", K.meetings_post_60, BLUE)]), width="stretch")
 
 with tab_f:
     conf = fe[fe.is_confirmed]
     a, b = st.columns(2)
-    a.markdown("**Follow-up within 30 days, by tier and event**")
+    chart_head(a, "Follow-up within 30 days, by tier and event")
     g = conf.groupby(["tier", "event_id"]).followed_up_30.mean().unstack()
     a.plotly_chart(bar_fig(list(g.index), [(EV_SHORT[e], g[e], EV_COLOR[e]) for e in g.columns], yfmt=".0%"), width="stretch")
     dim = b.selectbox("Cut conversion by", sorted(seg.dimension.unique()), index=sorted(seg.dimension.unique()).index("Tier"))
@@ -180,11 +242,11 @@ with tab_p:
     a, b = st.columns(2)
     src = opps.groupby("source_bucket").agg(pipeline=("amount_usd", "sum"), n=("opportunity_id", "count"))
     src["committed"] = opps[opps.outcome == "Committed"].groupby("source_bucket").amount_usd.sum()
-    a.markdown("**Where pipeline came from ($M)**")
+    chart_head(a, "Where pipeline came from ($M)")
     a.plotly_chart(bar_fig(list(src.index), [("Pipeline", src.pipeline / 1e6, BLUE), ("Committed", src.committed.fillna(0) / 1e6, AQUA)]), width="stretch")
     stages = ["Initial Conversation", "Follow-up / VDR", "Due Diligence", "IC / Documentation", "Committed"]
     ea, other = opps[opps.assoc_event_id_90.notna()], opps[opps.assoc_event_id_90.isna()]
-    b.markdown("**Funnel: count reaching each stage**")
+    chart_head(b, "Funnel: count reaching each stage")
     b.plotly_chart(bar_fig(stages, [("Event-associated", [(ea.max_stage_rank >= i + 1).sum() for i in range(5)], BLUE),
                                     ("All other", [(other.max_stage_rank >= i + 1).sum() for i in range(5)], NEUTRAL)], horizontal=True), width="stretch")
     c = st.columns(3)
@@ -203,3 +265,5 @@ with tab_m:
     st.markdown((ROOT / "docs" / "METHOD.md").read_text().replace("$", "\\$"))
     st.subheader("Data-quality log")
     st.dataframe(dq, width="stretch", hide_index=True)
+
+st.markdown('<div class="foot">Synthetic assessment data, as of 2026-09-23. Built by Colin Bayer for the Carlyle BI &amp; Analytics Lead take-home.</div>', unsafe_allow_html=True)
