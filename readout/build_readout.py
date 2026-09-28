@@ -116,7 +116,7 @@ th {{ white-space: nowrap; }}
 table {{ width: 100%; border-collapse: collapse; font-size: 12.5pt; }}
 th {{ text-align: right; font-size: 11pt; padding: 6px 8px; border-bottom: 2px solid #1b1f24; }}
 th:first-child, td:first-child {{ text-align: left; }}
-td {{ text-align: right; padding: 7px 8px; border-bottom: 1px solid #e3e6ea; font-variant-numeric: tabular-nums; }}
+td {{ text-align: right; padding: 5px 8px; border-bottom: 1px solid #e3e6ea; font-variant-numeric: tabular-nums; }}
 th .d {{ display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }}
 th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; }}
 .bars {{ margin-bottom: 20px; }}
@@ -157,7 +157,7 @@ th small {{ display: block; font-weight: 400; color: #6b7785; font-size: 9.5pt; 
 <section class="slide">
   <img class="logo" src="{LOGO}" alt="Carlyle">
   <div class="kicker">What happened after each event</div>
-  <h1 >The $185K dinner produced opportunities at about half the cost of NY and a fifth of Berlin</h1>
+  <h1 >The $185K London dinner produced opportunities at about half the cost of NY and a fifth of Berlin</h1>
   <div class="grid">
     <div>
       <table>
