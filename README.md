@@ -81,7 +81,7 @@ python readout/build_readout.py          # needs Google Chrome for the PDF step
 
 ## Key assumptions (full list in [docs/METHOD.md](docs/METHOD.md))
 
-- **Attended** means at least one Confirmed contact; tentative-only firms are a toggle.
+- **Attended** means at least one Confirmed contact; tentative-only registrations can be counted with the "Include tentative firm registrations as attendance" toggle.
 - **Associated** means the opportunity was created 0 to 90 days after an attended event; the most recent event gets credit. 30/60/180 days are available as sensitivities.
 - **As-of date is 2026-09-23** (the data delivery date). 19 stage entries dated later (up to 2026-11-19) are treated as projected, not achieved.
 - The $650M commitment (O0017) is kept and flagged; it is not linked to any event.

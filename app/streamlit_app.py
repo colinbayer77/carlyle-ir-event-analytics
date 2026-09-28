@@ -135,8 +135,10 @@ def bar_fig(x, series, yfmt=None, horizontal=False, height=300):
 brand_css()
 
 c1, c2 = st.columns([1, 3])
-window = c1.selectbox("Association window (days)", [30, 60, 90, 180], index=2)
-tent = c2.toggle("Include tentative-only firms", value=False)
+window = c1.selectbox("Association window (days)", [30, 60, 90, 180], index=2,
+                      help="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker.")
+tent = c2.toggle("Include tentative firm registrations as attendance", value=False,
+                 help="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended.")
 K = kpi_all[(kpi_all.window_days == window) & (kpi_all.include_tentative == tent)].sort_values("event_id")
 labels = [EV_SHORT[e] for e in K.event_id]
 

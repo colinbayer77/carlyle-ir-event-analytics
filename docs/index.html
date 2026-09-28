@@ -33,6 +33,7 @@ nav button.active { color: #fff; border-bottom-color: #fff; font-weight: 600; }
 .card h2, .insights h2 { font-family: 'EB Garamond', Georgia, serif; font-size: 19px; font-weight: 600; color: var(--text); }
 main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; }
+.controls .info { color: var(--muted); cursor: help; font-size: 13px; }
 .controls label { display: flex; gap: 6px; align-items: center; color: var(--text-2); font-size: 13px; }
 select, input[type=search] { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; }
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
@@ -94,13 +95,13 @@ tr.sel { background: var(--surface-2); }
 </header>
 <main>
   <div class="controls" id="controls">
-    <label>Association window
+    <label title="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker.">Association window <span class="info">ⓘ</span>
       <select id="win">
         <option value="30">30 days</option><option value="60">60 days</option>
         <option value="90" selected>90 days</option><option value="180">180 days</option>
       </select>
     </label>
-    <label><input type="checkbox" id="tent"> Include tentative-only firms</label>
+    <label title="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended."><input type="checkbox" id="tent"> Include tentative firm registrations as attendance <span class="info">ⓘ</span></label>
     <span class="note" id="asof"></span>
   </div>
 
