@@ -468,7 +468,7 @@ with tab_x:
                                        text="▼ " + EV_SHORT[r.event_id] + ("" if r.is_confirmed else " (tent.)"), font=dict(size=11, color="#5b6570"))
             fig.update_yaxes(tickprefix="$", gridcolor="#e6eaed", zeroline=False, rangemode="tozero")
             fig.update_layout(barmode="stack", height=380, margin=dict(l=10, r=10, t=50, b=10), plot_bgcolor="rgba(0,0,0,0)", hovermode="x unified",
-                              legend=dict(orientation="h", y=-0.15, x=0, traceorder="reversed"), font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"))
+                              legend=dict(orientation="h", y=-0.15, x=0.5, xanchor="center", traceorder="reversed"), font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"))
             st.plotly_chart(fig, width="stretch")
 
 with tab_p:

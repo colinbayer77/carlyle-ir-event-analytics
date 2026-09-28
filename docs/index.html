@@ -793,7 +793,7 @@ function renderStageChart(f) {
     if (i >= 0) evMonths[i] = (evMonths[i] ? evMonths[i] + ' / ' : '') + evShort(r.event_id) + (r.is_confirmed ? '' : ' (tent.)'); });
   chart('cStage', {type: 'bar', plugins: [eventMarkers], data: {labels: months.map(m => m.label), datasets},
     options: {interaction: {mode: 'index', intersect: false}, layout: {padding: {top: 30}},
-      plugins: {legend: {position: 'bottom', align: 'start', reverse: true, labels: {boxWidth: 10, boxHeight: 10}},
+      plugins: {legend: {position: 'bottom', align: 'center', reverse: true, labels: {boxWidth: 10, boxHeight: 10}},
         eventMarkers: {marks: Object.entries(evMonths).map(([i, label]) => ({i: +i, label}))},
         tooltip: {callbacks: {title: c => { const m = months[c[0].dataIndex]; return `${m.label.replace('*', '')} · as of ${mdy(m.snap)}${m.projected ? ' (projected)' : ''}`; },
           label: c => (c.raw ? `${c.dataset.label}: ${fmtM(c.raw)} (${c.dataset.ids[c.dataIndex].join(', ')})` : null),
