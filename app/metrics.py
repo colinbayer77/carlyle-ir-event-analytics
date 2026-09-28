@@ -7,11 +7,13 @@ mart_event_kpis exactly; tests/test_metrics.py asserts that for all 24 grid cell
 docs/metrics.js is a line-for-line port for the static dashboard.
 
 Filter semantics
-  segment    keeps firms in that investor segment (attendees, comparison group, opportunities)
-  fund       keeps opportunities for that fund (attendance and meetings unaffected)
+  segment    keeps firms in the selected investor segments (attendees, comparison group, opportunities)
+  fund       keeps opportunities for the selected funds (attendance and meetings unaffected)
   seniority  "senior": count attendance only where a CIO or MD was registered
              "non_senior": only where none was; firms dropped by this filter are
              excluded from the comparison group rather than counted as non-attendees
+  Each of these three is multi-select: an empty selection (or "All") means no filter;
+  selecting both seniority options is the same as no seniority filter.
   exclude_outlier drops opportunities flagged is_amount_outlier (O0017, $650M)
 """
 from __future__ import annotations
@@ -28,14 +30,24 @@ N_PERMUTATIONS = 5_000
 class Filters:
     window: int = 90
     tentative: bool = False
-    segment: str = "All"
-    fund: str = "All"
-    seniority: str = "All"  # All | senior | non_senior
+    segment: tuple = ()
+    fund: tuple = ()
+    seniority: tuple = ()  # subset of ("senior", "non_senior")
     exclude_outlier: bool = False
+
+    def __post_init__(self):
+        for name in ("segment", "fund", "seniority"):
+            v = getattr(self, name)
+            v = () if v in (None, "All") else (v,) if isinstance(v, str) else tuple(sorted(x for x in v if x != "All"))
+            object.__setattr__(self, name, v)
+
+    @property
+    def seniority_mode(self) -> str:
+        return self.seniority[0] if len(self.seniority) == 1 else "All"
 
     @property
     def is_default_extra(self) -> bool:
-        return self.segment == "All" and self.fund == "All" and self.seniority == "All" and not self.exclude_outlier
+        return not self.segment and not self.fund and self.seniority_mode == "All" and not self.exclude_outlier
 
 
 def _median(s: pd.Series):
@@ -61,23 +73,23 @@ def attendance(P: dict, f: Filters) -> tuple[pd.DataFrame, pd.DataFrame]:
     """(attending firm-events after all filters, attending firm-events before the seniority filter)."""
     fe = P["fe"]
     base = fe[fe.is_confirmed | f.tentative]
-    if f.segment != "All":
-        base = base[base.segment == f.segment]
+    if f.segment:
+        base = base[base.segment.isin(f.segment)]
     senior = base.senior_contacts.gt(0) if f.tentative else base.has_confirmed_senior
     att = base
-    if f.seniority == "senior":
+    if f.seniority_mode == "senior":
         att = base[senior]
-    elif f.seniority == "non_senior":
+    elif f.seniority_mode == "non_senior":
         att = base[~senior]
     return att, base
 
 
 def filtered_opps(P: dict, f: Filters) -> pd.DataFrame:
     o = P["opps"]
-    if f.segment != "All":
-        o = o[o.segment == f.segment]
-    if f.fund != "All":
-        o = o[o.fund_name == f.fund]
+    if f.segment:
+        o = o[o.segment.isin(f.segment)]
+    if f.fund:
+        o = o[o.fund_name.isin(f.fund)]
     if f.exclude_outlier:
         o = o[~o.is_amount_outlier]
     return o
@@ -106,7 +118,7 @@ def event_kpis(P: dict, f: Filters) -> pd.DataFrame:
     att, base = attendance(P, f)
     opps = filtered_opps(P, f)
     assoc = associate(opps, att, f.window)
-    firms = P["firms"] if f.segment == "All" else P["firms"][P["firms"].segment == f.segment]
+    firms = P["firms"] if not f.segment else P["firms"][P["firms"].segment.isin(f.segment)]
     stages = P["stages"]
     rng = np.random.default_rng(7)
     rows = []

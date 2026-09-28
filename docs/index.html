@@ -38,6 +38,15 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 .ctl-selects { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 16px; }
 .ctl-selects label.sel { flex-direction: column; align-items: stretch; gap: 4px; }
 .ctl-selects select { width: 100%; }
+.ms { position: relative; }
+.ms summary { list-style: none; cursor: pointer; border: 1px solid var(--border); border-radius: 6px; padding: 5px 28px 5px 10px; background: var(--surface); color: var(--text); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
+.ms summary::-webkit-details-marker { display: none; }
+.ms summary::after { content: '▾'; position: absolute; right: 10px; color: var(--text-2); }
+.ms[open] summary { border-color: var(--accent); }
+.ms-panel { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 6px; max-height: 260px; overflow: auto; }
+.ms-panel label { display: flex; gap: 8px; align-items: center; padding: 5px 6px; border-radius: 4px; color: var(--text); font-size: 13px; cursor: pointer; }
+.ms-panel label:hover { background: var(--surface-2); }
+.ms-panel .ms-clear { display: block; width: 100%; text-align: left; border: 0; background: none; color: var(--accent); font: inherit; font-size: 12px; padding: 5px 6px; cursor: pointer; border-top: 1px solid var(--border); margin-top: 4px; }
 .ctl-toggles { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
 #filterNote:not(:empty) { margin-top: 8px; }
 #asof { margin-top: 6px; }
@@ -114,10 +123,10 @@ tr.sel { background: var(--surface-2); }
         <option value="90" selected>90 days</option><option value="180">180 days</option>
       </select>
     </label>
-    <label class="sel" title="Keep only firms in this investor segment: attendees, the non-attendee comparison group, and their opportunities."><span class="lbl">Investor segment <span class="info">ⓘ</span></span><select id="gSeg"><option>All</option></select></label>
-    <label class="sel" title="Keep only opportunities for this fund. Attendance, meetings and follow-up are not affected."><span class="lbl">Fund <span class="info">ⓘ</span></span><select id="gFund"><option>All</option></select></label>
-    <label class="sel" title="Count attendance only where a CIO or Managing Director was registered (or only where none was). Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees."><span class="lbl">Attendee seniority <span class="info">ⓘ</span></span>
-      <select id="gSen"><option value="All">All</option><option value="senior">CIO or MD registered</option><option value="non_senior">No CIO or MD</option></select></label>
+    <label class="sel" title="Pick one or more investor segments. Keeps only firms in those segments: attendees, the non-attendee comparison group, and their opportunities."><span class="lbl">Investor segment <span class="info">ⓘ</span></span><details class="ms" id="gSeg"><summary>All</summary><div class="ms-panel"></div></details></label>
+    <label class="sel" title="Pick one or more funds. Keeps only opportunities for those funds. Attendance, meetings and follow-up are not affected."><span class="lbl">Fund <span class="info">ⓘ</span></span><details class="ms" id="gFund"><summary>All</summary><div class="ms-panel"></div></details></label>
+    <label class="sel" title="Count attendance only where a CIO or Managing Director was registered (or only where none was). Selecting both options is the same as All. Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees."><span class="lbl">Attendee seniority <span class="info">ⓘ</span></span>
+      <details class="ms" id="gSen"><summary>All</summary><div class="ms-panel"><label><input type="checkbox" value="senior"> CIO or MD registered</label><label><input type="checkbox" value="non_senior"> No CIO or MD</label></div></details></label>
     </div>
     <div class="ctl-toggles">
     <label title="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended."><input type="checkbox" id="tent"> Include tentative firm registrations as attendance <span class="info">ⓘ</span></label>
@@ -413,24 +422,25 @@ document.querySelectorAll('#nav button').forEach(b => b.onclick = () => {
 
 const P = IRMetrics.prepare(D);
 (() => { const bad = IRMetrics.selfTest(P); bad.length ? console.error('metrics.js does not match mart_event_kpis', bad) : console.info('metrics.js self-test passed: matches mart_event_kpis for all 24 settings'); })();
-const filters = () => ({window: +$('#win').value, tentative: $('#tent').checked, segment: $('#gSeg').value, fund: $('#gFund').value,
-  seniority: $('#gSen').value, excludeOutlier: $('#gOut').checked});
-const extraActive = f => f.segment !== 'All' || f.fund !== 'All' || f.seniority !== 'All' || f.excludeOutlier;
+const msValues = id => [...document.querySelectorAll(`#${id} input:checked`)].map(x => x.value);
+const filters = () => ({window: +$('#win').value, tentative: $('#tent').checked, segment: msValues('gSeg'), fund: msValues('gFund'),
+  seniority: msValues('gSen'), excludeOutlier: $('#gOut').checked});
+const extraActive = f => !IRMetrics.isDefaultExtra(f);
 function kpis() { return IRMetrics.eventKpis(P, filters()); }
 function ctx() {
   const f = filters(), {att, base} = IRMetrics.attendance(P, f);
   const attFirms = new Set(att.map(r => r.firm_id));
-  const noneLabel = f.seniority !== 'All' ? 'No qualifying attendance' : f.tentative ? 'No attendance' : 'No confirmed attendance';
+  const noneLabel = IRMetrics.senMode(f) !== 'All' ? 'No qualifying attendance' : f.tentative ? 'No attendance' : 'No confirmed attendance';
   const opps = IRMetrics.associate(IRMetrics.filteredOpps(P, f), att, f.window).map(o => ({...o,
     bucket: o.assoc_event_id ? `Event-associated (${f.window}d)` : attFirms.has(o.firm_id) ? 'Attendee, outside window' : noneLabel}));
-  const firmsIn = f.segment === 'All' ? D.mart_firm : D.mart_firm.filter(r => r.segment === f.segment);
+  const firmsIn = !f.segment.length ? D.mart_firm : D.mart_firm.filter(r => f.segment.includes(r.segment));
   return {f, att, base, opps, attFirms, firmsIn, noneLabel, buckets: [`Event-associated (${f.window}d)`, 'Attendee, outside window', noneLabel]};
 }
 function describeFilters(f) {
   const parts = [`${f.window}-day window`, f.tentative ? 'confirmed + tentative attendance' : 'confirmed attendance'];
-  if (f.segment !== 'All') parts.push(`segment: ${f.segment}`);
-  if (f.fund !== 'All') parts.push(`fund: ${f.fund}`);
-  if (f.seniority !== 'All') parts.push(f.seniority === 'senior' ? 'CIO/MD registered' : 'no CIO/MD');
+  if (f.segment.length) parts.push(`segment: ${f.segment.join(', ')}`);
+  if (f.fund.length) parts.push(`fund: ${f.fund.join(', ')}`);
+  if (IRMetrics.senMode(f) !== 'All') parts.push(IRMetrics.senMode(f) === 'senior' ? 'CIO/MD registered' : 'no CIO/MD');
   if (f.excludeOutlier) parts.push('excl. $650M outlier');
   return parts.join(' · ');
 }
@@ -482,7 +492,7 @@ function renderOverview() {
   const C = ctx(), cost = sum('cost_usd'), firms = C.attFirms.size;
   const tiles = [
     ['Event spend', fmtM(cost), '3 events, 2026'],
-    ['Firms reached', firms, `of ${C.firmsIn.length} covered firms${C.f.segment !== 'All' ? ' in segment' : ''}`],
+    ['Firms reached', firms, `of ${C.firmsIn.length} covered firms${C.f.segment.length ? ' in selected segments' : ''}`],
     ['Associated opportunities', sum('assoc_opps'), `of ${C.opps.length} opened this year${extraActive(C.f) ? ' (filtered)' : ''}`],
     ['Associated pipeline', fmtM(sum('assoc_pipeline_usd')), `${fmtK(cost / Math.max(1, sum('assoc_opps')))} spend per opp`],
     ['Associated commitments', fmtM(sum('assoc_committed_usd')), `${sum('assoc_committed_opps')} opportunities committed`],
@@ -739,9 +749,19 @@ function renderAll() {
 }
 $('#win').onchange = renderAll; $('#tent').onchange = renderAll;
 initFirmFilters();
-$('#gSeg').insertAdjacentHTML('beforeend', [...new Set(D.mart_firm.map(r => r.segment))].sort().map(v => `<option>${esc(v)}</option>`).join(''));
-$('#gFund').insertAdjacentHTML('beforeend', [...new Set(D.mart_opportunity.map(r => r.fund_name))].sort().map(v => `<option>${esc(v)}</option>`).join(''));
-['#gSeg', '#gFund', '#gSen', '#gOut'].forEach(sel => $(sel).onchange = renderAll);
+const msOptions = (id, vals) => $(`#${id} .ms-panel`).insertAdjacentHTML('afterbegin', vals.map(v => `<label><input type="checkbox" value="${esc(v)}"> ${esc(v)}</label>`).join(''));
+msOptions('gSeg', [...new Set(D.mart_firm.map(r => r.segment))].sort());
+msOptions('gFund', [...new Set(D.mart_opportunity.map(r => r.fund_name))].sort());
+['gSeg', 'gFund', 'gSen'].forEach(id => {
+  const el = document.getElementById(id), panel = el.querySelector('.ms-panel');
+  panel.insertAdjacentHTML('beforeend', '<button type="button" class="ms-clear">Clear (All)</button>');
+  const sync = () => { const v = [...el.querySelectorAll('input:checked')].map(x => x.parentElement.textContent.trim());
+    el.querySelector('summary').textContent = !v.length ? 'All' : v.length <= 2 ? v.join(', ') : `${v.length} selected`; };
+  panel.addEventListener('change', () => { sync(); renderAll(); });
+  panel.querySelector('.ms-clear').onclick = () => { el.querySelectorAll('input').forEach(x => (x.checked = false)); sync(); renderAll(); };
+});
+document.addEventListener('click', e => document.querySelectorAll('details.ms[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; }));
+$('#gOut').onchange = renderAll;
 if (startView) document.querySelector(`#nav button[data-view="${startView}"]`)?.click(); else renderAll();
 </script>
 </body>

@@ -161,13 +161,13 @@ brand_css()
 row = st.columns(4)
 window = row[0].selectbox("Association window (days)", [30, 60, 90, 180], index=2,
                           help="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker.")
-segment = row[1].selectbox("Investor segment", ["All"] + sorted(firms.segment.unique()),
-                           help="Keep only firms in this investor segment: attendees, the non-attendee comparison group, and their opportunities.")
-fund = row[2].selectbox("Fund", ["All"] + sorted(opps.fund_name.unique()),
-                        help="Keep only opportunities for this fund. Attendance, meetings and follow-up are not affected.")
-seniority = row[3].selectbox("Attendee seniority", ["All", "senior", "non_senior"],
-                             format_func={"All": "All", "senior": "CIO or MD registered", "non_senior": "No CIO or MD"}.get,
-                             help="Count attendance only where a CIO or Managing Director was registered (or only where none was). Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees.")
+segment = tuple(row[1].multiselect("Investor segment", sorted(firms.segment.unique()), placeholder="All",
+                                   help="Pick one or more investor segments. Keeps only firms in those segments: attendees, the non-attendee comparison group, and their opportunities."))
+fund = tuple(row[2].multiselect("Fund", sorted(opps.fund_name.unique()), placeholder="All",
+                                help="Pick one or more funds. Keeps only opportunities for those funds. Attendance, meetings and follow-up are not affected."))
+seniority = tuple(row[3].multiselect("Attendee seniority", ["senior", "non_senior"], placeholder="All",
+                             format_func={"senior": "CIO or MD registered", "non_senior": "No CIO or MD"}.get,
+                             help="Count attendance only where a CIO or Managing Director was registered (or only where none was). Selecting both options is the same as All. Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees."))
 row = st.columns([2.2, 1.3, 2.5])
 tent = row[0].toggle("Include tentative firm registrations as attendance", value=False,
                      help="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended.")
@@ -188,22 +188,22 @@ labels = [EV_SHORT[e] for e in K.event_id]
 # filtered detail shared by the charts
 ATT, _BASE = attendance(P, F)
 ATT_FIRMS = set(ATT.firm_id)
-NONE_LABEL = "No qualifying attendance" if seniority != "All" else "No attendance" if tent else "No confirmed attendance"
+NONE_LABEL = "No qualifying attendance" if F.seniority_mode != "All" else "No attendance" if tent else "No confirmed attendance"
 BUCKETS = [f"Event-associated ({window}d)", "Attendee, outside window", NONE_LABEL]
 FOPPS = associate(filtered_opps(P, F), ATT, window)
 FOPPS["bucket"] = [BUCKETS[0] if isinstance(e, str) else BUCKETS[1] if fid in ATT_FIRMS else NONE_LABEL
                    for e, fid in zip(FOPPS.assoc_event_id, FOPPS.firm_id)]
-FIRMS_IN = firms if segment == "All" else firms[firms.segment == segment]
+FIRMS_IN = firms if not segment else firms[firms.segment.isin(segment)]
 
 
 def describe(f: Filters) -> str:
     parts = [f"{f.window}-day window", "confirmed + tentative attendance" if f.tentative else "confirmed attendance"]
-    if f.segment != "All":
-        parts.append(f"segment: {f.segment}")
-    if f.fund != "All":
-        parts.append(f"fund: {f.fund}")
-    if f.seniority != "All":
-        parts.append("CIO/MD registered" if f.seniority == "senior" else "no CIO/MD")
+    if f.segment:
+        parts.append("segment: " + ", ".join(f.segment))
+    if f.fund:
+        parts.append("fund: " + ", ".join(f.fund))
+    if f.seniority_mode != "All":
+        parts.append("CIO/MD registered" if f.seniority_mode == "senior" else "no CIO/MD")
     if f.exclude_outlier:
         parts.append("excl. $650M outlier")
     return " · ".join(parts)
@@ -223,7 +223,7 @@ with tab_o:
     reached = len(ATT_FIRMS)
     cols = st.columns(3) + st.columns(3)
     cols[0].metric("Event spend", fm(K.cost_usd.sum()), help="3 events, 2026")
-    cols[1].metric("Firms reached", reached, help=f"of {len(FIRMS_IN)} covered firms" + (" in segment" if segment != "All" else ""))
+    cols[1].metric("Firms reached", reached, help=f"of {len(FIRMS_IN)} covered firms" + (" in selected segments" if segment else ""))
     cols[2].metric("Associated opportunities", int(K.assoc_opps.sum()), help=f"of {len(FOPPS)} opened this year" + ("" if F.is_default_extra else " (filtered)"))
     cols[3].metric("Associated pipeline", fm(K.assoc_pipeline_usd.sum()))
     cols[4].metric("Associated commitments", fm(K.assoc_committed_usd.sum()))

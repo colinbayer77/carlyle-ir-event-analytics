@@ -31,10 +31,23 @@ def test_default_filters_match_sql_mart():
 
 def test_filters_only_shrink():
     base = event_kpis(P, Filters())
-    for f in [Filters(segment="Pension"), Filters(fund="Fund Beta"), Filters(seniority="senior"), Filters(exclude_outlier=True)]:
+    for f in [Filters(segment="Pension"), Filters(fund="Fund Beta"), Filters(seniority="senior"), Filters(exclude_outlier=True),
+              Filters(segment=("Pension", "Insurance")), Filters(fund=("Fund Alpha", "Fund Beta"))]:
         k = event_kpis(P, f)
         assert (k.assoc_opps <= base.assoc_opps).all() and (k.firms_attended <= base.firms_attended).all(), f
 
 
+def test_multiselect_semantics():
+    """Two segments = sum of each alone for firm counts; both seniority options = no filter."""
+    a, b = event_kpis(P, Filters(segment="Pension")), event_kpis(P, Filters(segment="Insurance"))
+    ab = event_kpis(P, Filters(segment=("Pension", "Insurance")))
+    assert (ab.firms_attended.values == a.firms_attended.values + b.firms_attended.values).all()
+    assert (ab.assoc_opps.values == a.assoc_opps.values + b.assoc_opps.values).all()
+    both = event_kpis(P, Filters(seniority=("senior", "non_senior")))
+    assert Filters(seniority=("senior", "non_senior")).is_default_extra
+    assert (both.assoc_opps.values == event_kpis(P, Filters()).assoc_opps.values).all()
+
+
 if __name__ == "__main__":
+    test_multiselect_semantics()
     test_default_filters_match_sql_mart(); test_filters_only_shrink(); print("metrics tests passed")

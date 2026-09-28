@@ -1,6 +1,7 @@
 // Filter-aware event KPIs for the static dashboard. Line-for-line port of app/metrics.py:
 // with no extra filters it reproduces mart_event_kpis (checked by selfTest() below).
-// Filters: {window, tentative, segment, fund, seniority: 'All'|'senior'|'non_senior', excludeOutlier}
+// Filters: {window, tentative, segment: [..], fund: [..], seniority: subset of ['senior','non_senior'], excludeOutlier}
+// Empty arrays mean no filter; both seniority options selected is the same as none.
 (function () {
   const DAY = 864e5;
   const toDate = s => (s ? new Date(s + 'T00:00:00Z') : null);
@@ -27,20 +28,22 @@
     return {fe, opps, stages, events, firms: D.mart_firm, meetings: D.mart_meetings, kpis: D.mart_event_kpis};
   }
 
-  const isDefaultExtra = f => f.segment === 'All' && f.fund === 'All' && f.seniority === 'All' && !f.excludeOutlier;
+  const arr = v => (v == null || v === 'All' ? [] : Array.isArray(v) ? v : [v]);
+  const senMode = f => (arr(f.seniority).length === 1 ? arr(f.seniority)[0] : 'All');
+  const isDefaultExtra = f => !arr(f.segment).length && !arr(f.fund).length && senMode(f) === 'All' && !f.excludeOutlier;
 
   function attendance(P, f) {
     let base = P.fe.filter(r => r.is_confirmed || f.tentative);
-    if (f.segment !== 'All') base = base.filter(r => r.segment === f.segment);
+    if (arr(f.segment).length) base = base.filter(r => arr(f.segment).includes(r.segment));
     const senior = r => (f.tentative ? r.senior_contacts > 0 : r.has_confirmed_senior);
     let att = base;
-    if (f.seniority === 'senior') att = base.filter(senior);
-    else if (f.seniority === 'non_senior') att = base.filter(r => !senior(r));
+    if (senMode(f) === 'senior') att = base.filter(senior);
+    else if (senMode(f) === 'non_senior') att = base.filter(r => !senior(r));
     return {att, base};
   }
 
   function filteredOpps(P, f) {
-    return P.opps.filter(o => (f.segment === 'All' || o.segment === f.segment) && (f.fund === 'All' || o.fund_name === f.fund) && !(f.excludeOutlier && o.is_amount_outlier));
+    return P.opps.filter(o => (!arr(f.segment).length || arr(f.segment).includes(o.segment)) && (!arr(f.fund).length || arr(f.fund).includes(o.fund_name)) && !(f.excludeOutlier && o.is_amount_outlier));
   }
 
   function associate(opps, att, window) {
@@ -73,7 +76,7 @@
     const {att, base} = attendance(P, f);
     const opps = filteredOpps(P, f);
     const assoc = associate(opps, att, f.window);
-    const firms = f.segment === 'All' ? P.firms : P.firms.filter(r => r.segment === f.segment);
+    const firms = !arr(f.segment).length ? P.firms : P.firms.filter(r => arr(f.segment).includes(r.segment));
     const rand = rng(7);
     const rows = P.events.map(ev => {
       const a = att.filter(r => r.event_id === ev.event_id);
@@ -131,12 +134,12 @@
       'diff_in_diff_opp_rate', 'open_opps_attendees', 'open_opps_attendees_advanced', 'open_opps_non_attendees', 'open_opps_non_attendees_advanced',
       'open_pipeline_attendees_usd'];
     const bad = [];
-    [30, 60, 90, 180].forEach(w => [false, true].forEach(t => eventKpis(P, {window: w, tentative: t, segment: 'All', fund: 'All', seniority: 'All', excludeOutlier: false}).forEach(r => {
+    [30, 60, 90, 180].forEach(w => [false, true].forEach(t => eventKpis(P, {window: w, tentative: t, segment: [], fund: [], seniority: [], excludeOutlier: false}).forEach(r => {
       const m = P.kpis.find(k => k.event_id === r.event_id && k.window_days === w && k.include_tentative === t);
       cols.forEach(c => { const x = r[c], y = m[c]; if (!((x == null && y == null) || Math.abs(x - y) < 1e-9)) bad.push(`${w}/${t}/${r.event_id}/${c}: ${x} vs ${y}`); });
     })));
     return bad;
   }
 
-  window.IRMetrics = {prepare, attendance, filteredOpps, associate, eventKpis, selfTest};
+  window.IRMetrics = {prepare, attendance, filteredOpps, associate, eventKpis, selfTest, senMode, isDefaultExtra};
 })();

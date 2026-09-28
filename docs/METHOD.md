@@ -28,9 +28,9 @@ The window and tentative controls read precomputed SQL results. Four more filter
 
 | Filter | What it does |
 |---|---|
-| Investor segment | Keeps only firms in that segment: attendees, the non-attendee comparison group, and their opportunities |
-| Fund | Keeps only opportunities for that fund. Attendance, meetings and follow-up do not change |
-| Attendee seniority | Counts attendance only where a CIO or Managing Director was registered, or only where none was. Firms dropped by this filter also leave the comparison group, rather than being counted as non-attendees |
+| Investor segment (multi-select) | Keeps only firms in the selected segments: attendees, the non-attendee comparison group, and their opportunities |
+| Fund (multi-select) | Keeps only opportunities for the selected funds. Attendance, meetings and follow-up do not change |
+| Attendee seniority (multi-select) | Counts attendance only where a CIO or Managing Director was registered, or only where none was; selecting both is the same as no filter. Firms dropped by this filter also leave the comparison group, rather than being counted as non-attendees |
 | Exclude $650M outlier | Removes O0017. The firm attended no event, so event metrics do not change; totals, the pipeline donut and opportunity charts do |
 
 Event cost is not split by filter, so cost-per-opportunity under a filter is full event cost over the filtered opportunities. With no filters, both engines reproduce the SQL results exactly for all 24 window and attendance settings (`tests/test_metrics.py`, and a self-test the static page runs on load). Under filters, p-values are recomputed with a fresh set of 5,000 reshuffles, so the two dashboards can differ in the second decimal place. Filtered groups are small: read rates as directional.
