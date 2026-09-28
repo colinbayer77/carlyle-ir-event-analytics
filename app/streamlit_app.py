@@ -417,12 +417,6 @@ with tab_f:
     fig = bar_fig(list(g.index), [(EV_SHORT[e], g[e], EV_COLOR[e]) for e in g.columns])
     a.plotly_chart(label_bars(fig, [[pct(v) for v in g[e]] for e in g.columns], light=tuple(i for i, e in enumerate(g.columns) if e == "E002"),
                               min_share=0.12, headroom=1.1), width="stretch")
-    d = conf.days_to_first_followup
-    fu_vals = [int((d <= 30).sum()), int(((d > 30) & (d <= 60)).sum()), int((d > 60).sum()), int(d.isna().sum())]
-    chart_head(a, "Follow-up status of attending firms", "Attending firm-event pairs under the current filters: time from event to first meeting.")
-    a.plotly_chart(donut_fig(["Met within 30 days", "Met in 31-60 days", "Met after 60 days", "No meeting since event"], fu_vals,
-                             [BLUE, AQUA, ORANGE, NEUTRAL], pct(fu_vals[0] / len(conf) if len(conf) else None), "met within 30 days",
-                             lambda v: f"{v} firm-events"), width="stretch")
     senior = conf.senior_contacts.gt(0) if tent else conf.has_confirmed_senior
     cuts = {"Tier": conf.tier, "Segment": conf.segment, "Relationship": conf.relationship_band,
             "Senior attendee": senior.map({True: "CIO/MD registered", False: "No CIO/MD"}),
@@ -434,6 +428,16 @@ with tab_f:
                   [(f"Converted to opp ({window}d)", s.conversion_rate, BLUE), ("Followed up in 30d", s.followup_rate_30, NEUTRAL)], horizontal=True)
     b.plotly_chart(label_bars(fig, [[pct(v) for v in s.conversion_rate], [pct(v) for v in s.followup_rate_30]], light=(1,),
                               min_share=0.08, horizontal=True, headroom=1.05), width="stretch")
+    # donut on its own row, centered on the page
+    d = conf.days_to_first_followup
+    fu_vals = [int((d <= 30).sum()), int(((d > 30) & (d <= 60)).sum()), int((d > 60).sum()), int(d.isna().sum())]
+    _, mid, _ = st.columns([1, 2, 1])
+    mid.markdown('<div class="chart-title" style="text-align:center">Follow-up status of attending firms</div>'
+                 '<div class="chart-sub" style="text-align:center">Attending firm-event pairs under the current filters: time from event to first meeting.</div>',
+                 unsafe_allow_html=True)
+    mid.plotly_chart(donut_fig(["Met within 30 days", "Met in 31-60 days", "Met after 60 days", "No meeting since event"], fu_vals,
+                               [BLUE, AQUA, ORANGE, NEUTRAL], pct(fu_vals[0] / len(conf) if len(conf) else None), "met within 30 days",
+                               lambda v: f"{v} firm-events"), width="stretch")
     st.subheader("Follow-up gaps: attending firms with no meeting within 60 days")
     leak = conf[conf.meetings_post_60.fillna(0) == 0].merge(firms[["firm_id", "pipeline_usd"]], on="firm_id")
     leak = leak.sort_values(["tier", "pipeline_usd"], ascending=[True, False])
