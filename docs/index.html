@@ -257,7 +257,7 @@ tr.sel { background: var(--surface-2); }
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
         <div style="flex:1;min-width:260px">
           <h2 id="stageTitle">Pipeline dollars by stage over time</h2>
-          <p class="sub">Dollars of the selected firm's opportunities sitting in each stage on each date. Dashed vertical lines mark events the firm attended; dotted segments are after the as-of date (projected stages). Hover a point for details.</p>
+          <p class="sub">Dollars of the selected firm's opportunities sitting in each stage on each date, stacked, so the top edge is the firm's total pipeline. Dashed vertical lines mark events the firm attended; the shaded band after the as-of date shows projected stages. Hover for details.</p>
         </div>
         <label class="sel ctl-inline" style="width:220px"><span class="lbl">Stage</span><details class="ms" id="stageFilter"><summary>All</summary><div class="ms-panel"><div class="ms-opts"><label><input type="checkbox" value="1"> Initial Conversation</label><label><input type="checkbox" value="2"> Follow-up / VDR</label><label><input type="checkbox" value="3"> Due Diligence</label><label><input type="checkbox" value="4"> IC / Documentation</label><label><input type="checkbox" value="5"> Committed</label><label><input type="checkbox" value="0"> Declined</label></div></div></details></label>
       </div>
@@ -755,6 +755,13 @@ function renderTimeline() {
 // A deal sits in a stage from the date it reached it until its next stage; Committed and Declined persist.
 const STAGE_NAMES = ['Declined', 'Initial Conversation', 'Follow-up / VDR', 'Due Diligence', 'IC / Documentation', 'Committed'];
 const STAGE_ORDER = [1, 2, 3, 4, 5, 0];
+const STACK_ORDER = [5, 4, 3, 2, 1, 0];  // bottom to top: Committed at the base, Declined on top
+const projectedBand = {id: 'projectedBand', beforeDatasetsDraw(ch, a, o) {
+  if (!o || o.from == null) return;
+  const {ctx, chartArea: {top, bottom, right}, scales: {x}} = ch, px = Math.max(x.getPixelForValue(o.from), x.left);
+  if (px >= right) return;
+  ctx.save(); ctx.fillStyle = 'rgba(12,55,74,0.06)'; ctx.fillRect(px, top, right - px, bottom - top);
+  ctx.fillStyle = css('--text-2'); ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'right'; ctx.fillText('Projected', right - 4, bottom - 6); ctx.restore(); }};
 const STAGE_COLORS = () => ({1: '#9fb3c2', 2: '#6f8ea6', 3: '#3f6784', 4: '#1f3f5a', 5: css('--good'), 0: css('--bad')});
 const eventLines = {id: 'eventLines', afterDatasetsDraw(ch, a, o) {
   if (!o || !o.marks) return;
@@ -787,24 +794,23 @@ function renderStageChart(f) {
   const evs = D.mart_firm_event.filter(r => r.firm_id === f.firm_id).map(r => ({t: t(r.event_date), label: evShort(r.event_id) + (r.is_confirmed ? '' : ' (tent.)')}));
   const lo = Math.min(...times, ...evs.map(e => e.t)) - 10 * 864e5, hi = Math.max(...times, ...evs.map(e => e.t), asOf) + 10 * 864e5;
   const picked = [...document.querySelectorAll('#stageFilter input:checked')].map(x => +x.value);
-  const show = STAGE_ORDER.filter(r => (!picked.length || picked.includes(r)) && series[r].some(p => p.y > 0));
+  const show = STACK_ORDER.filter(r => (!picked.length || picked.includes(r)) && series[r].some(p => p.y > 0));
   const colors = STAGE_COLORS();
-  const datasets = show.map(r => {
+  const datasets = show.map((r, k) => {
     const pts = [...series[r], {...series[r][series[r].length - 1], x: hi}];  // carry the last value to the right edge
-    return {label: STAGE_NAMES[r], data: pts, stepped: 'before', borderColor: colors[r], backgroundColor: colors[r], borderWidth: 2.5,
-      pointRadius: pts.map((p, i) => (i < pts.length - 1 && (i === 0 || p.y !== pts[i - 1].y) ? 4 : 0)), pointHoverRadius: 6,
-      segment: {borderDash: c => (c.p1.parsed.x > asOf ? [3, 3] : undefined)}};
+    return {label: STAGE_NAMES[r], data: pts, stepped: 'before', fill: k === 0 ? 'origin' : '-1', borderColor: colors[r], backgroundColor: colors[r] + 'cc',
+      borderWidth: 1, pointRadius: 0, pointHoverRadius: 4};
   });
-  chart('cStage', {type: 'line', plugins: [eventLines], data: {datasets},
+  chart('cStage', {type: 'line', plugins: [projectedBand, eventLines], data: {datasets},
     options: {interaction: {mode: 'nearest', intersect: false, axis: 'x'}, layout: {padding: {top: 18}},
-      plugins: {legend: {position: 'bottom', align: 'start', labels: {boxWidth: 10, boxHeight: 10}}, eventLines: {marks: evs},
+      plugins: {legend: {position: 'bottom', align: 'start', reverse: true, labels: {boxWidth: 10, boxHeight: 10}}, eventLines: {marks: evs}, projectedBand: {from: asOf},
         tooltip: {callbacks: {title: c => mdy(new Date(c[0].parsed.x).toISOString().slice(0, 10)) + (c[0].parsed.x > asOf ? ' (projected)' : ''),
           label: c => `${c.dataset.label}: ${fmtM(c.raw.y)}${c.raw.ids.length ? ' (' + c.raw.ids.join(', ') + ')' : ''}`}}},
       scales: {x: {type: 'linear', min: lo, max: hi, grid: {display: false},
           afterBuildTicks: ax => { const out = [], d = new Date(ax.min); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() + 1);
             for (; d.getTime() <= ax.max; d.setUTCMonth(d.getUTCMonth() + 1)) out.push({value: d.getTime()}); ax.ticks = out; },
           ticks: {callback: v => new Date(v).toLocaleString('en-US', {month: 'short', timeZone: 'UTC'})}},
-        y: {beginAtZero: true, grid: {color: css('--grid')}, border: {display: false}, ticks: {callback: v => fmtM(v)}}}}});
+        y: {stacked: true, beginAtZero: true, grid: {color: css('--grid')}, border: {display: false}, ticks: {callback: v => fmtM(v)}}}}});
 }
 
 // ---------- opps ----------

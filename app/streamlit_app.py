@@ -430,8 +430,8 @@ with tab_x:
         st.dataframe(t[["dt", "kind", "detail"]], width="stretch", hide_index=True)
         hc = st.columns([3, 1])
         chart_head(hc[0], f"Pipeline dollars by stage over time: {info.firm_name}",
-                   "Dollars of the firm's opportunities sitting in each stage on each date. Dashed vertical lines mark events the firm "
-                   "attended; dotted segments are after the as-of date (projected stages).")
+                   "Dollars of the firm's opportunities sitting in each stage on each date, stacked, so the top edge is the firm's total "
+                   "pipeline. Dashed vertical lines mark events the firm attended; the shaded band after the as-of date shows projected stages.")
         stage_names = {1: "Initial Conversation", 2: "Follow-up / VDR", 3: "Due Diligence", 4: "IC / Documentation", 5: "Committed", 0: "Declined"}
         pick_st = hc[1].multiselect("Stage", list(stage_names), format_func=stage_names.get, placeholder="All", key="fx_stage")
         fo = opps[opps.firm_id == pick]
@@ -452,7 +452,7 @@ with tab_x:
 
             colors = {1: "#9fb3c2", 2: "#6f8ea6", 3: "#3f6784", 4: "#1f3f5a", 5: "#008300", 0: "#c23b3a"}
             fig = go.Figure()
-            for r in [1, 2, 3, 4, 5, 0]:
+            for r in [5, 4, 3, 2, 1, 0]:  # bottom to top: Committed at the base, Declined on top
                 if pick_st and r not in pick_st:
                     continue
                 ys, ids = [], []
@@ -461,25 +461,19 @@ with tab_x:
                     ys.append(float(amt[inn].sum())); ids.append(", ".join(inn))
                 if not any(ys):
                     continue
-                xs = list(times) + [hi]
-                ys, ids = ys + [ys[-1]], ids + [ids[-1]]
-                actual = [i for i, x in enumerate(xs) if pd.Timestamp(x) <= as_of]
-                split = (actual[-1] + 1) if actual else 0
-                seg = [(xs[:split + 1], ys[:split + 1], ids[:split + 1], "solid", True), (xs[split:], ys[split:], ids[split:], "dot", False)]
-                for sx, sy, sid, dash, legend in seg:
-                    if len(sx) < 2 and dash == "dot":
-                        continue
-                    fig.add_scatter(x=sx, y=sy, mode="lines+markers", name=stage_names[r], legendgroup=str(r), showlegend=legend,
-                                    line=dict(color=colors[r], width=2.5, shape="hv", dash=dash), marker=dict(size=6),
-                                    customdata=sid, hovertemplate=stage_names[r] + ": %{y:$,.0f} · %{x|%m-%d-%Y}<br>%{customdata}<extra></extra>")
+                fig.add_scatter(x=list(times) + [hi], y=ys + [ys[-1]], mode="lines", name=stage_names[r], stackgroup="stages",
+                                line=dict(color=colors[r], width=1, shape="hv"), fillcolor=colors[r],
+                                customdata=ids + [ids[-1]], hovertemplate=stage_names[r] + ": %{y:$,.0f} · %{x|%m-%d-%Y}<br>%{customdata}<extra></extra>")
+            fig.add_vrect(x0=as_of, x1=hi, fillcolor="#0c374a", opacity=0.06, line_width=0,
+                          annotation_text="Projected", annotation_position="bottom right", annotation_font=dict(size=11, color="#5b6570"))
             for k, r in enumerate(ev_rows.itertuples()):
                 fig.add_vline(x=pd.Timestamp(r.event_date).value / 1e6, line=dict(color="#8a949c", dash="dash", width=1))
                 fig.add_annotation(x=r.event_date, y=1.02 + 0.07 * (k % 2), yref="paper", yanchor="bottom", showarrow=False,
                                    text=EV_SHORT[r.event_id] + ("" if r.is_confirmed else " (tent.)"), font=dict(size=11, color="#5b6570"))
             fig.update_yaxes(tickprefix="$", gridcolor="#e6eaed", zeroline=False, rangemode="tozero")
             fig.update_xaxes(showgrid=False, tickformat="%b")
-            fig.update_layout(height=380, margin=dict(l=10, r=10, t=50, b=10), plot_bgcolor="rgba(0,0,0,0)", hovermode="closest",
-                              legend=dict(orientation="h", y=-0.15, x=0), font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"))
+            fig.update_layout(height=380, margin=dict(l=10, r=10, t=50, b=10), plot_bgcolor="rgba(0,0,0,0)", hovermode="x unified",
+                              legend=dict(orientation="h", y=-0.15, x=0, traceorder="reversed"), font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"))
             st.plotly_chart(fig, width="stretch")
 
 with tab_p:
