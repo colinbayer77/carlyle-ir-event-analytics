@@ -1,6 +1,6 @@
 # How I used AI, and how I checked it
 
-**Tool:** Claude Code (Claude Opus) in the terminal, working in this repo. I set the direction and the deliverable design, reviewed and approved the approach, and iterated on the output. Claude wrote the code and drafted the analysis, and validated its own work as it went.
+**Tools:** Claude Code (Claude Opus) in the terminal, working in this repo, and Wispr Flow for voice dictation: almost every instruction and piece of feedback I gave was dictated rather than typed. I set the direction and the deliverable design, reviewed and approved the approach, and iterated on the output. Claude wrote the code and drafted the analysis, and validated its own work as it went.
 
 ## What I directed
 
