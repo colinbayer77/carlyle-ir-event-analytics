@@ -64,6 +64,13 @@ div[data-testid="stAlert"] p, div[data-testid="stAlert"] li {{ font-size: 14px; 
 div[data-testid="stElementContainer"]:has(> div > div[data-testid="stAlert"]) {{ margin-bottom: -6px; }}
 .stTabs [data-baseweb="tab-list"] {{ gap: 6px; border-bottom: 1px solid #e1e7eb; }}
 .st-key-nav {{ border-bottom: 1px solid #e1e7eb; margin-bottom: 6px; }}
+/* denser text on the data model / data quality tab */
+.st-key-tab_underlying_data_model_and_data_quality p, .st-key-tab_underlying_data_model_and_data_quality li {{ font-size: 13.5px; line-height: 1.45; }}
+.st-key-tab_underlying_data_model_and_data_quality table {{ font-size: 12.5px; }}
+.st-key-tab_underlying_data_model_and_data_quality th, .st-key-tab_underlying_data_model_and_data_quality td {{ padding: 5px 8px !important; line-height: 1.35; }}
+.st-key-tab_underlying_data_model_and_data_quality td code, .st-key-tab_underlying_data_model_and_data_quality p code {{ font-size: 11.5px; }}
+.st-key-tab_underlying_data_model_and_data_quality h4 {{ font-size: 18px !important; margin-top: 10px; }}
+.st-key-tab_underlying_data_model_and_data_quality h5 {{ font-size: 15px !important; }}
 .st-key-nav [role="radiogroup"] {{ gap: 2px 20px; flex-wrap: wrap; }}
 .st-key-nav [data-testid="stRadioOption"] > div > div:first-child {{ display: none; }}
 .st-key-nav [data-testid="stRadioOption"] {{ padding: 6px 2px 8px; margin: 0; border-bottom: 3px solid transparent; cursor: pointer; }}
@@ -278,7 +285,7 @@ _hidden = []
 
 def _tab(name):
     if name == PAGE:
-        return st.container()
+        return st.container(key="tab_" + "".join(c if c.isalnum() else "_" for c in name.lower()))
     ph = st.empty()
     _hidden.append(ph)
     return ph.container()
