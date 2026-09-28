@@ -22,6 +22,19 @@ To test for lift beyond the base rate, each event is compared with **firms that 
 
 **Statistical significance.** Each gap is tested with a two-sided permutation test: which firms attended the event is randomly reshuffled 5,000 times, and the p-value is the share of reshuffles that produce a gap at least as large as the observed one. A gap counts as significant only if p < 0.05. At the default rule, p = 0.61 (NY), 0.44 (London), 1.00 (Berlin); across all 24 window and attendance settings the smallest is 0.07 (NY, 30 days). With 19 to 26 attending firms per event, only very large gaps could reach significance.
 
+## Dashboard filters
+
+The window and tentative controls read precomputed SQL results. Four more filters recompute every card and chart from firm- and opportunity-level data (`app/metrics.py`, and `docs/metrics.js` for the static page):
+
+| Filter | What it does |
+|---|---|
+| Investor segment | Keeps only firms in that segment: attendees, the non-attendee comparison group, and their opportunities |
+| Fund | Keeps only opportunities for that fund. Attendance, meetings and follow-up do not change |
+| Attendee seniority | Counts attendance only where a CIO or Managing Director was registered, or only where none was. Firms dropped by this filter also leave the comparison group, rather than being counted as non-attendees |
+| Exclude $650M outlier | Removes O0017. The firm attended no event, so event metrics do not change; totals, the pipeline donut and opportunity charts do |
+
+Event cost is not split by filter, so cost-per-opportunity under a filter is full event cost over the filtered opportunities. With no filters, both engines reproduce the SQL results exactly for all 24 window and attendance settings (`tests/test_metrics.py`, and a self-test the static page runs on load). Under filters, p-values are recomputed with a fresh set of 5,000 reshuffles, so the two dashboards can differ in the second decimal place. Filtered groups are small: read rates as directional.
+
 ## Metric definitions
 
 | Metric | Definition |

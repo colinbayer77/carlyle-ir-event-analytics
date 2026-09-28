@@ -349,3 +349,12 @@ FROM bridge_opp_event b JOIN fct_opportunity o USING (opportunity_id)
 WHERE b.window_days = 180 AND NOT b.include_tentative
 GROUP BY ALL
 ORDER BY 1, 2;
+
+-- ------------------------------------------------------------------------------------
+-- Detail extracts for dashboard-side filtering (segment, fund, seniority, outlier).
+-- ------------------------------------------------------------------------------------
+CREATE OR REPLACE TABLE mart_stage_history AS
+SELECT opportunity_id, stage_rank, stage_date, is_future FROM stg_opp_stage ORDER BY 1, 3;
+
+CREATE OR REPLACE TABLE mart_meetings AS
+SELECT meeting_id, firm_id, meeting_date, meeting_type, purpose FROM fct_meeting ORDER BY meeting_date;

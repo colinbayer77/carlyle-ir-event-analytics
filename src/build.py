@@ -39,6 +39,8 @@ EXPORT_TABLES = [
     "mart_segment",
     "mart_monthly",
     "mart_event_curve",
+    "mart_stage_history",
+    "mart_meetings",
     "dq_log",
 ]
 

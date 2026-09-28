@@ -31,6 +31,8 @@ sql/02_core.sql         dimensions and facts (event, firm, firm x event, meeting
 sql/03_marts.sql        association bridge, sensitivity grid, KPI and explorer marts
 src/build.py            runs the SQL in DuckDB, DQ checks, exports marts + docs/data.js
 src/dq_checks.py        10 logged findings, 11 build-breaking assertions
+app/metrics.py          filter-aware KPI engine (docs/metrics.js is the JS port)
+tests/                  engine-vs-SQL and Streamlit filter tests
 notebooks/analysis.ipynb  independent pandas recomputation vs SQL, sensitivity, permutation test
 docs/index.html         static dashboard (GitHub Pages)
 app/streamlit_app.py    same dashboard in Streamlit, reading the same marts
@@ -72,6 +74,13 @@ Streamlit version:
 
 ```bash
 streamlit run app/streamlit_app.py
+```
+
+Tests (filter engine matches SQL; Streamlit runs under every filter):
+
+```bash
+python tests/test_metrics.py
+python tests/test_streamlit_app.py
 ```
 
 Regenerate the notebook and readout:

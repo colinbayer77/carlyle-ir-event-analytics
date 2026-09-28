@@ -9,9 +9,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import sys
+
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from metrics import Filters, associate, attendance, event_kpis, filtered_opps, prepare  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 MARTS = ROOT / "data" / "marts"
@@ -91,7 +96,7 @@ def footnote(text: str) -> None:
 
 
 def sig_note(rows: pd.DataFrame, label: str) -> str:
-    ps = ", ".join(f"{r.p_value_did:.2f} ({EV_SHORT[r.event_id]})" for r in rows.itertuples())
+    ps = ", ".join(("n/a" if pd.isna(r.p_value_did) else f"{r.p_value_did:.2f}") + f" ({EV_SHORT[r.event_id]})" for r in rows.itertuples())
     return (f"Statistical significance: two-sided permutation test. Which firms attended each event was randomly reshuffled "
             f"{int(rows.n_permutations.iloc[0]):,} times to see how often a difference-in-differences this large appears by chance; "
             f"a gap counts as significant only if p < 0.05. {label}: p = {ps}.")
@@ -151,20 +156,72 @@ window = c1.selectbox("Association window (days)", [30, 60, 90, 180], index=2,
                       help="How many days after an event a new opportunity can be opened and still be linked to that event. The firm must have attended; if several events qualify, the most recent one gets credit. Longer windows link more pipeline but make the link to the event weaker.")
 tent = c2.toggle("Include tentative firm registrations as attendance", value=False,
                  help="Each registrant is Confirmed or Tentative. By default a firm counts as attending an event only if at least one of its contacts is Confirmed. Turn this on to also count the 9 firm-event registrations where every contact was Tentative. Off by default because the data has no check-in record, so tentative firms may not have attended.")
-K = kpi_all[(kpi_all.window_days == window) & (kpi_all.include_tentative == tent)].sort_values("event_id")
+c = st.columns([1, 1, 1, 1.3])
+segment = c[0].selectbox("Investor segment", ["All"] + sorted(firms.segment.unique()),
+                         help="Keep only firms in this investor segment: attendees, the non-attendee comparison group, and their opportunities.")
+fund = c[1].selectbox("Fund", ["All"] + sorted(opps.fund_name.unique()),
+                      help="Keep only opportunities for this fund. Attendance, meetings and follow-up are not affected.")
+seniority = c[2].selectbox("Attendee seniority", ["All", "senior", "non_senior"],
+                           format_func={"All": "All", "senior": "CIO or MD registered", "non_senior": "No CIO or MD"}.get,
+                           help="Count attendance only where a CIO or Managing Director was registered (or only where none was). Firms dropped by this filter leave the comparison group too, rather than being counted as non-attendees.")
+c[3].markdown("<div style='height:30px'></div>", unsafe_allow_html=True)
+excl = c[3].toggle("Exclude $650M outlier",
+                   help="Removes O0017, a $650M commitment (next largest ticket is $150M). The firm attended no event, so event metrics do not change; totals, the pipeline donut and opportunity charts do.")
+F = Filters(window=window, tentative=tent, segment=segment, fund=fund, seniority=seniority, exclude_outlier=excl)
+P = prepare(D)
+
+
+@st.cache_data
+def kpis_for(window, tentative, segment, fund, seniority, exclude_outlier) -> pd.DataFrame:
+    return event_kpis(P, Filters(window, tentative, segment, fund, seniority, exclude_outlier))
+
+
+K = kpis_for(window, tent, segment, fund, seniority, excl).sort_values("event_id").reset_index(drop=True)
 labels = [EV_SHORT[e] for e in K.event_id]
+
+# filtered detail shared by the charts
+ATT, _BASE = attendance(P, F)
+ATT_FIRMS = set(ATT.firm_id)
+NONE_LABEL = "No qualifying attendance" if seniority != "All" else "No attendance" if tent else "No confirmed attendance"
+BUCKETS = [f"Event-associated ({window}d)", "Attendee, outside window", NONE_LABEL]
+FOPPS = associate(filtered_opps(P, F), ATT, window)
+FOPPS["bucket"] = [BUCKETS[0] if isinstance(e, str) else BUCKETS[1] if fid in ATT_FIRMS else NONE_LABEL
+                   for e, fid in zip(FOPPS.assoc_event_id, FOPPS.firm_id)]
+FIRMS_IN = firms if segment == "All" else firms[firms.segment == segment]
+
+
+def describe(f: Filters) -> str:
+    parts = [f"{f.window}-day window", "confirmed + tentative attendance" if f.tentative else "confirmed attendance"]
+    if f.segment != "All":
+        parts.append(f"segment: {f.segment}")
+    if f.fund != "All":
+        parts.append(f"fund: {f.fund}")
+    if f.seniority != "All":
+        parts.append("CIO/MD registered" if f.seniority == "senior" else "no CIO/MD")
+    if f.exclude_outlier:
+        parts.append("excl. $650M outlier")
+    return " · ".join(parts)
+
+
+def pct(v) -> str:
+    return "-" if v is None or pd.isna(v) else f"{v:.0%}"
+
+
+if not F.is_default_extra:
+    footnote(f"<b>Filters on:</b> {describe(F)} · {len(ATT)} attending firm-events, {len(FOPPS)} opportunities. "
+             "Event cost is not split by filter. Small groups: read rates as directional.")
 
 tab_o, tab_f, tab_x, tab_p, tab_m = st.tabs(["Executive summary", "Follow-up & segments", "Firm explorer", "Opportunities", "Underlying Data and Model"])
 
 with tab_o:
-    reached = fe[fe.is_confirmed | tent].firm_id.nunique()
+    reached = len(ATT_FIRMS)
     cols = st.columns(3) + st.columns(3)
     cols[0].metric("Event spend", fm(K.cost_usd.sum()), help="3 events, 2026")
-    cols[1].metric("Firms reached", reached, help=f"of {len(firms)} covered firms")
-    cols[2].metric("Associated opportunities", int(K.assoc_opps.sum()), help=f"of {len(opps)} opened this year")
+    cols[1].metric("Firms reached", reached, help=f"of {len(FIRMS_IN)} covered firms" + (" in segment" if segment != "All" else ""))
+    cols[2].metric("Associated opportunities", int(K.assoc_opps.sum()), help=f"of {len(FOPPS)} opened this year" + ("" if F.is_default_extra else " (filtered)"))
     cols[3].metric("Associated pipeline", fm(K.assoc_pipeline_usd.sum()))
     cols[4].metric("Associated commitments", fm(K.assoc_committed_usd.sum()))
-    cols[5].metric("Follow-up within 30 days", f"{K.firms_followup_30.sum() / K.firms_attended.sum():.0%}")
+    cols[5].metric("Follow-up within 30 days", pct(K.firms_followup_30.sum() / K.firms_attended.sum() if K.firms_attended.sum() else None))
 
     d = kpi_all[(kpi_all.window_days == 90) & (~kpi_all.include_tentative)].set_index("event_id")
     t1 = fe[fe.is_confirmed & (fe.tier == "Tier 1")]
@@ -185,27 +242,32 @@ with tab_o:
         "Cost": K.cost_usd.map(fk),
         "Firms attended (Tier 1)": K.firms_attended.astype(str) + " (" + K.tier1_firms.astype(str) + ")",
         "Cost per firm": K.cost_per_firm.map(fk),
-        "Follow-up within 30d": K.followup_rate_30.map("{:.0%}".format),
+        "Follow-up within 30d": K.followup_rate_30.map(pct),
         "Median days to first follow-up": K.median_days_to_followup.map(lambda v: "-" if pd.isna(v) else f"{v:.0f}"),
         "Meetings 60d before → after": K.meetings_pre_60.astype(int).astype(str) + " → " + K.meetings_post_60.astype(int).astype(str),
         "Associated opportunities": K.assoc_opps.astype(str),
         "Associated pipeline": K.assoc_pipeline_usd.map(fm),
         "Committed": K.assoc_committed_usd.map(fm) + " (" + K.assoc_committed_opps.astype(str) + ")",
         "Cost per associated opp": K.cost_per_assoc_opp.map(fk),
-        "New-opp rate attendees before → after": K.attendee_prior_opp_rate.map("{:.0%}".format) + " → " + K.attendee_new_opp_rate.map("{:.0%}".format),
-        "New-opp rate non-attendees before → after": K.non_attendee_prior_opp_rate.map("{:.0%}".format) + " → " + K.non_attendee_new_opp_rate.map("{:.0%}".format),
-        "Difference-in-differences": (K.diff_in_diff_opp_rate * 100).map("{:+.0f} pts".format),
-        "p-value, permutation test*": K.p_value_did.map("{:.2f}".format) + K.did_significant.map({True: " (significant)", False: " (not significant)"}),
+        "New-opp rate attendees before → after": K.attendee_prior_opp_rate.map(pct) + " → " + K.attendee_new_opp_rate.map(pct),
+        "New-opp rate non-attendees before → after": K.non_attendee_prior_opp_rate.map(pct) + " → " + K.non_attendee_new_opp_rate.map(pct),
+        "Difference-in-differences": K.diff_in_diff_opp_rate.map(lambda v: "n/a" if v is None or pd.isna(v) else f"{v * 100:+.0f} pts"),
+        "p-value, permutation test*": [("n/a" if pd.isna(p) else f"{p:.2f}" + (" (significant)" if p < 0.05 else " (not significant)")) for p in K.p_value_did],
         "Days since event (as-of)": K.days_since_event.astype(str),
     }
     score = pd.DataFrame({k: list(v) for k, v in rows.items()}, index=[f"{n} ({l})" for n, l in zip(K.event_name, K.location)]).T
     st.subheader("Event scorecard")
     st.dataframe(score, width="stretch")
-    footnote("* " + sig_note(K, f"Current settings ({window} days{', incl. tentative' if tent else ''})"))
+    footnote("* " + sig_note(K, f"Current settings ({describe(F)})"))
 
     a, b = st.columns(2)
     chart_head(a, "New opportunities and meetings by month, 2026",
                "Dashed lines mark events. Opportunity creation peaked in June and July for all firms. September is partial.")
+    ym = monthly.month.str[:7]
+    firm_set = set(FIRMS_IN.firm_id)
+    mt = D["mart_meetings"]
+    monthly = monthly.assign(new_opps=[int((FOPPS.created_date.dt.strftime("%Y-%m") == m).sum()) for m in ym],
+                             meetings=[int((mt.firm_id.isin(firm_set) & (mt.meeting_date.str[:7] == m)).sum()) for m in ym])
     mlab = pd.to_datetime(monthly.month).dt.strftime("%b").tolist()
     if monthly.month.iloc[-1].startswith("2026-09"):
         mlab[-1] += "*"
@@ -221,10 +283,10 @@ with tab_o:
             n += 1
     fig.update_layout(legend=dict(orientation="h", y=-0.15, x=0))
     a.plotly_chart(line_layout(fig, top=60).update_layout(legend=dict(orientation="h", y=-0.15, x=0)), width="stretch")
-    chart_head(b, "Where 2026 pipeline came from", "Share of $ pipeline by source, default rule (90 days, confirmed).")
-    order = ["Event-associated (90d)", "Attendee, outside window", "No confirmed attendance"]
-    vals = [opps.loc[opps.source_bucket == o, "amount_usd"].sum() for o in order]
-    b.plotly_chart(donut_fig(["Opened within 90d of an attended event", "Attendee firm, outside window", "Firm with no confirmed attendance"],
+    chart_head(b, "Where 2026 pipeline came from", "Share of $ pipeline by source, under the current filters.")
+    vals = [float(FOPPS.loc[FOPPS.bucket == o, "amount_usd"].sum()) for o in BUCKETS]
+    b.plotly_chart(donut_fig([f"Opened within {window}d of an attended event", "Attendee firm, outside window",
+                              "Firm with no confirmed attendance" if NONE_LABEL == "No confirmed attendance" else NONE_LABEL],
                              vals, [BLUE, AQUA, NEUTRAL], fm(sum(vals)), "2026 pipeline", fm), width="stretch")
 
     a, b = st.columns(2)
@@ -232,11 +294,11 @@ with tab_o:
                "Event cost / opportunities created in window (lower is better). Label shows the share of attending firms that converted.")
     fig = go.Figure(go.Bar(
         x=labels, y=K.cost_per_assoc_opp, marker_color=[EV_COLOR[e] for e in K.event_id],
-        text=[f"<b>{fk(c)}</b><br>{r:.0%} converted" for c, r in zip(K.cost_per_assoc_opp, K.firm_conversion_rate)],
+        text=[("no opps" if pd.isna(c) else f"<b>{fk(c)}</b>") + f"<br>{pct(r)} converted" for c, r in zip(K.cost_per_assoc_opp, K.firm_conversion_rate)],
         textposition="outside", cliponaxis=False))
     fig.update_layout(height=340, margin=dict(l=10, r=10, t=30, b=10), yaxis_tickprefix="$", plot_bgcolor="rgba(0,0,0,0)",
                       font=dict(family="Inter, system-ui, sans-serif", color="#3b4450"),
-                      yaxis=dict(range=[0, K.cost_per_assoc_opp.max() * 1.3], gridcolor="#e6eaed"))
+                      yaxis=dict(range=[0, (K.cost_per_assoc_opp.max() if K.cost_per_assoc_opp.notna().any() else 1) * 1.3], gridcolor="#e6eaed"))
     fig.update_layout(uniformtext_minsize=11, uniformtext_mode="show")
     a.plotly_chart(fig, width="stretch")
     chart_head(b, "Associated pipeline and commitments",
@@ -247,7 +309,7 @@ with tab_o:
     fig.data[1].update(text=[f"<b>{fm(v) if v else '$0M'}</b><br>{c:.0%}" for v, c in zip(K.assoc_committed_usd, conv)],
                        hovertemplate="%{x}<br>Committed: $%{y:.0f}M<extra></extra>",
                        textposition="outside", cliponaxis=False)
-    fig.update_yaxes(tickprefix="$", ticksuffix="M", range=[0, K.assoc_pipeline_usd.max() / 1e6 * 1.25])
+    fig.update_yaxes(tickprefix="$", ticksuffix="M", range=[0, max(K.assoc_pipeline_usd.max() / 1e6, 1) * 1.25])
     fig.update_layout(uniformtext_minsize=11, uniformtext_mode="show", legend=dict(y=1.18))
     b.plotly_chart(fig, width="stretch")
     a, b = st.columns(2)
@@ -259,23 +321,31 @@ with tab_o:
     b.plotly_chart(bar_fig(labels, [("Before", K.meetings_pre_60, NEUTRAL), ("After", K.meetings_post_60, BLUE)]), width="stretch")
 
 with tab_f:
-    conf = fe[fe.is_confirmed]
+    conf = ATT.copy()
+    conf["followed_up_30"] = conf.meetings_post_30 > 0
+    conv_keys = set(zip(FOPPS.firm_id, FOPPS.assoc_event_id))
+    conf["converted"] = [(fid, e) in conv_keys for fid, e in zip(conf.firm_id, conf.event_id)]
     a, b = st.columns(2)
     chart_head(a, "Follow-up within 30 days, by tier and event")
     g = conf.groupby(["tier", "event_id"]).followed_up_30.mean().unstack()
     a.plotly_chart(bar_fig(list(g.index), [(EV_SHORT[e], g[e], EV_COLOR[e]) for e in g.columns], yfmt=".0%"), width="stretch")
     d = conf.days_to_first_followup
     fu_vals = [int((d <= 30).sum()), int(((d > 30) & (d <= 60)).sum()), int((d > 60).sum()), int(d.isna().sum())]
-    chart_head(a, "Follow-up status of attending firms", "All confirmed firm-event pairs: time from event to first meeting.")
+    chart_head(a, "Follow-up status of attending firms", "Attending firm-event pairs under the current filters: time from event to first meeting.")
     a.plotly_chart(donut_fig(["Met within 30 days", "Met in 31-60 days", "Met after 60 days", "No meeting since event"], fu_vals,
-                             [BLUE, AQUA, ORANGE, NEUTRAL], f"{fu_vals[0] / len(conf):.0%}", "met within 30 days",
+                             [BLUE, AQUA, ORANGE, NEUTRAL], pct(fu_vals[0] / len(conf) if len(conf) else None), "met within 30 days",
                              lambda v: f"{v} firm-events"), width="stretch")
-    dim = b.selectbox("Cut conversion by", sorted(seg.dimension.unique()), index=sorted(seg.dimension.unique()).index("Tier"))
-    s = seg[seg.dimension == dim]
-    b.plotly_chart(bar_fig(list(s.value + " (n=" + s.firm_events.astype(str) + ")"),
-                           [("Converted to opp (90d)", s.conversion_rate, BLUE), ("Followed up in 30d", s.followup_rate_30, NEUTRAL)],
+    senior = conf.senior_contacts.gt(0) if tent else conf.has_confirmed_senior
+    cuts = {"Tier": conf.tier, "Segment": conf.segment, "Relationship": conf.relationship_band,
+            "Senior attendee": senior.map({True: "CIO/MD registered", False: "No CIO/MD"}),
+            "Follow-up in 30d": conf.followed_up_30.map({True: "Yes", False: "No"})}
+    dim = b.selectbox("Cut conversion by", list(cuts), index=0)
+    s = (conf.assign(v=cuts[dim]).groupby("v")
+         .agg(firm_events=("firm_id", "size"), conversion_rate=("converted", "mean"), followup_rate_30=("followed_up_30", "mean")).reset_index())
+    b.plotly_chart(bar_fig(list(s.v + " (n=" + s.firm_events.astype(str) + ")"),
+                           [(f"Converted to opp ({window}d)", s.conversion_rate, BLUE), ("Followed up in 30d", s.followup_rate_30, NEUTRAL)],
                            yfmt=".0%", horizontal=True), width="stretch")
-    st.subheader("Follow-up gaps: confirmed firms with no meeting within 60 days")
+    st.subheader("Follow-up gaps: attending firms with no meeting within 60 days")
     leak = conf[conf.meetings_post_60.fillna(0) == 0].merge(firms[["firm_id", "pipeline_usd"]], on="firm_id")
     leak = leak.sort_values(["tier", "pipeline_usd"], ascending=[True, False])
     st.dataframe(leak.assign(event=leak.event_id.map(EV_SHORT), pipeline=leak.pipeline_usd.map(fm))[
@@ -311,39 +381,47 @@ with tab_x:
 
 with tab_p:
     a, b = st.columns(2)
-    src = opps.groupby("source_bucket").agg(pipeline=("amount_usd", "sum"), n=("opportunity_id", "count"))
-    src["committed"] = opps[opps.outcome == "Committed"].groupby("source_bucket").amount_usd.sum()
+    src = FOPPS.groupby("bucket").agg(pipeline=("amount_usd", "sum"), n=("opportunity_id", "count")).reindex(BUCKETS).fillna(0)
+    src["committed"] = FOPPS[FOPPS.outcome == "Committed"].groupby("bucket").amount_usd.sum()
     chart_head(a, "Where pipeline came from ($M)")
     a.plotly_chart(bar_fig(list(src.index), [("Pipeline", src.pipeline / 1e6, BLUE), ("Committed", src.committed.fillna(0) / 1e6, AQUA)]), width="stretch")
     stages = ["Initial Conversation", "Follow-up / VDR", "Due Diligence", "IC / Documentation", "Committed"]
-    ea, other = opps[opps.assoc_event_id_90.notna()], opps[opps.assoc_event_id_90.isna()]
+    ea, other = FOPPS[FOPPS.assoc_event_id.notna()], FOPPS[FOPPS.assoc_event_id.isna()]
     chart_head(b, "Funnel: count reaching each stage")
     b.plotly_chart(bar_fig(stages, [("Event-associated", [(ea.max_stage_rank >= i + 1).sum() for i in range(5)], BLUE),
                                     ("All other", [(other.max_stage_rank >= i + 1).sum() for i in range(5)], NEUTRAL)], horizontal=True), width="stretch")
     chart_head(st, "Opportunity flow: source → furthest stage → status",
-               "All 107 opportunities, default rule (90 days, confirmed attendance). Band width is the number of opportunities; "
+               "Opportunities under the current filters. Band width is the number of opportunities; "
                "hover for $ pipeline. Committed opportunities flow straight to Committed.")
+    outside = f"Attendee, outside {window}d"
+
     def src_name(r):
-        if isinstance(r.assoc_event_id_90, str):
-            return EV_SHORT[r.assoc_event_id_90]
-        return "Attendee, outside 90d" if r.source_bucket == "Attendee, outside window" else "No confirmed attendance"
+        if isinstance(r.assoc_event_id, str):
+            return EV_SHORT[r.assoc_event_id]
+        return outside if r.bucket == "Attendee, outside window" else NONE_LABEL
     stg_name = lambda k: "Intro / VDR" if k <= 2 else "Due diligence" if k == 3 else "IC / documentation"
     node_color = {"NY Summit": EV_COLOR["E001"], "London Dinner": EV_COLOR["E002"], "Berlin Forum": EV_COLOR["E003"],
-                  "Attendee, outside 90d": "#8a98a3", "No confirmed attendance": NEUTRAL,
+                  outside: "#8a98a3", NONE_LABEL: NEUTRAL,
                   "Intro / VDR": "#9fb3c2", "Due diligence": "#6f8ea6", "IC / documentation": "#3f6784",
                   "Committed": "#008300", "Open": "#b8c3cb", "Declined": "#c23b3a"}
     names = list(node_color)
     flows = {}
-    for r in opps.itertuples():
+    for r in FOPPS.itertuples():
         src = src_name(r)
         hops = [(src, "Committed")] if r.outcome == "Committed" else [(src, stg_name(r.max_stage_rank)), (stg_name(r.max_stage_rank), r.outcome)]
         for h in hops:
             f = flows.setdefault(h, [0, 0.0]); f[0] += 1; f[1] += r.amount_usd
     def rgba(hex_, a=0.45):
         h = hex_.lstrip("#"); return f"rgba({int(h[0:2], 16)},{int(h[2:4], 16)},{int(h[4:6], 16)},{a})"
+    names = [n for n in names if any(n in k for k in flows)]
     totals = {n: sum(v[0] for (x, y), v in flows.items() if y == n) or sum(v[0] for (x, y), v in flows.items() if x == n) for n in names}
-    col = {n: 0.001 for n in names[:5]} | {n: 0.5 for n in names[5:8]} | {n: 0.999 for n in names[8:]}
-    ypos = dict(zip(names[:5], [0.08, 0.26, 0.4, 0.6, 0.88])) | dict(zip(names[5:8], [0.15, 0.48, 0.8])) | dict(zip(names[8:], [0.08, 0.5, 0.97]))
+    order0 = ["NY Summit", "London Dinner", "Berlin Forum", outside, NONE_LABEL]
+    order1, order2 = ["Intro / VDR", "Due diligence", "IC / documentation"], ["Committed", "Open", "Declined"]
+    def spread(group):
+        present = [n for n in group if n in names]
+        return {n: (i + 0.5) / len(present) for i, n in enumerate(present)}
+    col = {n: 0.001 for n in order0} | {n: 0.5 for n in order1} | {n: 0.999 for n in order2}
+    ypos = spread(order0) | spread(order1) | spread(order2)
     fig = go.Figure(go.Sankey(
         arrangement="fixed",
         node=dict(label=[f"{n} ({totals[n]})" for n in names], color=[node_color[n] for n in names], pad=18, thickness=14, line=dict(width=0),
@@ -356,28 +434,29 @@ with tab_p:
     fig.update_layout(height=460, margin=dict(l=10, r=10, t=10, b=10), font=dict(family="Inter, system-ui, sans-serif", size=12, color="#1b1f24"))
     st.plotly_chart(fig, width="stretch")
     chart_head(st, "How fast opportunities followed each event",
-               "Cumulative associated opportunities by days after the event (180-day window, confirmed, most recent event gets credit). "
+               "Cumulative associated opportunities by days after the event (180-day window, current attendance and opportunity filters, most recent event gets credit). "
                "Lines stop at each event's age on the as-of date; no opportunities were created after 2026-08-12, so lines flatten after that.")
     fig = go.Figure()
+    curve180 = associate(filtered_opps(P, F), ATT, 180)
     for e, name in EV_SHORT.items():
         age = int(kpi_all.loc[kpi_all.event_id == e, "days_since_event"].iloc[0])
         days = list(range(0, min(180, age) + 1, 5))
-        pts = curve[curve.event_id == e]
-        fig.add_scatter(x=days, y=[int(pts.loc[pts.days_after_event <= x, "opps"].sum()) for x in days], name=name, mode="lines",
+        pts = curve180[curve180.assoc_event_id == e]
+        fig.add_scatter(x=days, y=[int((pts.days_after_event <= x).sum()) for x in days], name=name, mode="lines",
                         line=dict(color=EV_COLOR[e], width=2.5, shape="hv"))
     fig.update_xaxes(title="Days after event", gridcolor="#f0f2f4")
     fig.update_yaxes(title="Cumulative opportunities")
     st.plotly_chart(line_layout(fig, height=340), width="stretch")
-    c = st.columns(3)
-    s1 = c[0].selectbox("Source", ["All"] + sorted(opps.source_bucket.unique()))
+    c = st.columns(2)
+    s1 = c[0].selectbox("Source", ["All"] + BUCKETS)
     s2 = c[1].selectbox("Outcome", ["All", "Open", "Committed", "Declined"])
-    s3 = c[2].selectbox("Fund", ["All"] + sorted(opps.fund_name.unique()))
-    o = opps
-    for col, val in [("source_bucket", s1), ("outcome", s2), ("fund_name", s3)]:
+    o = FOPPS
+    for col_, val in [("bucket", s1), ("outcome", s2)]:
         if val != "All":
-            o = o[o[col] == val]
-    st.dataframe(o[["opportunity_id", "firm_name", "tier", "fund_name", "created_date", "amount_usd", "current_stage", "outcome",
-                    "assoc_event_id_90", "days_after_event_90", "is_amount_outlier", "projected_stage_rows"]],
+            o = o[o[col_] == val]
+    st.dataframe(o.assign(created_date=o.created_date.dt.strftime("%Y-%m-%d"))[
+                 ["opportunity_id", "firm_name", "tier", "fund_name", "created_date", "amount_usd", "current_stage", "outcome",
+                  "assoc_event_id", "days_after_event", "is_amount_outlier", "projected_stage_rows"]],
                  width="stretch", hide_index=True)
 
 def md_doc(name: str) -> str:
