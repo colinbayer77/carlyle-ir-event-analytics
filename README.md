@@ -2,7 +2,7 @@
 
 **Question from leadership:** What happened after our investor events, what business outcomes are associated with them, and what should we learn for future events?
 
-**Live dashboard:** https://colinbayer.github.io/carlyle-ir-event-analytics/ (static, no install)
+**Live dashboard:** https://colinbayer77.github.io/carlyle-ir-event-analytics/ (static, no install)
 **Executive readout (3 slides):** [readout/exec_readout.pdf](readout/exec_readout.pdf)
 **How AI was used and checked:** [AI_USAGE.md](AI_USAGE.md)
 **Method, metric definitions, data-quality decisions:** [docs/METHOD.md](docs/METHOD.md)
