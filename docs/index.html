@@ -77,6 +77,7 @@ select, input[type=search] { font: inherit; color: var(--text); background: var(
 .chart { position: relative; height: 260px; }
 .insights { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
 .insights h2 { font-size: 15px; margin: 0 0 6px; }
+.insights .box-foot { margin: 8px 0 0; padding-top: 6px; border-top: 1px solid var(--border); font-style: italic; }
 .insights ol { margin: 0; padding-left: 20px; }
 .insights li { margin: 4px 0; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
@@ -159,9 +160,9 @@ tr.sel { background: var(--surface-2); }
     <div class="tiles" id="tiles"></div>
     <div class="insights">
       <h2>What leadership should take away</h2>
-      <p class="sub">Baseline view: 90-day window, confirmed attendance, all events. This box does not change with the filters above; the cards and charts do.</p>
       <ol id="insights"></ol>
       <p class="note sig-note" id="sigNoteIns"></p>
+      <p class="note box-foot">Baseline view: 90-day window, confirmed attendance, all events. This box does not change with the filters above; the cards and charts do.</p>
     </div>
   </section>
 
