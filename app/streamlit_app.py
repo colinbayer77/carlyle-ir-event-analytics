@@ -152,16 +152,28 @@ def chart_head(col, title: str, sub: str = "") -> None:
     col.markdown(f'<div class="chart-title">{title}</div>' + (f'<div class="chart-sub">{sub}</div>' if sub else ""), unsafe_allow_html=True)
 
 
-@st.cache_data
-def load() -> dict[str, pd.DataFrame]:
+def data_version() -> str:
+    """Hash of the mart files. Every cached function takes it as an argument, so a redeploy with new
+    data (Streamlit Cloud reruns the script without clearing st.cache_data) never serves stale frames."""
+    import hashlib
+
     if not (MARTS / "mart_event_kpis.csv").exists():
         import subprocess, sys
 
         subprocess.run([sys.executable, str(ROOT / "src" / "build.py")], check=True, cwd=ROOT / "src")
+    h = hashlib.sha256()
+    for p in sorted(MARTS.glob("*.csv")):
+        h.update(p.name.encode()); h.update(p.read_bytes())
+    return h.hexdigest()
+
+
+@st.cache_data
+def load(version: str) -> dict[str, pd.DataFrame]:
     return {p.stem: pd.read_csv(p) for p in MARTS.glob("*.csv")}
 
 
-D = load()
+DATA_VERSION = data_version()
+D = load(DATA_VERSION)
 monthly, curve = D["mart_monthly"], D["mart_event_curve"]
 kpi_all, fe, firms, opps, tl, seg, dq = (
     D["mart_event_kpis"], D["mart_firm_event"], D["mart_firm"], D["mart_opportunity"],
@@ -238,11 +250,11 @@ P = prepare(D)
 
 
 @st.cache_data
-def kpis_for(window, tentative, segment, fund, seniority, exclude_outlier, events) -> pd.DataFrame:
+def kpis_for(version, window, tentative, segment, fund, seniority, exclude_outlier, events) -> pd.DataFrame:
     return event_kpis(P, Filters(window, tentative, segment, fund, seniority, exclude_outlier, events))
 
 
-K = kpis_for(window, tent, segment, fund, seniority, excl, events).sort_values("event_id").reset_index(drop=True)
+K = kpis_for(DATA_VERSION, window, tent, segment, fund, seniority, excl, events).sort_values("event_id").reset_index(drop=True)
 labels = [EV_SHORT[e] for e in K.event_id]
 
 # filtered detail shared by the charts
@@ -631,7 +643,7 @@ with tab_p:
 # spread of what actually happened; they are planning ranges, not forecasts.
 # ---------------------------------------------------------------------------
 @st.cache_data
-def planner_pool() -> pd.DataFrame:
+def planner_pool(version: str = "") -> pd.DataFrame:
     fe_ = D["mart_firm_event"].query("is_confirmed")
     k_ = D["mart_event_kpis"].query("window_days == 90 and not include_tentative")[["event_id", "event_type"]]
     return fe_.merge(k_, on="event_id")[["event_id", "event_type", "tier", "assoc_opps_90", "assoc_pipeline_90_usd", "meetings_post_30"]]
@@ -641,7 +653,7 @@ def plan_estimate(tier_counts: dict, fmt: str | None, n_boot: int = 4000, seed: 
     """Bootstrap total associated opportunities and pipeline for a planned attendee mix.
     fmt=None pools all three 2026 events (more stable); otherwise uses that format's events only."""
     import numpy as np
-    pool = planner_pool()
+    pool = planner_pool(DATA_VERSION)
     if fmt:
         pool = pool[pool.event_type == fmt]
     rng = np.random.default_rng(seed)
