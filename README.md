@@ -13,15 +13,15 @@
 
 ## The answer in five points
 
-1. **Events reach most priority firms (13 of 17 Tier 1, 47 of 60 overall) for $1.2M.** 37 of 106 opportunities ($1.55B, 31% of 2026 pipeline, $253M committed) opened within 90 days of an event the firm attended.
-2. **That is association, not demonstrated lift.** Against firms that did not attend, over the same dates, there is no evidence attendees opened opportunities faster (difference-in-differences: NY +12 pts, London -14, Berlin -3). None is statistically significant\*.
+1. **Events reach most priority firms (13 of 17 Tier 1, 47 of 60 overall) for $1.2M.** 37 of 106 opportunities ($1.55B, 31% of 2026 pipeline) opened within 90 days of an event the firm attended; $253M of that has committed and $150M was declined.
+2. **That is association, not demonstrated lift.** Compared with non-attendees over the same dates, the change in attendees' new-opportunity rate ranges from -14 to +18 points, and its sign flips for every event depending on whether the comparison is firms not at that event (NY +12, London -14, Berlin -3) or the 13 firms at no event (NY -8, London +8, Berlin +18). None is statistically significant\*, so there is no evidence of incremental lift either way.
 
-   \* Two-sided permutation test, 5,000 random reshuffles of which firms attended; significant only if p < 0.05. p = 0.61 (NY), 0.44 (London), 1.00 (Berlin).
+   \* Two-sided permutation test, 5,000 random reshuffles of which firms attended; significant only if p < 0.05. p = 0.61, 0.44, 1.00 (firms not at the event) and 0.84, 0.79, 0.52 (firms at no event).
 3. **Follow-up is the biggest controllable gap, worst at Tier 1.** 39% of attending firms had a meeting within 30 days; Tier 1 was 6 of 21. Ten Tier 1 firms with $808M of pipeline attended and were not met in the following 60 days.
-4. **The $185K London dinner had the lowest spend per associated opportunity:** $14K vs $26K for NY and $76K for Berlin, and the largest rise in post-event meetings.
-5. **Berlin ($610K) needs a case before renewal:** meetings with attendees fell after the event (19 to 11), no commitments yet. Recheck at 180 days.
+4. **The $185K London dinner was the cheapest way to reach firms:** $7K per attending firm vs $16K for NY and $32K for Berlin, with a similar share of firms opening an opportunity (40% vs 42% and 32%). That, not stronger conversion, is why it shows the lowest spend per associated opportunity ($14K vs $26K and $76K). It is one dinner, and its only commitment is a flagged record (O9998).
+5. **Berlin ($610K) needs a case before renewal:** meetings per attending firm fell from 1.0 to 0.6 after the event, more than for firms not at it (0.56 to 0.49), and nothing has committed. The data has no opportunity created after 2026-08-12, so recheck at 180 days.
 
-Recommendations (readout slide 3): a 10-day Tier 1 follow-up standard, shift budget toward hospitality formats, capture source-event and check-in data, and design the next events with a matched holdout so lift can be measured.
+Recommendations (readout slide 3): a 10-day Tier 1 follow-up standard (a service standard to test), a second dinner before moving any budget, capture source-event and check-in data, and build a comparison into the next events by varying follow-up among attendees rather than withholding invitations.
 
 ## What is in the repo
 
@@ -32,7 +32,7 @@ sql/01_staging.sql      type casting, dedupe, DQ flags
 sql/02_core.sql         dimensions and facts (event, firm, firm x event, meeting, opportunity)
 sql/03_marts.sql        association bridge, sensitivity grid, KPI and explorer marts
 src/build.py            runs the SQL in DuckDB, DQ checks, exports marts + docs/data.js
-src/dq_checks.py        10 logged findings, 11 build-breaking assertions
+src/dq_checks.py        16 logged findings, 11 build-breaking assertions
 app/metrics.py          filter-aware KPI engine (docs/metrics.js is the JS port)
 tests/                  engine-vs-SQL and Streamlit filter tests
 notebooks/analysis.ipynb  independent pandas recomputation vs SQL, sensitivity, permutation test

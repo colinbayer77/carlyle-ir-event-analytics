@@ -1,6 +1,9 @@
 check_name,severity,rows_affected,handling
 Duplicate attendance row,Medium,1,Exact duplicate (A0011) collapsed to one row.
 Duplicate opportunity record,High,1,"O9998 and O9999 are identical (same firm, fund, dates, stage, $25M). Kept O9998, dropped O9999."
+Out-of-sequence IDs with a single stage row,Medium,3,"O9998/O9999 and A9998 sit outside the normal ID ranges, like planted test rows. O9998 (the kept copy) has one stage row, Committed 10 days after creation (other commitments took 28 to 111 days). It is London's only associated commitment: kept, but London commits $25M with it and $0 without; all events $253M with it, $228M without."
+Possible affiliate firm,Info,1,"F028 'Investor Firm 08 Holdings' is the only name off the standard pattern and echoes F008. Segment and history differ, so kept as separate firms. If merged, London gains 2 associated opportunities ($12.5M) and F028 leaves the comparison group."
+No opportunities created after 2026-08-12,Medium,9,"The last opportunity was created 42 days before the 2026-09-23 cutoff (July 23 new, August 5, September 0). Opportunities opened late in the extract likely had no stage row yet. Berlin's 90-day window is effectively about 57 days; count shown is meetings logged after the last opportunity creation."
 Attendee with no firm_id,Medium,1,"Kept in contact counts, excluded from firm-level metrics. Process fix: enforce firm mapping at registration."
 Tentative-only firm attendance,Low,9,Excluded from default metrics; included via the 'include tentative' sensitivity toggle.
 Amount stored as float text,Low,61,"Cast to integer USD. Values (1.5M, 2.5M) read as whole dollars; treated as small tickets, not a unit error."

@@ -123,7 +123,10 @@ def sig_note(rows: pd.DataFrame, label: str) -> str:
     ps = ", ".join(("n/a" if pd.isna(r.p_value_did) else f"{r.p_value_did:.2f}") + f" ({EV_SHORT[r.event_id]})" for r in rows.itertuples())
     return (f"Statistical significance: two-sided permutation test. Which firms attended each event was randomly reshuffled "
             f"{int(rows.n_permutations.iloc[0]):,} times to see how often a difference-in-differences this large appears by chance; "
-            f"a gap counts as significant only if p < 0.05. {label}: p = {ps}.")
+            f"a gap counts as significant only if p < 0.05. {label}: p = {ps} against firms not at the event"
+            + ("" if "p_value_did_clean" not in rows else "; " + ", ".join(("n/a" if pd.isna(r.p_value_did_clean) else f"{r.p_value_did_clean:.2f}")
+                                                                          + f" ({EV_SHORT[r.event_id]})" for r in rows.itertuples()) + " against firms at no event")
+            + ". 72 tests across the window and attendance settings; expect a few below 0.05 by chance.")
 
 
 def inside_labels(values, axis_max, min_share, light_bar=False):
@@ -248,7 +251,7 @@ SEL_EVENTS = list(events) or list(EV_SHORT)
 ATT = ATT_ALL[ATT_ALL.event_id.isin(SEL_EVENTS)]  # attendance at the selected events
 ATT_FIRMS = set(ATT.firm_id)
 NONE_LABEL = "Did not attend selected events" if events else "No qualifying attendance" if F.seniority_mode != "All" else "No attendance" if tent else "No confirmed attendance"
-BUCKETS = [f"Event-associated ({window}d)", "Attendee, outside window", NONE_LABEL]
+BUCKETS = [f"Event-associated ({window}d)", "Attendee, not in window", NONE_LABEL]
 FOPPS = associate(filtered_opps(P, F), ATT_ALL, window)  # credit across all events, then keep selected
 FOPPS.loc[~FOPPS.assoc_event_id.isin(SEL_EVENTS), ["assoc_event_id", "days_after_event"]] = [None, float("nan")]
 FOPPS["bucket"] = [BUCKETS[0] if isinstance(e, str) else BUCKETS[1] if fid in ATT_FIRMS else NONE_LABEL
@@ -309,10 +312,10 @@ with tab_o:
         f"""**What leadership should take away** · Baseline view: 90-day window, confirmed attendance, all events. This box does not change with the filters above; the cards and charts do.
 
 1. **Most pipeline did not follow an event.** {int(d.assoc_opps.sum())} of {len(opps)} opportunities ({fm(d.assoc_pipeline_usd.sum())} of {fm(opps.amount_usd.sum())}) opened within 90 days of an attended event. The largest commitment ($650M) came from a firm that attended nothing.
-2. **No evidence of incremental lift versus non-attendees.** Difference-in-differences in new-opportunity rate: NY {d.loc['E001','diff_in_diff_opp_rate']*100:+.0f} pts, London {d.loc['E002','diff_in_diff_opp_rate']*100:+.0f} pts, Berlin {d.loc['E003','diff_in_diff_opp_rate']*100:+.0f} pts; none statistically significant\\*.
+2. **No evidence of incremental lift versus non-attendees.** The difference-in-differences in new-opportunity rate runs from {min(d.diff_in_diff_opp_rate.min(), d.diff_in_diff_clean.min())*100:+.0f} to {max(d.diff_in_diff_opp_rate.max(), d.diff_in_diff_clean.max())*100:+.0f} pts across events, and its sign flips depending on whether attendees are compared with firms not at that event (NY {d.loc['E001','diff_in_diff_opp_rate']*100:+.0f}, London {d.loc['E002','diff_in_diff_opp_rate']*100:+.0f}, Berlin {d.loc['E003','diff_in_diff_opp_rate']*100:+.0f}) or with the {int(d.clean_control_firms.iloc[0])} firms at no event ({d.loc['E001','diff_in_diff_clean']*100:+.0f}, {d.loc['E002','diff_in_diff_clean']*100:+.0f}, {d.loc['E003','diff_in_diff_clean']*100:+.0f}). None is statistically significant\\*.
 3. **Follow-up is the controllable gap.** {d.firms_followup_30.sum() / d.firms_attended.sum():.0%} of attending firms met within 30 days; Tier 1 only {int(t1.followed_up_30.sum())} of {len(t1)}.
-4. **London dinner ($185K) had the lowest spend per associated opportunity:** {fk(d.loc['E002','cost_per_assoc_opp'])} vs {fk(d.loc['E001','cost_per_assoc_opp'])} NY and {fk(d.loc['E003','cost_per_assoc_opp'])} Berlin.
-5. **Berlin ($610K) needs a case before renewal:** attendee meetings fell {int(d.loc['E003','meetings_pre_60'])} → {int(d.loc['E003','meetings_post_60'])}, no commitments yet (recheck at 180 days)."""
+4. **London ($185K) was the cheapest way to reach firms:** {fk(d.loc['E002','cost_per_firm'])} per attending firm vs {fk(d.loc['E001','cost_per_firm'])} NY and {fk(d.loc['E003','cost_per_firm'])} Berlin, with a similar share of firms opening an opportunity ({d.loc['E002','firm_conversion_rate']:.0%} vs {d.loc['E001','firm_conversion_rate']:.0%} and {d.loc['E003','firm_conversion_rate']:.0%}). That low cost, not stronger conversion, drives its {fk(d.loc['E002','cost_per_assoc_opp'])} per associated opportunity, and it is one dinner.
+5. **Berlin ($610K) needs a case before renewal:** meetings per attending firm fell {d.loc['E003','meetings_pre_60']/d.loc['E003','firms_attended']:.2f} → {d.loc['E003','meetings_post_60']/d.loc['E003','firms_attended']:.2f}, more than for firms not at the event ({d.loc['E003','non_attendee_meetings_pre_60']/d.loc['E003','non_attendee_firms']:.2f} → {d.loc['E003','non_attendee_meetings_post_60']/d.loc['E003','non_attendee_firms']:.2f}), though part of the "before" count is London follow-up. No commitments yet, and no opportunity in the data was created after {opps.created_date.max()}; recheck at 180 days."""
         .replace("$", "\\$")  # stop Streamlit markdown reading $...$ as LaTeX
     )
     footnote("* " + sig_note(d.reset_index(), "Default rule (90 days, confirmed)"))
@@ -327,14 +330,18 @@ with tab_s:
         "Follow-up within 30d": K.followup_rate_30.map(pct),
         "Median days to first follow-up": K.median_days_to_followup.map(lambda v: "-" if pd.isna(v) else f"{v:.0f}"),
         "Meetings 60d before → after": K.meetings_pre_60.astype(int).astype(str) + " → " + K.meetings_post_60.astype(int).astype(str),
+        "Meetings per firm, before → after: attendees": [f"{a / n:.2f} → {b / n:.2f}" if n else "n/a" for a, b, n in zip(K.meetings_pre_60, K.meetings_post_60, K.firms_attended)],
+        "Meetings per firm, before → after: firms not at event": [f"{a / n:.2f} → {b / n:.2f}" if n else "n/a" for a, b, n in zip(K.non_attendee_meetings_pre_60, K.non_attendee_meetings_post_60, K.non_attendee_firms)],
         "Associated opportunities": K.assoc_opps.astype(str),
-        "Associated pipeline": K.assoc_pipeline_usd.map(fm),
-        "Committed": K.assoc_committed_usd.map(fm) + " (" + K.assoc_committed_opps.astype(str) + ")",
+        "Firms converting": K.firm_conversion_rate.map(pct),
+        "Associated pipeline (of which declined)": K.assoc_pipeline_usd.map(fm) + " (" + K.assoc_declined_usd.map(fm) + ")",
+        "Committed (face value)": K.assoc_committed_usd.map(fm) + " (" + K.assoc_committed_opps.astype(str) + ")",
         "Cost per associated opp": K.cost_per_assoc_opp.map(fk),
         "New-opp rate attendees before → after": K.attendee_prior_opp_rate.map(pct) + " → " + K.attendee_new_opp_rate.map(pct),
-        "New-opp rate non-attendees before → after": K.non_attendee_prior_opp_rate.map(pct) + " → " + K.non_attendee_new_opp_rate.map(pct),
-        "Difference-in-differences": K.diff_in_diff_opp_rate.map(lambda v: "n/a" if v is None or pd.isna(v) else f"{v * 100:+.0f} pts"),
-        "p-value, permutation test*": [("n/a" if pd.isna(p) else f"{p:.2f}" + (" (significant)" if p < 0.05 else " (not significant)")) for p in K.p_value_did],
+        "New-opp rate, firms not at event, before → after": K.non_attendee_prior_opp_rate.map(pct) + " → " + K.non_attendee_new_opp_rate.map(pct),
+        "New-opp rate, firms at no event, before → after": K.clean_prior_opp_rate.map(pct) + " → " + K.clean_new_opp_rate.map(pct),
+        "Diff-in-diff vs firms not at event*": [("n/a" if v is None or pd.isna(v) else f"{v * 100:+.0f} pts") + ("" if pd.isna(p) else f" (p {p:.2f})") for v, p in zip(K.diff_in_diff_opp_rate, K.p_value_did)],
+        "Diff-in-diff vs firms at no event*": [("n/a" if v is None or pd.isna(v) else f"{v * 100:+.0f} pts") + ("" if pd.isna(p) else f" (p {p:.2f})") + f", n={int(c)}" for v, p, c in zip(K.diff_in_diff_clean, K.p_value_did_clean, K.clean_control_firms)],
         "Days since event (as-of)": K.days_since_event.astype(str),
     }
     score = pd.DataFrame({k: list(v) for k, v in rows.items()}, index=[f"{n} ({l})" for n, l in zip(K.event_name, K.location)]).T
@@ -374,7 +381,7 @@ with tab_s:
     a.plotly_chart(fig, width="stretch")
     chart_head(b, "Where 2026 pipeline came from", "Share of $ pipeline by source, under the current filters.")
     vals = [float(FOPPS.loc[FOPPS.bucket == o, "amount_usd"].sum()) for o in BUCKETS]
-    b.plotly_chart(donut_fig([f"Opened within {window}d of an attended event", "Attendee firm, outside window",
+    b.plotly_chart(donut_fig([f"Opened within {window}d of an attended event", "Attendee firm, not in window (mostly opened before its first event)",
                               "Firm with no confirmed attendance" if NONE_LABEL == "No confirmed attendance" else NONE_LABEL],
                              vals, [BLUE, AQUA, NEUTRAL], fm(sum(vals)), "2026 pipeline", fm), width="stretch")
 
@@ -446,7 +453,7 @@ with tab_f:
     mid.plotly_chart(donut_fig(["Met within 30 days", "Met in 31-60 days", "Met after 60 days", "No meeting since event"], fu_vals,
                                [BLUE, AQUA, ORANGE, NEUTRAL], pct(fu_vals[0] / len(conf) if len(conf) else None), "met within 30 days",
                                lambda v: f"{v} firm-events"), width="stretch")
-    st.subheader("Follow-up gaps: attending firms with no meeting within 60 days")
+    st.subheader("Follow-up gaps: firm-events with no meeting within 60 days")
     leak = conf[conf.meetings_post_60.fillna(0) == 0].merge(firms[["firm_id", "pipeline_usd"]], on="firm_id")
     leak = leak.sort_values(["tier", "pipeline_usd"], ascending=[True, False])
     st.dataframe(leak.assign(event=leak.event_id.map(EV_SHORT), pipeline=leak.pipeline_usd.map(fm))[
@@ -549,12 +556,12 @@ with tab_p:
     chart_head(st, "Opportunity flow: source → furthest stage → status",
                "Opportunities under the current filters. Band width is the number of opportunities; "
                "hover for $ pipeline. Committed opportunities flow straight to Committed.")
-    outside = f"Attendee, outside {window}d"
+    outside = f"Attendee, not in {window}d window"
 
     def src_name(r):
         if isinstance(r.assoc_event_id, str):
             return EV_SHORT[r.assoc_event_id]
-        return outside if r.bucket == "Attendee, outside window" else NONE_LABEL
+        return outside if r.bucket == "Attendee, not in window" else NONE_LABEL
     stg_name = lambda k: "Intro / VDR" if k <= 2 else "Due diligence" if k == 3 else "IC / documentation"
     node_color = {"NY Summit": EV_COLOR["E001"], "London Dinner": EV_COLOR["E002"], "Berlin Forum": EV_COLOR["E003"],
                   outside: "#8a98a3", NONE_LABEL: NEUTRAL,
@@ -683,7 +690,7 @@ with tab_n:
         cpo = lambda x: cost / x if x > 0 else float("nan")
         m = st.columns(3) + st.columns(3)
         m[0].metric("Firms reached", firms_n, help=f"Tier 1 {int(t1)} · Tier 2 {int(t2)} · Tier 3 {int(t3)}")
-        m[1].metric("Cost per firm", fk(cost / firms_n))
+        m[1].metric("Spend per firm", fk(cost / firms_n))
         m[2].metric("Opportunities that followed similar events", f"{lo:.0f}–{hi_:.0f}", help=f"10th to 90th percentile of the resampled 2026 outcomes; middle value {mid:.0f}")
         # a value like "$299M to $839M" would be read as LaTeX ($...$) by the metric widget; use an en dash and one dollar sign
         m[3].metric("Pipeline that followed (face value)", f"{fm(plo)}–{fm(phi)[1:]}", help=f"Range of resampled 2026 outcomes; middle value {fm(pmid)}. Historical analog, not a forecast.")
@@ -714,7 +721,7 @@ with tab_n:
         for tier, n in [("Tier 1", t1), ("Tier 2", t2), ("Tier 3", t3)]:
             o_t, _ = plan_estimate({tier: int(n)}, fmt if basis == "Same format only" else None)
             per_tier.append(float(np.percentile(o_t, 50)) if n else 0.0)
-        fig = bar_fig(["Tier 1", "Tier 2", "Tier 3"], [("Expected opportunities", per_tier, BLUE)])
+        fig = bar_fig(["Tier 1", "Tier 2", "Tier 3"], [("Middle estimate", per_tier, BLUE)])
         b.plotly_chart(label_bars(fig, [[f"{v:.0f}" for v in per_tier]], min_share=0.1), width="stretch")
 
         st.subheader("2026 benchmarks")
@@ -728,8 +735,8 @@ with tab_n:
                                       "followup_rate_30": "Met within 30d", "opps_per_firm": "Opps per firm"}),
                      width="stretch", hide_index=True)
         st.info("**How to use this.** Compare formats at the same budget, or see how many more Tier 3 firms it takes to match a Tier 1-heavy list. Read every figure as a range of what followed comparable 2026 attendances. "
-                "The follow-up target is shown as a count only: in 2026, firms met within 30 days did not convert at a higher rate (37% vs 40%), "
-                "so the planner does not add pipeline for faster follow-up. Treat that as something to test, not assume.")
+                "The follow-up target is shown as a count only: in 2026, firms met within 30 days converted at 37% vs 40% for those not met, "
+                "on groups too small to tell whether follow-up speed matters, so the planner adds no pipeline for it. Treat that as something to test.")
 
 
 def md_doc(name: str) -> str:

@@ -25,7 +25,8 @@
     const seen = new Set(), events = [];
     D.mart_event_kpis.forEach(r => { if (!seen.has(r.event_id)) { seen.add(r.event_id); events.push({...r, ed: toDate(r.event_date)}); } });
     events.sort((a, b) => a.event_id.localeCompare(b.event_id));
-    return {fe, opps, stages, events, firms: D.mart_firm, meetings: D.mart_meetings, kpis: D.mart_event_kpis};
+    const meetings = D.mart_meetings.map(m => ({...m, md: toDate(m.meeting_date)}));
+    return {fe, opps, stages, events, firms: D.mart_firm, meetings, kpis: D.mart_event_kpis};
   }
 
   const arr = v => (v == null || v === 'All' ? [] : Array.isArray(v) ? v : [v]);
@@ -77,7 +78,8 @@
     const opps = filteredOpps(P, f);
     const assoc = associate(opps, att, f.window);
     const firms = !arr(f.segment).length ? P.firms : P.firms.filter(r => arr(f.segment).includes(r.segment));
-    const rand = rng(7);
+    const rand = rng(7), randClean = rng(11);
+    const everIds = new Set(base.map(r => r.firm_id));  // attended any event under the rule
     const rows = P.events.map(ev => {
       const a = att.filter(r => r.event_id === ev.event_id);
       const attIds = new Set(a.map(r => r.firm_id));
@@ -96,6 +98,7 @@
       r.assoc_opps_reached_dd = s.filter(o => o.reached_dd).length;
       const won = s.filter(o => o.outcome === 'Committed');
       r.assoc_committed_opps = won.length; r.assoc_committed_usd = sum(won, o => o.amount_usd); r.assoc_declined_opps = s.filter(o => o.outcome === 'Declined').length;
+      r.assoc_declined_usd = sum(s.filter(o => o.outcome === 'Declined'), o => o.amount_usd);
       r.median_days_event_to_opp = median(s.map(o => o.days_after_event));
       r.pipeline_to_cost = r.assoc_pipeline_usd / ev.cost_usd; r.cost_per_assoc_opp = r.assoc_opps ? ev.cost_usd / r.assoc_opps : null;
       const ed = ev.ed, w = f.window * DAY;
@@ -109,6 +112,17 @@
       r.diff_in_diff_opp_rate = A.length && N.length ? (r.attendee_new_opp_rate - r.attendee_prior_opp_rate) - (r.non_attendee_new_opp_rate - r.non_attendee_prior_opp_rate) : null;
       r.p_value_did = A.length && N.length && !isDefaultExtra(f)
         ? permP(grp.map(x => (after.has(x.firm_id) ? 1 : 0) - (before.has(x.firm_id) ? 1 : 0)), grp.map(x => attIds.has(x.firm_id)), rand) : null;
+      // stricter comparison group: firms that attended no event at all
+      const C = firms.filter(x => !everIds.has(x.firm_id));
+      r.clean_new_opp_rate = rate(C, after); r.clean_prior_opp_rate = rate(C, before); r.clean_control_firms = C.length;
+      r.diff_in_diff_clean = A.length && C.length ? (r.attendee_new_opp_rate - r.attendee_prior_opp_rate) - (r.clean_new_opp_rate - r.clean_prior_opp_rate) : null;
+      const g2 = A.concat(C);
+      r.p_value_did_clean = A.length && C.length && !isDefaultExtra(f)
+        ? permP(g2.map(x => (after.has(x.firm_id) ? 1 : 0) - (before.has(x.firm_id) ? 1 : 0)), g2.map(x => attIds.has(x.firm_id)), randClean) : null;
+      // meetings with the comparison group in the same 60-day windows
+      const nIds = new Set(N.map(x => x.firm_id)), mN = P.meetings.filter(m => nIds.has(m.firm_id));
+      r.non_attendee_meetings_pre_60 = mN.filter(m => m.md < ed && m.md >= ed.getTime() - 60 * DAY).length;
+      r.non_attendee_meetings_post_60 = mN.filter(m => m.md > ed && m.md <= ed.getTime() + 60 * DAY).length;
       let nA = 0, aA = 0, nN = 0, aN = 0, usd = 0;
       opps.filter(o => o.cd < ed && !(o.comd && o.comd < ed) && !(o.decd && o.decd < ed)).forEach(o => {
         const h = P.stages[o.opportunity_id] || [];
@@ -120,7 +134,7 @@
       return r;
     });
     if (isDefaultExtra(f)) { // same p-values as the build, so every surface agrees
-      rows.forEach(r => { const m = P.kpis.find(k => k.event_id === r.event_id && k.window_days === f.window && k.include_tentative === f.tentative); r.p_value_did = m.p_value_did; });
+      rows.forEach(r => { const m = P.kpis.find(k => k.event_id === r.event_id && k.window_days === f.window && k.include_tentative === f.tentative); r.p_value_did = m.p_value_did; r.p_value_did_clean = m.p_value_did_clean; });
     }
     rows.forEach(r => { r.did_significant = r.p_value_did != null && r.p_value_did < 0.05; r.n_permutations = 5000; });
     const ev = arr(f.events);
@@ -133,7 +147,8 @@
       'assoc_opps_reached_dd', 'assoc_committed_opps', 'assoc_committed_usd', 'assoc_declined_opps', 'median_days_event_to_opp', 'cost_per_assoc_opp',
       'attendee_new_opp_rate', 'attendee_prior_opp_rate', 'non_attendee_new_opp_rate', 'non_attendee_prior_opp_rate', 'non_attendee_firms',
       'diff_in_diff_opp_rate', 'open_opps_attendees', 'open_opps_attendees_advanced', 'open_opps_non_attendees', 'open_opps_non_attendees_advanced',
-      'open_pipeline_attendees_usd'];
+      'open_pipeline_attendees_usd', 'assoc_declined_usd', 'clean_new_opp_rate', 'clean_prior_opp_rate', 'clean_control_firms', 'diff_in_diff_clean',
+      'non_attendee_meetings_pre_60', 'non_attendee_meetings_post_60'];
     const bad = [];
     [30, 60, 90, 180].forEach(w => [false, true].forEach(t => eventKpis(P, {window: w, tentative: t, segment: [], fund: [], seniority: [], excludeOutlier: false}).forEach(r => {
       const m = P.kpis.find(k => k.event_id === r.event_id && k.window_days === w && k.include_tentative === t);

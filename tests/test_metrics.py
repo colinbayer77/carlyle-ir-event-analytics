@@ -17,7 +17,8 @@ COLS = ["firms_attended", "tier1_firms", "firms_with_senior", "cost_per_firm", "
         "assoc_declined_opps", "median_days_event_to_opp", "cost_per_assoc_opp", "attendee_new_opp_rate", "attendee_prior_opp_rate",
         "non_attendee_new_opp_rate", "non_attendee_prior_opp_rate", "non_attendee_firms", "diff_in_diff_opp_rate",
         "open_opps_attendees", "open_opps_attendees_advanced", "open_opps_non_attendees", "open_opps_non_attendees_advanced",
-        "open_pipeline_attendees_usd", "p_value_did"]
+        "open_pipeline_attendees_usd", "p_value_did", "assoc_declined_usd", "clean_new_opp_rate", "clean_prior_opp_rate",
+        "clean_control_firms", "diff_in_diff_clean", "p_value_did_clean", "non_attendee_meetings_pre_60", "non_attendee_meetings_post_60"]
 
 
 def test_default_filters_match_sql_mart():

@@ -25,6 +25,24 @@ FINDINGS = [
         "O9998 and O9999 are identical (same firm, fund, dates, stage, $25M). Kept O9998, dropped O9999.",
     ),
     (
+        "Out-of-sequence IDs with a single stage row",
+        "Medium",
+        "SELECT (SELECT COUNT(DISTINCT opportunity_id) FROM raw_opportunity_stage_history WHERE opportunity_id NOT BETWEEN 'O0001' AND 'O0999') + (SELECT COUNT(*) FROM raw_event_attendees WHERE attendance_id NOT BETWEEN 'A0001' AND 'A0999')",
+        "O9998/O9999 and A9998 sit outside the normal ID ranges, like planted test rows. O9998 (the kept copy) has one stage row, Committed 10 days after creation (other commitments took 28 to 111 days). It is London's only associated commitment: kept, but London commits $25M with it and $0 without; all events $253M with it, $228M without.",
+    ),
+    (
+        "Possible affiliate firm",
+        "Info",
+        "SELECT COUNT(*) FROM raw_firms WHERE NOT regexp_matches(firm_name, '^Investor Firm [0-9]+$')",
+        "F028 'Investor Firm 08 Holdings' is the only name off the standard pattern and echoes F008. Segment and history differ, so kept as separate firms. If merged, London gains 2 associated opportunities ($12.5M) and F028 leaves the comparison group.",
+    ),
+    (
+        "No opportunities created after 2026-08-12",
+        "Medium",
+        "SELECT COUNT(*) FROM stg_meetings WHERE meeting_date > (SELECT MAX(created_date) FROM stg_opp_stage)",
+        "The last opportunity was created 42 days before the 2026-09-23 cutoff (July 23 new, August 5, September 0). Opportunities opened late in the extract likely had no stage row yet. Berlin's 90-day window is effectively about 57 days; count shown is meetings logged after the last opportunity creation.",
+    ),
+    (
         "Attendee with no firm_id",
         "Medium",
         "SELECT COUNT(*) FROM raw_event_attendees WHERE NULLIF(TRIM(firm_id), '') IS NULL",

@@ -6,7 +6,7 @@
 
 | Step | What AI did |
 |---|---|
-| Data profiling | Profiled all five files: duplicates, blank keys, float-formatted amounts, the $650M outlier, stage dates after the delivery date, repeated stage rows |
+| Data profiling | Profiled all five files: duplicates, blank keys, float-formatted amounts, the $650M outlier, stage dates after the extract date, repeated stage rows |
 | Data model | Wrote the staging, core, and mart SQL and the sensitivity grid (4 windows x 2 attendance rules) |
 | Two front ends | Built the static page and the Streamlit app on the same marts, so offering both cost little extra |
 | Validation code | Wrote an independent pandas recomputation, build-breaking assertions, a permutation test, and Streamlit UI tests |
@@ -48,7 +48,8 @@ Claude caught most of these in its own validation passes; the audit agent and I 
 - **A claim the data did not support.** Draft notebook text said London and Berlin lift "stays at or below zero at every window." The output showed Berlin at +3 points at 180 days. The text now matches the table.
 - **A misleading label.** A bucket called "Never attended" included firms that were only tentative. Renamed to "No confirmed attendance."
 - **Headline wording.** A draft slide said the London dinner delivered the "same pipeline story at a third of the cost." London's pipeline was half of New York's, so the title now states the cost-per-opportunity comparison. "Events reach nearly all priority firms" became "most" (13 of 17 Tier 1).
-- **Attribution rule.** An early plan credited opportunities to the first event a firm attended. With 24 firms at two or more events, that would credit March's summit for opportunities opened weeks after a June event. Changed to the most recent event within the window.
+- **Attribution rule.** An early plan credited opportunities to the first event a firm attended. With 21 firms at two or more events, that would credit March's summit for opportunities opened weeks after a June event. Changed to the most recent event within the window.
 - **Future-dated stages.** 23 raw stage rows (19 after collapsing repeats) are dated after the extract date. They are treated as projected rather than counted as commitments.
 - **Rounding that disagreed across surfaces.** After the duplicate fix, the readout showed $252M and the dashboards $253M for the same $252.5M. The Python formatters now round the same way as the page.
+- **A second full review changed the headline framing.** A final multi-agent review (six lenses, three independent verifiers per finding) found that the comparison group for the difference-in-differences was mostly attendees of the other two events, and that switching to the 13 firms at no event flips the sign for all three events. The dashboards and readout now show both comparisons and no longer quote a single event's sign as evidence. The same review caught a wrong claim on slide 3 (7 of the 10 "unmet" Tier 1 firms had been met, just not within 60 days), an unsupported "shift budget to hospitality" recommendation (London's advantage is its low cost per firm; conversion was similar), a holdout design that could not deliver what it promised, and data-extent limits (no opportunities created after 2026-08-12, NY's short before-window) that the docs had stated wrongly.
 - **UI defects I found by using the app.** Streamlit controls that had stopped responding, page filters duplicated on the Firm explorer, a timeline panel that stayed on one firm after filtering, and card titles pushed off center by their tooltip icons. Each was fixed and, where possible, covered by a test.

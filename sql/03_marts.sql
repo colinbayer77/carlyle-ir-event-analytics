@@ -90,6 +90,18 @@ JOIN dim_event e USING (event_id)
 LEFT JOIN fct_meeting m ON m.firm_id = fe.firm_id
 GROUP BY ALL;
 
+-- Meetings for every firm around every event date (attendees and comparison groups alike).
+CREATE OR REPLACE TABLE int_firm_meetings_around_event AS
+SELECT e.event_id, f.firm_id,
+       COUNT(m.meeting_id) FILTER (WHERE m.meeting_date <  e.event_date
+                                     AND m.meeting_date >= e.event_date - 60)    AS meetings_pre_60,
+       COUNT(m.meeting_id) FILTER (WHERE m.meeting_date >  e.event_date
+                                     AND m.meeting_date <= e.event_date + 60)    AS meetings_post_60
+FROM dim_event e
+CROSS JOIN dim_firm f
+LEFT JOIN fct_meeting m ON m.firm_id = f.firm_id
+GROUP BY ALL;
+
 -- Per-firm new-opportunity flag after/before each event date (for comparison groups).
 CREATE OR REPLACE TABLE int_firm_window_opps AS
 SELECT g.window_days, e.event_id, f.firm_id,
@@ -148,21 +160,34 @@ assoc AS (
            COUNT(*) FILTER (WHERE o.outcome = 'Committed')               AS assoc_committed_opps,
            COALESCE(SUM(o.amount_usd) FILTER (WHERE o.outcome = 'Committed'), 0) AS assoc_committed_usd,
            COUNT(*) FILTER (WHERE o.outcome = 'Declined')                AS assoc_declined_opps,
+           COALESCE(SUM(o.amount_usd) FILTER (WHERE o.outcome = 'Declined'), 0) AS assoc_declined_usd,
            MEDIAN(b.days_after_event)                                    AS median_days_event_to_opp
     FROM bridge_opp_event b JOIN fct_opportunity o USING (opportunity_id)
     GROUP BY ALL
 ),
-cmp AS (  -- new-opportunity rate: attendees vs non-attendees after the event, attendees before
+ever AS (  -- firms that attended any 2026 event under the attendance rule
+    SELECT DISTINCT include_tentative, firm_id FROM int_attendance_rule
+),
+cmp AS (  -- new-opportunity rate: attendees vs non-attendees after the event, attendees before.
+          -- Two comparison groups: every firm that did not attend this event (which includes attendees
+          -- of the other two events), and the stricter group of firms that attended no event at all.
     SELECT g.window_days, g.include_tentative, w.event_id,
            AVG(CASE WHEN w.opps_after  > 0 THEN 1.0 ELSE 0 END) FILTER (WHERE ar.firm_id IS NOT NULL) AS attendee_new_opp_rate,
            AVG(CASE WHEN w.opps_before > 0 THEN 1.0 ELSE 0 END) FILTER (WHERE ar.firm_id IS NOT NULL) AS attendee_prior_opp_rate,
            AVG(CASE WHEN w.opps_after  > 0 THEN 1.0 ELSE 0 END) FILTER (WHERE ar.firm_id IS NULL)     AS non_attendee_new_opp_rate,
            AVG(CASE WHEN w.opps_before > 0 THEN 1.0 ELSE 0 END) FILTER (WHERE ar.firm_id IS NULL)     AS non_attendee_prior_opp_rate,
-           COUNT(*) FILTER (WHERE ar.firm_id IS NULL)                                                  AS non_attendee_firms
+           COUNT(*) FILTER (WHERE ar.firm_id IS NULL)                                                  AS non_attendee_firms,
+           AVG(CASE WHEN w.opps_after  > 0 THEN 1.0 ELSE 0 END) FILTER (WHERE ev.firm_id IS NULL)     AS clean_new_opp_rate,
+           AVG(CASE WHEN w.opps_before > 0 THEN 1.0 ELSE 0 END) FILTER (WHERE ev.firm_id IS NULL)     AS clean_prior_opp_rate,
+           COUNT(*) FILTER (WHERE ev.firm_id IS NULL)                                                  AS clean_control_firms,
+           SUM(mm.meetings_pre_60)  FILTER (WHERE ar.firm_id IS NULL)                                  AS non_attendee_meetings_pre_60,
+           SUM(mm.meetings_post_60) FILTER (WHERE ar.firm_id IS NULL)                                  AS non_attendee_meetings_post_60
     FROM grid g
     JOIN int_firm_window_opps w ON w.window_days = g.window_days
+    JOIN int_firm_meetings_around_event mm ON mm.event_id = w.event_id AND mm.firm_id = w.firm_id
     LEFT JOIN int_attendance_rule ar
       ON ar.firm_id = w.firm_id AND ar.event_id = w.event_id AND ar.include_tentative = g.include_tentative
+    LEFT JOIN ever ev ON ev.firm_id = w.firm_id AND ev.include_tentative = g.include_tentative
     GROUP BY ALL
 ),
 adv AS (  -- acceleration of pipeline already open at the event
@@ -197,6 +222,7 @@ SELECT
     COALESCE(s.assoc_committed_opps, 0)                              AS assoc_committed_opps,
     COALESCE(s.assoc_committed_usd, 0)                               AS assoc_committed_usd,
     COALESCE(s.assoc_declined_opps, 0)                               AS assoc_declined_opps,
+    COALESCE(s.assoc_declined_usd, 0)                                AS assoc_declined_usd,
     s.median_days_event_to_opp,
     COALESCE(s.assoc_pipeline_usd, 0) / e.cost_usd                   AS pipeline_to_cost,
     COALESCE(s.assoc_pipeline_ex_outlier_usd, 0) / e.cost_usd        AS pipeline_to_cost_ex_outlier,
@@ -205,6 +231,10 @@ SELECT
     cmp.non_attendee_new_opp_rate, cmp.non_attendee_prior_opp_rate, cmp.non_attendee_firms,
     (cmp.attendee_new_opp_rate - cmp.attendee_prior_opp_rate)
       - (cmp.non_attendee_new_opp_rate - cmp.non_attendee_prior_opp_rate)   AS diff_in_diff_opp_rate,
+    cmp.clean_new_opp_rate, cmp.clean_prior_opp_rate, cmp.clean_control_firms,
+    (cmp.attendee_new_opp_rate - cmp.attendee_prior_opp_rate)
+      - (cmp.clean_new_opp_rate - cmp.clean_prior_opp_rate)                 AS diff_in_diff_clean,
+    cmp.non_attendee_meetings_pre_60, cmp.non_attendee_meetings_post_60,
     DATE_DIFF('day', e.event_date, (SELECT as_of_date FROM params))         AS days_since_event,
     adv.open_opps_attendees, adv.open_opps_attendees_advanced,
     adv.open_opps_non_attendees, adv.open_opps_non_attendees_advanced,
@@ -254,7 +284,7 @@ SELECT
     b.event_id                                 AS assoc_event_id_90,
     b.days_after_event                         AS days_after_event_90,
     CASE WHEN b.event_id IS NOT NULL THEN 'Event-associated (90d)'
-         WHEN o.firm_id IN (SELECT firm_id FROM fct_firm_event WHERE is_confirmed) THEN 'Attendee, outside window'
+         WHEN o.firm_id IN (SELECT firm_id FROM fct_firm_event WHERE is_confirmed) THEN 'Attendee, not in window'
          ELSE 'No confirmed attendance' END             AS source_bucket
 FROM fct_opportunity o
 JOIN dim_firm f USING (firm_id)

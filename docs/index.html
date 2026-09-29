@@ -232,7 +232,7 @@ tr.sel { background: var(--surface-2); }
       </div>
     </div>
     <div class="card">
-      <h2>Follow-up gaps: confirmed firms with no meeting within 60 days of an event</h2>
+      <h2>Follow-up gaps: firm-events with no meeting within 60 days</h2>
       <p class="sub">The action list. Sorted by tier, then pipeline at stake.</p>
       <div class="scroll"><table id="leak"></table></div>
     </div>
@@ -451,8 +451,8 @@ tr.sel { background: var(--surface-2); }
 <td>An opportunity whose firm attended an event and whose <code>created_date</code> falls 0 to W days after that event's date (both ends inclusive). If more than one attended event qualifies, the <strong>most recent</strong> one gets credit, so an opportunity is never counted twice.</td>
 </tr>
 <tr>
-<td>Comparison group (non-attendees)</td>
-<td>For each event, every firm in scope that did <strong>not</strong> attend that event. Firms removed by the seniority filter are dropped from both groups rather than treated as non-attendees.</td>
+<td>Comparison groups</td>
+<td>Two are shown. <strong>Firms not at the event</strong>: for each event, every firm in scope that did not attend that event; this includes attendees of the other two events (21 to 28 of the 34 to 41 firms), so it is partly treated. <strong>Firms at no event</strong>: firms that attended none of the three events under the current rule (13 at the default rule); clean but small. Firms removed by the seniority filter are dropped from both groups rather than treated as non-attendees.</td>
 </tr>
 <tr>
 <td>Window before / after</td>
@@ -472,7 +472,7 @@ tr.sel { background: var(--surface-2); }
 </tr>
 <tr>
 <td>Pipeline ($)</td>
-<td>Sum of <code>opportunity_amount_usd</code>, at any stage, unless the text says committed. Each opportunity has one amount that never changes.</td>
+<td>Sum of <code>opportunity_amount_usd</code>, at any stage, including opportunities later declined, unless the text says committed. Each opportunity has one amount that never changes.</td>
 </tr>
 <tr>
 <td>Tier</td>
@@ -508,12 +508,12 @@ tr.sel { background: var(--surface-2); }
 </tr>
 <tr>
 <td>Associated pipeline</td>
-<td>Sum of amounts of the associated opportunities. Sub-label: event spend / associated opportunities.</td>
+<td>Sum of amounts of the associated opportunities, gross (declined opportunities included; $150M at the default rule). Sub-label: event spend / associated opportunities.</td>
 <td><code>fct_opportunity.amount_usd</code></td>
 </tr>
 <tr>
-<td>Associated commitments</td>
-<td>Sum of amounts of associated opportunities whose outcome is Committed. Sub-label: their count.</td>
+<td>Associated commitments (face value)</td>
+<td>Sum of amounts of associated opportunities whose outcome is Committed. Face value of the opportunity, not capital called. Sub-label: their count.</td>
 <td><code>fct_opportunity</code></td>
 </tr>
 <tr>
@@ -571,6 +571,11 @@ tr.sel { background: var(--surface-2); }
 <td><code>meetings_pre_60</code>, <code>meetings_post_60</code></td>
 </tr>
 <tr>
+<td>Meetings per firm, before → after (attendees; firms not at event)</td>
+<td>The same 60-day meeting counts divided by the number of firms in each group, so events of different size and the seasonal trend can be compared. Meetings with firms not at the event use the same dates. Berlin's "before" window includes 11 meetings held after the London dinner.</td>
+<td><code>meetings_pre_60</code>, <code>meetings_post_60</code>, <code>non_attendee_meetings_pre_60</code>, <code>non_attendee_meetings_post_60</code></td>
+</tr>
+<tr>
 <td>Associated opportunities</td>
 <td>Event-associated opportunities credited to this event.</td>
 <td><code>assoc_opps</code></td>
@@ -581,9 +586,9 @@ tr.sel { background: var(--surface-2); }
 <td><code>firm_conversion_rate</code></td>
 </tr>
 <tr>
-<td>Associated pipeline</td>
-<td>Sum of amounts of this event's associated opportunities.</td>
-<td><code>assoc_pipeline_usd</code></td>
+<td>Associated pipeline (of which declined)</td>
+<td>Sum of amounts of this event's associated opportunities, with the declined part in brackets.</td>
+<td><code>assoc_pipeline_usd</code>, <code>assoc_declined_usd</code></td>
 </tr>
 <tr>
 <td>Reached due diligence+</td>
@@ -591,8 +596,8 @@ tr.sel { background: var(--surface-2); }
 <td><code>assoc_opps_reached_dd</code></td>
 </tr>
 <tr>
-<td>Committed</td>
-<td>Sum of amounts of this event's associated opportunities with outcome Committed, and their count.</td>
+<td>Committed (face value)</td>
+<td>Sum of amounts of this event's associated opportunities with outcome Committed, and their count. London's only commitment is O9998, a flagged record (see the data-quality log).</td>
 <td><code>assoc_committed_usd</code>, <code>assoc_committed_opps</code></td>
 </tr>
 <tr>
@@ -606,19 +611,24 @@ tr.sel { background: var(--surface-2); }
 <td><code>attendee_prior_opp_rate</code>, <code>attendee_new_opp_rate</code></td>
 </tr>
 <tr>
-<td>New-opp rate: non-attendees before → after</td>
-<td>The same two shares for the comparison group.</td>
+<td>New-opp rate: firms not at event, before → after</td>
+<td>The same two shares for firms not at this event.</td>
 <td><code>non_attendee_prior_opp_rate</code>, <code>non_attendee_new_opp_rate</code></td>
 </tr>
 <tr>
-<td>Difference-in-differences</td>
-<td>(attendee after − attendee before) − (non-attendee after − non-attendee before), in percentage points. Positive means attendees' rate rose more than non-attendees' over the same dates.</td>
-<td><code>diff_in_diff_opp_rate</code></td>
+<td>New-opp rate: firms at no event, before → after</td>
+<td>The same two shares for firms that attended no event.</td>
+<td><code>clean_prior_opp_rate</code>, <code>clean_new_opp_rate</code>, <code>clean_control_firms</code></td>
 </tr>
 <tr>
-<td>p-value, permutation test</td>
-<td>Two-sided permutation test on the difference-in-differences. Which firms attended is randomly reshuffled 5,000 times, keeping the number of attendees fixed; the p-value is the share of reshuffles whose gap is at least as large as the observed one. Significant only if p &lt; 0.05. Recomputed with a fresh set of reshuffles under any extra filter, so it can differ in the second decimal between the two dashboards.</td>
-<td><code>p_value_did</code>, <code>did_significant</code></td>
+<td>Diff-in-diff vs firms not at event</td>
+<td>(attendee after − attendee before) − (comparison after − comparison before), in percentage points, with the permutation p-value. Positive means attendees' rate rose more than the comparison group's over the same dates.</td>
+<td><code>diff_in_diff_opp_rate</code>, <code>p_value_did</code></td>
+</tr>
+<tr>
+<td>Diff-in-diff vs firms at no event</td>
+<td>The same, against firms that attended no event, with its own p-value (reshuffles among attendees and those firms only). The two diff-in-diff rows disagree in sign for every event; neither is significant. p-values are two-sided permutation tests with 5,000 reshuffles, significant only if p &lt; 0.05; under extra filters they are recomputed with fresh reshuffles, so they can differ in the second decimal between the two dashboards.</td>
+<td><code>diff_in_diff_clean</code>, <code>p_value_did_clean</code></td>
 </tr>
 <tr>
 <td>Open opps advancing a stage (attendees vs not)</td>
@@ -712,7 +722,7 @@ tr.sel { background: var(--surface-2); }
 </tr>
 <tr>
 <td>Follow-up gaps table</td>
-<td>Attending firm-events with no meeting in the 60 days after the event, sorted by tier then the firm's total pipeline. "Days to next meeting" is the first meeting after the event, if any.</td>
+<td>Attending firm-events (not firms: a firm at two events can appear twice) with no meeting in the 60 days after the event, sorted by tier then the firm's total pipeline. "Days to next meeting" is the first meeting after the event, if any, which may fall after the 60 days.</td>
 <td><code>meetings_post_60 = 0</code>, <code>days_to_first_followup</code></td>
 </tr>
 </tbody>
@@ -788,7 +798,7 @@ tr.sel { background: var(--surface-2); }
 <tbody>
 <tr>
 <td>Source bucket</td>
-<td>Event-associated (in window, attended); Attendee, outside window (the firm attended some selected event but this opportunity is outside every window); No confirmed attendance (the firm attended no selected event under the current rule).</td>
+<td>Event-associated (in window, attended); Attendee, not in window (the firm attended some selected event but this opportunity is outside every window; at the default rule 29 of these 39 were opened before the firm's first event); No confirmed attendance (the firm attended no selected event under the current rule).</td>
 <td><code>source_bucket</code>, recomputed under filters</td>
 </tr>
 <tr>
@@ -842,8 +852,8 @@ tr.sel { background: var(--surface-2); }
 <td>Confirmed firm-events from 2026 with each firm's outcomes at the default rule (<code>mart_firm_event</code>): associated opportunities, associated pipeline, follow-up within 30 days. "All 2026 events" uses all 70; "Same format only" uses the events of the chosen format.</td>
 </tr>
 <tr>
-<td>Estimates</td>
-<td>For the planned number of firms in each tier, the pool's firm-events of that tier are resampled with replacement 4,000 times (a bootstrap); the sums give a distribution of total associated opportunities and pipeline. The card shows the median, and the tooltip and footnote show the 10th to 90th percentile range.</td>
+<td>Ranges</td>
+<td>For the planned number of firms in each tier, the pool's firm-events of that tier are resampled with replacement 4,000 times (a bootstrap); the sums give a distribution of total associated opportunities and pipeline. The cards lead with the 10th to 90th percentile range; the middle value is in the tooltip and footnote. It is a historical analog, not a forecast.</td>
 </tr>
 <tr>
 <td>Cost per firm / per associated opp</td>
@@ -851,11 +861,11 @@ tr.sel { background: var(--surface-2); }
 </tr>
 <tr>
 <td>Firms met within 30 days</td>
-<td>Firms reached x the target slider. The planner adds no pipeline for follow-up because, in 2026, firms followed up within 30 days did not convert at a higher rate.</td>
+<td>Firms reached x the target slider. The planner adds no pipeline for follow-up because the 2026 comparison (37% vs 40% conversion) is too small to show whether follow-up speed matters.</td>
 </tr>
 <tr>
-<td>Expected opportunities by tier</td>
-<td>Median of the same bootstrap run for each tier alone.</td>
+<td>Opportunities that followed, by tier</td>
+<td>Middle estimate of the same bootstrap run for each tier alone; tier medians need not add to the overall middle value.</td>
 </tr>
 </tbody>
 </table>
@@ -1016,11 +1026,11 @@ function ctx() {
   const opps = IRMetrics.associate(IRMetrics.filteredOpps(P, f), attAll, f.window).map(o => {
     const a = o.assoc_event_id && sel(o.assoc_event_id) ? o.assoc_event_id : null;
     return {...o, assoc_event_id: a, days_after_event: a ? o.days_after_event : null,
-      bucket: a ? `Event-associated (${f.window}d)` : attFirms.has(o.firm_id) ? 'Attendee, outside window' : noneLabel};
+      bucket: a ? `Event-associated (${f.window}d)` : attFirms.has(o.firm_id) ? 'Attendee, not in window' : noneLabel};
   });
   const firmsIn = !f.segment.length ? D.mart_firm : D.mart_firm.filter(r => f.segment.includes(r.segment));
   const events = EVENTS.filter(e => sel(e.event_id));
-  return {f, att, attAll, base, opps, attFirms, firmsIn, noneLabel, events, buckets: [`Event-associated (${f.window}d)`, 'Attendee, outside window', noneLabel]};
+  return {f, att, attAll, base, opps, attFirms, firmsIn, noneLabel, events, buckets: [`Event-associated (${f.window}d)`, 'Attendee, not in window', noneLabel]};
 }
 function describeFilters(f) {
   const parts = [`${f.window}-day window`, f.tentative ? 'confirmed + tentative attendance' : 'confirmed attendance'];
@@ -1122,18 +1132,21 @@ function renderOverview() {
   const t1fu = t1.filter(r => r.followed_up_30).length;
   const allAssoc = d.reduce((a, r) => a + r.assoc_opps, 0);
   const leakT1 = D.mart_firm.filter(r => r.has_unfollowed_event && r.tier === 'Tier 1').length;
+  const sgn = v => (v >= 0 ? '+' : '') + Math.round(v * 100) + ' pts';
+  const lastCreated = D.mart_opportunity.reduce((a, o) => (o.created_date > a ? o.created_date : a), '');
   $('#insights').innerHTML = [
     `<b>Events touch most of the book, but most pipeline did not follow an event.</b> ${allAssoc} of ${D.mart_opportunity.length} opportunities (${fmtM(d.reduce((a,r)=>a+r.assoc_pipeline_usd,0))} of ${fmtM(D.mart_opportunity.reduce((a,r)=>a+r.amount_usd,0))}) were opened within 90 days of an attended event. The largest commitment of the year (${fmtM(650e6)}, O0017) came from a firm that attended nothing.`,
-    `<b>No evidence of incremental lift versus non-attendees.</b> After adjusting for each group's prior rate, only the NY Summit shows attendees opening new opportunities faster (+${Math.round(by.E001.diff_in_diff_opp_rate*100)} pts); London (${Math.round(by.E002.diff_in_diff_opp_rate*100)} pts) and Berlin (${Math.round(by.E003.diff_in_diff_opp_rate*100)} pts) do not. None of the three gaps is statistically significant<sup>*</sup>: this is association on small numbers, not proof either way.`,
+    `<b>No evidence of incremental lift versus non-attendees.</b> The difference-in-differences in new-opportunity rate flips sign depending on the comparison group: against firms not at that event it is ${sgn(by.E001.diff_in_diff_opp_rate)} (NY), ${sgn(by.E002.diff_in_diff_opp_rate)} (London), ${sgn(by.E003.diff_in_diff_opp_rate)} (Berlin); against the ${by.E001.clean_control_firms} firms at no event it is ${sgn(by.E001.diff_in_diff_clean)}, ${sgn(by.E002.diff_in_diff_clean)}, ${sgn(by.E003.diff_in_diff_clean)}. None of the three gaps is statistically significant<sup>*</sup>: this is association on small numbers, not proof either way.`,
     `<b>Follow-up is the biggest controllable gap, worst at Tier 1.</b> Only ${pct(d.reduce((a,r)=>a+r.firms_followup_30,0)/d.reduce((a,r)=>a+r.firms_attended,0))} of attending firms got a meeting within 30 days; Tier 1 was ${t1fu} of ${t1.length}. ${leakT1} Tier 1 firms have an event with no meeting in the following 60 days.`,
-    `<b>The $185K London dinner had the lowest spend per associated opportunity.</b> ${fmtK(by.E002.cost_per_assoc_opp)}, and the highest 30-day follow-up (${pct(by.E002.followup_rate_30)}), versus ${fmtK(by.E001.cost_per_assoc_opp)} for NY and ${fmtK(by.E003.cost_per_assoc_opp)} for Berlin.`,
-    `<b>Berlin ($610K) needs a case before it is renewed.</b> Meetings with attendees fell after the event (${by.E003.meetings_pre_60} in the 60 days before, ${by.E003.meetings_post_60} after), ${by.E003.assoc_opps} associated opportunities, no commitments yet. It is the youngest event (${by.E003.days_since_event} days), so recheck at 180 days.`,
+    `<b>The $185K London dinner was the cheapest way to reach firms.</b> ${fmtK(by.E002.cost_per_firm)} per attending firm vs ${fmtK(by.E001.cost_per_firm)} NY and ${fmtK(by.E003.cost_per_firm)} Berlin, with a similar share of firms opening an opportunity (${pct(by.E002.firm_conversion_rate)} vs ${pct(by.E001.firm_conversion_rate)} and ${pct(by.E003.firm_conversion_rate)}). That low cost, not stronger conversion, drives its ${fmtK(by.E002.cost_per_assoc_opp)} per associated opportunity, and it is one dinner.`,
+    `<b>Berlin ($610K) needs a case before it is renewed.</b> Meetings per attending firm fell from ${(by.E003.meetings_pre_60 / by.E003.firms_attended).toFixed(2)} to ${(by.E003.meetings_post_60 / by.E003.firms_attended).toFixed(2)}, more than for firms not at the event (${(by.E003.non_attendee_meetings_pre_60 / by.E003.non_attendee_firms).toFixed(2)} to ${(by.E003.non_attendee_meetings_post_60 / by.E003.non_attendee_firms).toFixed(2)}), though part of the "before" count is London follow-up. ${by.E003.assoc_opps} associated opportunities, no commitments yet, and no opportunity in the data was created after ${lastCreated}; recheck at 180 days.`,
   ].map(s => `<li>${s}</li>`).join('');
 
-  const sigText = (rows, label) => `<sup>*</sup> Statistical significance: two-sided permutation test. Which firms attended each event was randomly reshuffled ${rows[0].n_permutations.toLocaleString()} times to see how often a difference-in-differences this large appears by chance; a gap counts as significant only if p &lt; 0.05. ${label}: p = ${rows.map(r => (r.p_value_did == null ? 'n/a' : r.p_value_did.toFixed(2)) + ' (' + evShort(r.event_id) + ')').join(', ')}.`;
+  const sigText = (rows, label) => `<sup>*</sup> Statistical significance: two-sided permutation test. Which firms attended each event was randomly reshuffled ${rows[0].n_permutations.toLocaleString()} times to see how often a difference-in-differences this large appears by chance; a gap counts as significant only if p &lt; 0.05. ${label}: p = ${rows.map(r => (r.p_value_did == null ? 'n/a' : r.p_value_did.toFixed(2)) + ' (' + evShort(r.event_id) + ')').join(', ')} against firms not at the event; ${rows.map(r => (r.p_value_did_clean == null ? 'n/a' : r.p_value_did_clean.toFixed(2)) + ' (' + evShort(r.event_id) + ')').join(', ')} against firms at no event. 72 tests across the window and attendance settings; expect a few below 0.05 by chance.`;
   $('#sigNoteIns').innerHTML = sigText(d, 'Default rule (90 days, confirmed)');
   $('#sigNoteScore').innerHTML = sigText(K, `Current settings (${describeFilters(C.f)})`);
   // scorecard
+  const sgnPts = v => (v >= 0 ? '+' : '') + Math.round(v * 100) + ' pts';
   const rows = [
     ['Date / type', r => `${mdy(r.event_date)} · ${r.event_type}`],
     ['Cost', r => fmtK(r.cost_usd)],
@@ -1142,16 +1155,19 @@ function renderOverview() {
     ['Follow-up within 30d', r => pct(r.followup_rate_30)],
     ['Median days to first follow-up', r => r.median_days_to_followup ?? '-'],
     ['Meetings 60d before → after', r => `${r.meetings_pre_60} → ${r.meetings_post_60}`],
+    ['Meetings per firm, before → after: attendees', r => r.firms_attended ? `${(r.meetings_pre_60 / r.firms_attended).toFixed(2)} → ${(r.meetings_post_60 / r.firms_attended).toFixed(2)}` : 'n/a'],
+    ['Meetings per firm, before → after: firms not at event', r => r.non_attendee_firms ? `${(r.non_attendee_meetings_pre_60 / r.non_attendee_firms).toFixed(2)} → ${(r.non_attendee_meetings_post_60 / r.non_attendee_firms).toFixed(2)}` : 'n/a'],
     ['Associated opportunities', r => r.assoc_opps],
     ['Firms converting', r => pct(r.firm_conversion_rate)],
-    ['Associated pipeline', r => fmtM(r.assoc_pipeline_usd)],
+    ['Associated pipeline (of which declined)', r => `${fmtM(r.assoc_pipeline_usd)} (${fmtM(r.assoc_declined_usd)})`],
     ['Reached due diligence+', r => r.assoc_opps_reached_dd],
     ['Committed (face value)', r => `${fmtM(r.assoc_committed_usd)} (${r.assoc_committed_opps})`],
     ['Cost per associated opp', r => fmtK(r.cost_per_assoc_opp)],
     ['New-opp rate: attendees before → after', r => `${pct(r.attendee_prior_opp_rate)} → ${pct(r.attendee_new_opp_rate)}`],
-    ['New-opp rate: non-attendees before → after', r => `${pct(r.non_attendee_prior_opp_rate)} → ${pct(r.non_attendee_new_opp_rate)}`],
-    ['Difference-in-differences', r => r.diff_in_diff_opp_rate == null ? 'n/a' : (r.diff_in_diff_opp_rate >= 0 ? '+' : '') + Math.round(r.diff_in_diff_opp_rate * 100) + ' pts'],
-    ['p-value, permutation test <span class="info" title="Share of 5,000 random reshuffles of which firms attended that produce a gap at least this large. Significant only if below 0.05.">ⓘ</span><sup>*</sup>', r => r.p_value_did == null ? 'n/a' : r.p_value_did.toFixed(2) + (r.did_significant ? ' (significant)' : ' (not significant)')],
+    ['New-opp rate: firms not at event, before → after', r => `${pct(r.non_attendee_prior_opp_rate)} → ${pct(r.non_attendee_new_opp_rate)}`],
+    ['New-opp rate: firms at no event, before → after', r => `${pct(r.clean_prior_opp_rate)} → ${pct(r.clean_new_opp_rate)}`],
+    ['Diff-in-diff vs firms not at event <span class="info" title="Firms not at this event include attendees of the other two events. p: share of 5,000 random reshuffles of which firms attended that produce a gap at least this large; significant only if below 0.05.">ⓘ</span><sup>*</sup>', r => r.diff_in_diff_opp_rate == null ? 'n/a' : `${sgnPts(r.diff_in_diff_opp_rate)} (p ${r.p_value_did == null ? 'n/a' : r.p_value_did.toFixed(2)})`],
+    ['Diff-in-diff vs firms at no event <span class="info" title="Stricter comparison group: firms that attended none of the three events. Small (13 firms at the default rule).">ⓘ</span><sup>*</sup>', r => r.diff_in_diff_clean == null ? 'n/a' : `${sgnPts(r.diff_in_diff_clean)} (p ${r.p_value_did_clean == null ? 'n/a' : r.p_value_did_clean.toFixed(2)}), n=${r.clean_control_firms}`],
     ['Open opps advancing a stage (attendees vs not)', r => `${pct(r.open_opps_attendees_advanced / r.open_opps_attendees)} vs ${pct(r.open_opps_non_attendees_advanced / r.open_opps_non_attendees)}`],
     ['Days since event (as-of)', r => r.days_since_event],
   ];
@@ -1213,7 +1229,7 @@ function renderOverview() {
       layout: {padding: {top: 6, bottom: 4}},
       scales: {x: {grid: {display: false}}, y: {display: false, beginAtZero: true, suggestedMax: Math.max(...mo, ...mt) * 1.3}}}});
   const srcV = C.buckets.map(b => C.opps.filter(o => o.bucket === b).reduce((a, o) => a + o.amount_usd, 0));
-  donut('cSourceDonut', [`Opened within ${C.f.window}d of an attended event`, 'Attendee firm, outside window', C.noneLabel === 'No confirmed attendance' ? 'Firm with no confirmed attendance' : C.noneLabel], srcV,
+  donut('cSourceDonut', [`Opened within ${C.f.window}d of an attended event`, 'Attendee firm, not in window (mostly opened before its first event)', C.noneLabel === 'No confirmed attendance' ? 'Firm with no confirmed attendance' : C.noneLabel], srcV,
     [css('--s1'), css('--s3'), css('--neutral')], {text: fmtM(srcV.reduce((a, b) => a + b, 0)), sub: '2026 pipeline'}, fmtM);
   chart('cMtg', {type: 'bar', plugins: [ChartDataLabels], data: {labels, datasets: [
       bar('60 days before', K.map(r => r.meetings_pre_60), css('--neutral'), wide),
@@ -1362,8 +1378,8 @@ function renderOpps() {
     options: {plugins: {tooltip: {callbacks: {label: c => `${c.dataset.label.replace(' $M', '')}: $${Math.round(c.raw)}M (${c.dataset.n[c.dataIndex]} opps)`}},
         datalabels: barLabels((v, c) => [fmtM(v * 1e6), `${c.dataset.n[c.dataIndex]} opps`], () => 2)},
       scales: {x: {grid: {display: false}}, y: hiddenAxis(Math.max(1, ...buckets.map(b => agg(b).reduce((a, o) => a + o.amount_usd, 0) / 1e6)) * 1.1)}}});
-  const outside = `Attendee, outside ${C.f.window}d`;
-  const srcName = o => o.assoc_event_id ? evShort(o.assoc_event_id) : o.bucket === 'Attendee, outside window' ? outside : 'No confirmed attendance';
+  const outside = `Attendee, not in ${C.f.window}d window`;
+  const srcName = o => o.assoc_event_id ? evShort(o.assoc_event_id) : o.bucket === 'Attendee, not in window' ? outside : 'No confirmed attendance';
   const stgName = r => r <= 2 ? 'Intro / VDR' : r === 3 ? 'Due diligence' : 'IC / documentation';
   const flows = {};
   const addFlow = (a, b, o) => { const k = a + '|' + b; flows[k] = flows[k] || {from: a, to: b, flow: 0, usd: 0}; flows[k].flow++; flows[k].usd += o.amount_usd; };

@@ -123,7 +123,10 @@ def event_kpis(P: dict, f: Filters) -> pd.DataFrame:
     assoc = associate(opps, att, f.window)
     firms = P["firms"] if not f.segment else P["firms"][P["firms"].segment.isin(f.segment)]
     stages = P["stages"]
+    meetings = P["meetings"].assign(meeting_date=lambda x: pd.to_datetime(x.meeting_date))
+    ever_ids = set(base.firm_id)  # firms that attended any event under the rule (before the seniority filter)
     rng = np.random.default_rng(7)
+    rng_clean = np.random.default_rng(11)
     rows = []
     for ev in P["events"].itertuples():
         a = att[att.event_id == ev.event_id]
@@ -148,6 +151,7 @@ def event_kpis(P: dict, f: Filters) -> pd.DataFrame:
                  assoc_committed_opps=int((s.outcome == "Committed").sum()),
                  assoc_committed_usd=float(s.loc[s.outcome == "Committed", "amount_usd"].sum()),
                  assoc_declined_opps=int((s.outcome == "Declined").sum()),
+                 assoc_declined_usd=float(s.loc[s.outcome == "Declined", "amount_usd"].sum()),
                  median_days_event_to_opp=_median(s.days_after_event))
         r["pipeline_to_cost"] = r["assoc_pipeline_usd"] / ev.cost_usd
         r["cost_per_assoc_opp"] = ev.cost_usd / r["assoc_opps"] if r["assoc_opps"] else None
@@ -166,6 +170,21 @@ def event_kpis(P: dict, f: Filters) -> pd.DataFrame:
         r["diff_in_diff_opp_rate"] = (None if not len(A) or not len(N) else
                                       (r["attendee_new_opp_rate"] - r["attendee_prior_opp_rate"]) - (r["non_attendee_new_opp_rate"] - r["non_attendee_prior_opp_rate"]))
         r["p_value_did"] = _perm_pvalue((grp.after - grp.before).to_numpy(float), grp.att.to_numpy(bool), rng) if len(A) and len(N) else float("nan")
+        # stricter comparison group: firms that attended no event at all
+        C = firms[~firms.firm_id.isin(ever_ids)].copy()
+        C["after"] = C.firm_id.isin(after).astype(int)
+        C["before"] = C.firm_id.isin(before).astype(int)
+        r.update(clean_new_opp_rate=C.after.mean() if len(C) else None, clean_prior_opp_rate=C.before.mean() if len(C) else None,
+                 clean_control_firms=len(C))
+        r["diff_in_diff_clean"] = (None if not len(A) or not len(C) else
+                                   (r["attendee_new_opp_rate"] - r["attendee_prior_opp_rate"]) - (r["clean_new_opp_rate"] - r["clean_prior_opp_rate"]))
+        g2 = pd.concat([A.assign(att=True), C.assign(att=False)])
+        r["p_value_did_clean"] = (_perm_pvalue((g2.after - g2.before).to_numpy(float), g2.att.to_numpy(bool), rng_clean)
+                                  if len(A) and len(C) else float("nan"))
+        # meetings with the comparison group in the same 60-day windows
+        mn = meetings[meetings.firm_id.isin(N.firm_id)]
+        r["non_attendee_meetings_pre_60"] = int(((mn.meeting_date < ed) & (mn.meeting_date >= ed - pd.Timedelta(days=60))).sum())
+        r["non_attendee_meetings_post_60"] = int(((mn.meeting_date > ed) & (mn.meeting_date <= ed + pd.Timedelta(days=60))).sum())
         # open pipeline at the event, and whether it advanced a stage within the window
         o = opps[(opps.created_date < ed) & ~(opps.committed_date < ed) & ~(opps.declined_date < ed)]
         adv_att = adv_non = n_att = n_non = 0
@@ -186,6 +205,7 @@ def event_kpis(P: dict, f: Filters) -> pd.DataFrame:
     if f.is_default_extra:  # use the build's p-values so every surface shows the same number
         m = P["kpis"][(P["kpis"].window_days == f.window) & (P["kpis"].include_tentative == f.tentative)].set_index("event_id")
         out["p_value_did"] = out.event_id.map(m.p_value_did)
+        out["p_value_did_clean"] = out.event_id.map(m.p_value_did_clean)
     if f.events:
         out = out[out.event_id.isin(f.events)].reset_index(drop=True)
     out["did_significant"] = out.p_value_did < 0.05

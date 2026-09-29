@@ -22,7 +22,7 @@ RAW = ROOT / "data" / "raw"
 MARTS = ROOT / "data" / "marts"
 DB_PATH = ROOT / "data" / "ir_events.duckdb"
 
-# Parameters. AS_OF_DATE is the day the data extract was delivered (zip timestamp);
+# Parameters. AS_OF_DATE is the extract date (file timestamps in the delivered zip; the email arrived 2026-09-28);
 # stage changes dated after it are treated as projected rather than achieved.
 AS_OF_DATE = date(2026, 9, 23)
 OUTLIER_AMOUNT_USD = 500_000_000  # single tickets at or above this are flagged
@@ -75,31 +75,40 @@ def add_significance(con: duckdb.DuckDBPyConnection) -> None:
     rows = con.execute("""
         SELECT g.window_days, g.include_tentative, w.event_id, w.firm_id,
                (w.opps_after > 0)::INT - (w.opps_before > 0)::INT AS change,
-               ar.firm_id IS NOT NULL AS attended
+               ar.firm_id IS NOT NULL AS attended,
+               w.firm_id NOT IN (SELECT firm_id FROM int_attendance_rule r WHERE r.include_tentative = g.include_tentative) AS never_attended
         FROM grid g
         JOIN int_firm_window_opps w ON w.window_days = g.window_days
         LEFT JOIN int_attendance_rule ar
           ON ar.firm_id = w.firm_id AND ar.event_id = w.event_id AND ar.include_tentative = g.include_tentative
         ORDER BY 1, 2, 3, 4""").fetchall()
     groups: dict[tuple, list] = {}
-    for w, t, e, _, change, att in rows:
-        groups.setdefault((w, t, e), []).append((change, att))
-    rng = np.random.default_rng(7)
-    out = []
-    for (w, t, e), vals in groups.items():
-        change = np.array([v[0] for v in vals], dtype=float)
-        att = np.array([v[1] for v in vals], dtype=bool)
+    for w, t, e, _, change, att, never in rows:
+        groups.setdefault((w, t, e), []).append((change, att, never))
+
+    def perm_test(change, att, rng):
         obs = change[att].mean() - change[~att].mean()
         perms = rng.permuted(np.tile(att, (N_PERMUTATIONS, 1)), axis=1)
         n_att = att.sum()
         null = (perms @ change) / n_att - ((~perms) @ change) / (len(att) - n_att)
-        p = float(np.mean(np.abs(null) >= abs(obs) - 1e-12))
-        out.append((w, t, e, float(obs), p))
-    con.execute("CREATE OR REPLACE TABLE did_significance (window_days INT, include_tentative BOOLEAN, event_id VARCHAR, did DOUBLE, p_value_did DOUBLE)")
-    con.executemany("INSERT INTO did_significance VALUES (?, ?, ?, ?, ?)", out)
+        return float(obs), float(np.mean(np.abs(null) >= abs(obs) - 1e-12))
+
+    rng = np.random.default_rng(7)
+    rng_clean = np.random.default_rng(11)  # separate stream so the main p-values do not move
+    out = []
+    for (w, t, e), vals in groups.items():
+        change = np.array([v[0] for v in vals], dtype=float)
+        att = np.array([v[1] for v in vals], dtype=bool)
+        never = np.array([v[2] for v in vals], dtype=bool)
+        obs, p = perm_test(change, att, rng)
+        keep = att | never  # attendees vs firms that attended no event
+        _, p_clean = perm_test(change[keep], att[keep], rng_clean)
+        out.append((w, t, e, obs, p, p_clean))
+    con.execute("CREATE OR REPLACE TABLE did_significance (window_days INT, include_tentative BOOLEAN, event_id VARCHAR, did DOUBLE, p_value_did DOUBLE, p_value_did_clean DOUBLE)")
+    con.executemany("INSERT INTO did_significance VALUES (?, ?, ?, ?, ?, ?)", out)
     con.execute(f"""
         CREATE OR REPLACE TABLE mart_event_kpis AS
-        SELECT k.*, s.p_value_did, s.p_value_did < {SIGNIFICANCE_LEVEL} AS did_significant, {N_PERMUTATIONS} AS n_permutations
+        SELECT k.*, s.p_value_did, s.p_value_did < {SIGNIFICANCE_LEVEL} AS did_significant, s.p_value_did_clean, {N_PERMUTATIONS} AS n_permutations
         FROM mart_event_kpis k JOIN did_significance s USING (window_days, include_tentative, event_id)
         ORDER BY window_days, include_tentative, event_id""")
     bad = con.execute("SELECT COUNT(*) FROM mart_event_kpis k JOIN did_significance s USING (window_days, include_tentative, event_id) WHERE ABS(k.diff_in_diff_opp_rate - s.did) > 1e-9").fetchone()[0]

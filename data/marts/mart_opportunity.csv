@@ -5,102 +5,102 @@ O0003,F037,Secondaries Strategy,2026-06-09,25000000,false,1,5,0,0,5,Committed,20
 O0004,F007,Fund Beta,2026-04-09,75000000,false,1,3,0,0,3,Declined,2026-06-14,2026-05-20,,2026-06-14,Declined,,true,false,false,Investor Firm 07,Foundation,Tier 2,APAC,E001,28,Event-associated (90d)
 O0005,F006,Fund Beta,2026-07-02,150000000,false,1,4,0,0,4,IC / Documentation,2026-09-17,2026-08-24,,,Open,,true,false,false,Investor Firm 06,Asset Manager,Tier 1,APAC,E003,16,Event-associated (90d)
 O0006,F054,Secondaries Strategy,2026-05-02,5000000,false,1,5,0,0,5,Committed,2026-06-25,2026-06-25,2026-06-25,,Committed,54,true,false,false,Investor Firm 54,Pension,Tier 1,EMEA,,,No confirmed attendance
-O0007,F010,Fund Alpha,2026-03-05,10000000,false,1,4,0,1,4,Declined,2026-07-09,2026-05-05,,2026-07-09,Declined,,true,false,false,Investor Firm 10,Insurance,Tier 2,EMEA,,,"Attendee, outside window"
-O0008,F036,Credit Strategy,2026-08-06,15000000,false,1,3,0,0,3,Due Diligence,2026-09-22,2026-09-22,,,Open,,true,false,false,Investor Firm 36,Insurance,Tier 1,Americas,,,"Attendee, outside window"
+O0007,F010,Fund Alpha,2026-03-05,10000000,false,1,4,0,1,4,Declined,2026-07-09,2026-05-05,,2026-07-09,Declined,,true,false,false,Investor Firm 10,Insurance,Tier 2,EMEA,,,"Attendee, not in window"
+O0008,F036,Credit Strategy,2026-08-06,15000000,false,1,3,0,0,3,Due Diligence,2026-09-22,2026-09-22,,,Open,,true,false,false,Investor Firm 36,Insurance,Tier 1,Americas,,,"Attendee, not in window"
 O0009,F029,Fund Beta,2026-05-09,75000000,false,1,2,0,0,2,Follow-up / VDR,2026-06-22,,,,Open,,false,false,false,Investor Firm 29,Sovereign Wealth,Tier 2,Americas,E001,58,Event-associated (90d)
 O0010,F029,Credit Strategy,2026-07-15,150000000,false,1,4,2,0,3,Due Diligence,2026-09-20,2026-09-20,,,Open,,true,false,false,Investor Firm 29,Sovereign Wealth,Tier 2,Americas,E002,55,Event-associated (90d)
-O0011,F024,Secondaries Strategy,2026-01-24,75000000,false,1,5,0,0,5,Committed,2026-03-17,2026-03-02,2026-03-17,,Committed,52,true,false,false,Investor Firm 24,Sovereign Wealth,Tier 2,Americas,,,"Attendee, outside window"
+O0011,F024,Secondaries Strategy,2026-01-24,75000000,false,1,5,0,0,5,Committed,2026-03-17,2026-03-02,2026-03-17,,Committed,52,true,false,false,Investor Firm 24,Sovereign Wealth,Tier 2,Americas,,,"Attendee, not in window"
 O0012,F004,Credit Strategy,2026-07-12,100000000,false,1,4,0,0,4,IC / Documentation,2026-09-01,2026-08-25,,,Open,,true,false,false,Investor Firm 04,Pension,Tier 1,Americas,,,No confirmed attendance
 O0013,F047,Fund Beta,2026-06-27,2500000,true,1,2,0,0,2,Follow-up / VDR,2026-07-31,,,,Open,,false,false,false,Investor Firm 47,Pension,Tier 3,Americas,E002,37,Event-associated (90d)
-O0014,F059,Fund Beta,2026-07-23,5000000,false,1,2,0,0,2,Follow-up / VDR,2026-09-01,,,,Open,,false,false,false,Investor Firm 59,Foundation,Tier 1,Americas,,,"Attendee, outside window"
+O0014,F059,Fund Beta,2026-07-23,5000000,false,1,2,0,0,2,Follow-up / VDR,2026-09-01,,,,Open,,false,false,false,Investor Firm 59,Foundation,Tier 1,Americas,,,"Attendee, not in window"
 O0015,F011,Fund Gamma,2026-03-24,150000000,false,1,4,0,1,4,IC / Documentation,2026-05-25,2026-05-04,,,Open,,true,false,false,Investor Firm 11,Asset Manager,Tier 3,Americas,,,No confirmed attendance
 O0016,F017,Fund Beta,2026-06-07,100000000,false,1,3,0,0,3,Due Diligence,2026-07-04,2026-07-04,,,Open,,true,false,false,Investor Firm 17,Insurance,Tier 3,Americas,E002,17,Event-associated (90d)
 O0017,F041,Credit Strategy,2026-03-13,650000000,false,1,5,0,0,5,Committed,2026-05-16,2026-05-16,2026-05-16,,Committed,64,true,false,true,Investor Firm 41,Foundation,Tier 2,APAC,,,No confirmed attendance
 O0018,F041,Credit Strategy,2026-08-08,25000000,false,1,3,2,0,1,Initial Conversation,2026-08-31,,,,Open,,false,false,false,Investor Firm 41,Foundation,Tier 2,APAC,,,No confirmed attendance
 O0019,F035,Fund Gamma,2026-06-11,40000000,false,1,3,0,0,3,Due Diligence,2026-07-29,2026-07-29,,,Open,,true,false,false,Investor Firm 35,Sovereign Wealth,Tier 3,Americas,,,No confirmed attendance
 O0020,F049,Fund Beta,2026-01-21,75000000,false,1,2,0,0,2,Follow-up / VDR,2026-02-24,,,,Open,,false,false,false,Investor Firm 49,Insurance,Tier 2,APAC,,,No confirmed attendance
-O0021,F034,Secondaries Strategy,2026-03-06,15000000,false,1,4,0,1,4,IC / Documentation,2026-05-21,2026-04-23,,,Open,,true,false,false,Investor Firm 34,Family Office,Tier 2,APAC,,,"Attendee, outside window"
+O0021,F034,Secondaries Strategy,2026-03-06,15000000,false,1,4,0,1,4,IC / Documentation,2026-05-21,2026-04-23,,,Open,,true,false,false,Investor Firm 34,Family Office,Tier 2,APAC,,,"Attendee, not in window"
 O0022,F019,Credit Strategy,2026-06-07,40000000,false,1,3,0,0,3,Due Diligence,2026-07-12,2026-07-12,,,Open,,true,false,false,Investor Firm 19,Foundation,Tier 2,Americas,E002,17,Event-associated (90d)
-O0023,F042,Fund Alpha,2026-01-12,1500000,true,1,5,0,0,5,Committed,2026-02-27,2026-02-27,2026-02-27,,Committed,46,true,false,false,Investor Firm 42,Asset Manager,Tier 2,EMEA,,,"Attendee, outside window"
+O0023,F042,Fund Alpha,2026-01-12,1500000,true,1,5,0,0,5,Committed,2026-02-27,2026-02-27,2026-02-27,,Committed,46,true,false,false,Investor Firm 42,Asset Manager,Tier 2,EMEA,,,"Attendee, not in window"
 O0024,F027,Secondaries Strategy,2026-05-30,15000000,false,1,2,0,0,2,Follow-up / VDR,2026-07-09,,,,Open,,false,false,false,Investor Firm 27,Asset Manager,Tier 3,EMEA,E001,79,Event-associated (90d)
 O0025,F011,Fund Beta,2026-02-04,1500000,true,1,4,0,0,4,Declined,2026-04-17,2026-03-10,,2026-04-17,Declined,,true,false,false,Investor Firm 11,Asset Manager,Tier 3,Americas,,,No confirmed attendance
 O0026,F052,Fund Alpha,2026-03-09,1500000,true,1,4,0,0,4,IC / Documentation,2026-06-04,2026-05-10,,,Open,,true,false,false,Investor Firm 52,Insurance,Tier 1,APAC,,,No confirmed attendance
 O0027,F039,Fund Beta,2026-05-13,75000000,false,1,2,0,0,2,Declined,2026-05-29,,,2026-05-29,Declined,,false,false,false,Investor Firm 39,Family Office,Tier 2,Americas,E001,62,Event-associated (90d)
-O0028,F012,Fund Alpha,2026-03-02,5000000,false,1,4,0,1,4,IC / Documentation,2026-04-30,2026-04-08,,,Open,,true,false,false,Investor Firm 12,Asset Manager,Tier 2,EMEA,,,"Attendee, outside window"
-O0029,F010,Secondaries Strategy,2026-04-16,10000000,false,1,4,0,0,4,IC / Documentation,2026-07-14,2026-06-26,,,Open,,true,false,false,Investor Firm 10,Insurance,Tier 2,EMEA,,,"Attendee, outside window"
-O0030,F012,Fund Alpha,2026-05-11,15000000,false,1,3,0,0,3,Due Diligence,2026-07-14,2026-07-14,,,Open,,true,false,false,Investor Firm 12,Asset Manager,Tier 2,EMEA,,,"Attendee, outside window"
+O0028,F012,Fund Alpha,2026-03-02,5000000,false,1,4,0,1,4,IC / Documentation,2026-04-30,2026-04-08,,,Open,,true,false,false,Investor Firm 12,Asset Manager,Tier 2,EMEA,,,"Attendee, not in window"
+O0029,F010,Secondaries Strategy,2026-04-16,10000000,false,1,4,0,0,4,IC / Documentation,2026-07-14,2026-06-26,,,Open,,true,false,false,Investor Firm 10,Insurance,Tier 2,EMEA,,,"Attendee, not in window"
+O0030,F012,Fund Alpha,2026-05-11,15000000,false,1,3,0,0,3,Due Diligence,2026-07-14,2026-07-14,,,Open,,true,false,false,Investor Firm 12,Asset Manager,Tier 2,EMEA,,,"Attendee, not in window"
 O0031,F035,Credit Strategy,2026-01-02,40000000,false,1,4,0,0,4,IC / Documentation,2026-03-22,2026-02-25,,,Open,,true,false,false,Investor Firm 35,Sovereign Wealth,Tier 3,Americas,,,No confirmed attendance
-O0032,F015,Fund Beta,2026-01-27,15000000,false,1,4,0,0,4,IC / Documentation,2026-04-15,2026-03-19,,,Open,,true,false,false,Investor Firm 15,Asset Manager,Tier 2,EMEA,,,"Attendee, outside window"
+O0032,F015,Fund Beta,2026-01-27,15000000,false,1,4,0,0,4,IC / Documentation,2026-04-15,2026-03-19,,,Open,,true,false,false,Investor Firm 15,Asset Manager,Tier 2,EMEA,,,"Attendee, not in window"
 O0033,F017,Fund Gamma,2026-07-02,1500000,true,1,4,1,0,3,Due Diligence,2026-09-10,2026-09-10,,,Open,,true,false,false,Investor Firm 17,Insurance,Tier 3,Americas,E003,16,Event-associated (90d)
 O0034,F017,Fund Alpha,2026-03-17,10000000,false,1,4,0,1,4,IC / Documentation,2026-04-26,2026-04-14,,,Open,,true,false,false,Investor Firm 17,Insurance,Tier 3,Americas,E001,5,Event-associated (90d)
 O0035,F011,Fund Beta,2026-07-11,25000000,false,1,4,0,1,4,IC / Documentation,2026-09-17,2026-08-31,,,Open,,true,false,false,Investor Firm 11,Asset Manager,Tier 3,Americas,,,No confirmed attendance
-O0036,F043,Credit Strategy,2026-08-04,100000000,false,1,3,1,0,2,Follow-up / VDR,2026-09-21,,,,Open,,false,false,false,Investor Firm 43,Pension,Tier 2,Americas,,,"Attendee, outside window"
+O0036,F043,Credit Strategy,2026-08-04,100000000,false,1,3,1,0,2,Follow-up / VDR,2026-09-21,,,,Open,,false,false,false,Investor Firm 43,Pension,Tier 2,Americas,,,"Attendee, not in window"
 O0037,F028,Secondaries Strategy,2026-07-05,10000000,false,1,5,2,1,3,Due Diligence,2026-09-01,2026-09-01,,,Open,,true,false,false,Investor Firm 08 Holdings,Foundation,Tier 2,Americas,,,No confirmed attendance
-O0038,F003,Fund Alpha,2026-01-07,2500000,true,1,5,0,0,5,Committed,2026-03-16,2026-02-11,2026-03-16,,Committed,68,true,false,false,Investor Firm 03,Family Office,Tier 2,Americas,,,"Attendee, outside window"
-O0039,F045,Fund Alpha,2026-06-14,1500000,true,1,4,0,0,4,IC / Documentation,2026-08-28,2026-08-12,,,Open,,true,false,false,Investor Firm 45,Insurance,Tier 1,Americas,,,"Attendee, outside window"
+O0038,F003,Fund Alpha,2026-01-07,2500000,true,1,5,0,0,5,Committed,2026-03-16,2026-02-11,2026-03-16,,Committed,68,true,false,false,Investor Firm 03,Family Office,Tier 2,Americas,,,"Attendee, not in window"
+O0039,F045,Fund Alpha,2026-06-14,1500000,true,1,4,0,0,4,IC / Documentation,2026-08-28,2026-08-12,,,Open,,true,false,false,Investor Firm 45,Insurance,Tier 1,Americas,,,"Attendee, not in window"
 O0040,F053,Credit Strategy,2026-05-17,2500000,true,1,5,0,0,5,Committed,2026-06-14,2026-06-14,2026-06-14,,Committed,28,true,false,false,Investor Firm 53,Family Office,Tier 2,APAC,E001,66,Event-associated (90d)
-O0041,F053,Credit Strategy,2026-07-12,15000000,false,1,2,0,0,2,Follow-up / VDR,2026-08-19,,,,Open,,false,false,false,Investor Firm 53,Family Office,Tier 2,APAC,,,"Attendee, outside window"
+O0041,F053,Credit Strategy,2026-07-12,15000000,false,1,2,0,0,2,Follow-up / VDR,2026-08-19,,,,Open,,false,false,false,Investor Firm 53,Family Office,Tier 2,APAC,,,"Attendee, not in window"
 O0042,F014,Fund Gamma,2026-03-17,25000000,false,1,3,0,0,3,Due Diligence,2026-04-20,2026-04-20,,,Open,,true,false,false,Investor Firm 14,Pension,Tier 2,APAC,,,No confirmed attendance
 O0043,F004,Fund Gamma,2026-07-03,25000000,false,1,4,0,0,4,IC / Documentation,2026-09-20,2026-09-06,,,Open,,true,false,false,Investor Firm 04,Pension,Tier 1,Americas,,,No confirmed attendance
 O0044,F002,Fund Alpha,2026-07-21,40000000,false,1,3,0,0,3,Due Diligence,2026-09-12,2026-09-12,,,Open,,true,false,false,Investor Firm 02,Pension,Tier 1,Americas,E002,61,Event-associated (90d)
 O0045,F004,Fund Beta,2026-05-18,150000000,false,1,4,0,0,4,IC / Documentation,2026-07-11,2026-07-01,,,Open,,true,false,false,Investor Firm 04,Pension,Tier 1,Americas,,,No confirmed attendance
-O0046,F034,Fund Alpha,2026-02-21,15000000,false,1,2,0,0,2,Follow-up / VDR,2026-03-21,,,,Open,,false,false,false,Investor Firm 34,Family Office,Tier 2,APAC,,,"Attendee, outside window"
-O0047,F051,Credit Strategy,2026-07-31,5000000,false,1,3,1,0,2,Follow-up / VDR,2026-09-03,,,,Open,,false,false,false,Investor Firm 51,Sovereign Wealth,Tier 2,Americas,,,"Attendee, outside window"
+O0046,F034,Fund Alpha,2026-02-21,15000000,false,1,2,0,0,2,Follow-up / VDR,2026-03-21,,,,Open,,false,false,false,Investor Firm 34,Family Office,Tier 2,APAC,,,"Attendee, not in window"
+O0047,F051,Credit Strategy,2026-07-31,5000000,false,1,3,1,0,2,Follow-up / VDR,2026-09-03,,,,Open,,false,false,false,Investor Firm 51,Sovereign Wealth,Tier 2,Americas,,,"Attendee, not in window"
 O0048,F019,Fund Beta,2026-07-28,10000000,false,1,5,2,0,2,Follow-up / VDR,2026-08-30,,,,Open,,false,false,false,Investor Firm 19,Foundation,Tier 2,Americas,E002,68,Event-associated (90d)
 O0049,F041,Fund Alpha,2026-03-25,25000000,false,1,3,0,0,3,Due Diligence,2026-05-16,2026-05-16,,,Open,,true,false,false,Investor Firm 41,Foundation,Tier 2,APAC,,,No confirmed attendance
-O0050,F042,Fund Beta,2026-01-07,25000000,false,1,5,0,0,5,Committed,2026-04-03,2026-03-09,2026-04-03,,Committed,86,true,false,false,Investor Firm 42,Asset Manager,Tier 2,EMEA,,,"Attendee, outside window"
-O0051,F030,Secondaries Strategy,2026-02-02,100000000,false,1,4,0,0,4,IC / Documentation,2026-04-27,2026-04-21,,,Open,,true,false,false,Investor Firm 30,Sovereign Wealth,Tier 1,Americas,,,"Attendee, outside window"
+O0050,F042,Fund Beta,2026-01-07,25000000,false,1,5,0,0,5,Committed,2026-04-03,2026-03-09,2026-04-03,,Committed,86,true,false,false,Investor Firm 42,Asset Manager,Tier 2,EMEA,,,"Attendee, not in window"
+O0051,F030,Secondaries Strategy,2026-02-02,100000000,false,1,4,0,0,4,IC / Documentation,2026-04-27,2026-04-21,,,Open,,true,false,false,Investor Firm 30,Sovereign Wealth,Tier 1,Americas,,,"Attendee, not in window"
 O0052,F021,Credit Strategy,2026-05-14,5000000,false,1,4,0,0,4,IC / Documentation,2026-07-25,2026-07-06,,,Open,,true,false,false,Investor Firm 21,Insurance,Tier 3,Americas,,,No confirmed attendance
-O0053,F050,Fund Beta,2026-03-07,150000000,false,1,2,0,0,2,Follow-up / VDR,2026-04-20,,,,Open,,false,false,false,Investor Firm 50,Family Office,Tier 2,EMEA,,,"Attendee, outside window"
-O0054,F016,Fund Gamma,2026-05-10,10000000,false,1,3,0,0,3,Due Diligence,2026-07-09,2026-07-09,,,Open,,true,false,false,Investor Firm 16,Asset Manager,Tier 3,EMEA,,,"Attendee, outside window"
+O0053,F050,Fund Beta,2026-03-07,150000000,false,1,2,0,0,2,Follow-up / VDR,2026-04-20,,,,Open,,false,false,false,Investor Firm 50,Family Office,Tier 2,EMEA,,,"Attendee, not in window"
+O0054,F016,Fund Gamma,2026-05-10,10000000,false,1,3,0,0,3,Due Diligence,2026-07-09,2026-07-09,,,Open,,true,false,false,Investor Firm 16,Asset Manager,Tier 3,EMEA,,,"Attendee, not in window"
 O0055,F016,Secondaries Strategy,2026-07-05,25000000,false,1,3,0,0,3,Due Diligence,2026-08-11,2026-08-11,,,Open,,true,false,false,Investor Firm 16,Asset Manager,Tier 3,EMEA,E003,19,Event-associated (90d)
 O0056,F017,Fund Beta,2026-07-06,2500000,true,1,4,0,1,4,IC / Documentation,2026-08-20,2026-08-11,,,Open,,true,false,false,Investor Firm 17,Insurance,Tier 3,Americas,E003,20,Event-associated (90d)
 O0057,F047,Fund Gamma,2026-03-18,40000000,false,1,2,0,0,2,Follow-up / VDR,2026-04-20,,,,Open,,false,false,false,Investor Firm 47,Pension,Tier 3,Americas,E001,6,Event-associated (90d)
 O0058,F057,Fund Alpha,2026-04-10,75000000,false,1,2,0,0,2,Follow-up / VDR,2026-05-28,,,,Open,,false,false,false,Investor Firm 57,Family Office,Tier 2,EMEA,E001,29,Event-associated (90d)
 O0059,F033,Credit Strategy,2026-06-11,15000000,false,1,2,0,0,2,Follow-up / VDR,2026-07-18,,,,Open,,false,false,false,Investor Firm 33,Family Office,Tier 3,APAC,E002,21,Event-associated (90d)
 O0060,F001,Credit Strategy,2026-07-09,10000000,false,1,4,1,0,3,Due Diligence,2026-09-23,2026-09-23,,,Open,,true,false,false,Investor Firm 01,Family Office,Tier 3,APAC,E003,23,Event-associated (90d)
-O0061,F043,Fund Beta,2026-07-04,150000000,false,1,4,0,0,4,IC / Documentation,2026-09-12,2026-08-25,,,Open,,true,false,false,Investor Firm 43,Pension,Tier 2,Americas,,,"Attendee, outside window"
+O0061,F043,Fund Beta,2026-07-04,150000000,false,1,4,0,0,4,IC / Documentation,2026-09-12,2026-08-25,,,Open,,true,false,false,Investor Firm 43,Pension,Tier 2,Americas,,,"Attendee, not in window"
 O0062,F041,Credit Strategy,2026-06-29,2500000,true,1,2,0,0,2,Follow-up / VDR,2026-08-12,,,,Open,,false,false,false,Investor Firm 41,Foundation,Tier 2,APAC,,,No confirmed attendance
 O0063,F011,Credit Strategy,2026-03-06,40000000,false,1,3,0,0,3,Due Diligence,2026-05-08,2026-05-08,,,Open,,true,false,false,Investor Firm 11,Asset Manager,Tier 3,Americas,,,No confirmed attendance
 O0064,F060,Fund Gamma,2026-08-12,5000000,false,1,4,2,0,2,Follow-up / VDR,2026-09-18,,,,Open,,false,false,false,Investor Firm 60,Sovereign Wealth,Tier 2,Americas,E002,83,Event-associated (90d)
 O0065,F014,Secondaries Strategy,2026-02-11,10000000,false,1,3,0,0,3,Due Diligence,2026-04-16,2026-04-16,,,Open,,true,false,false,Investor Firm 14,Pension,Tier 2,APAC,,,No confirmed attendance
 O0066,F031,Fund Gamma,2026-05-12,1500000,true,1,3,0,0,3,Due Diligence,2026-07-16,2026-07-16,,,Open,,true,false,false,Investor Firm 31,Foundation,Tier 1,EMEA,E001,61,Event-associated (90d)
-O0067,F044,Secondaries Strategy,2026-02-17,40000000,false,1,4,0,0,4,IC / Documentation,2026-05-04,2026-04-18,,,Open,,true,false,false,Investor Firm 44,Insurance,Tier 1,EMEA,,,"Attendee, outside window"
+O0067,F044,Secondaries Strategy,2026-02-17,40000000,false,1,4,0,0,4,IC / Documentation,2026-05-04,2026-04-18,,,Open,,true,false,false,Investor Firm 44,Insurance,Tier 1,EMEA,,,"Attendee, not in window"
 O0068,F017,Credit Strategy,2026-03-12,40000000,false,1,2,0,0,2,Follow-up / VDR,2026-04-06,,,,Open,,false,false,false,Investor Firm 17,Insurance,Tier 3,Americas,E001,0,Event-associated (90d)
 O0069,F041,Secondaries Strategy,2026-06-28,25000000,false,1,3,0,0,3,Due Diligence,2026-08-21,2026-08-21,,,Open,,true,false,false,Investor Firm 41,Foundation,Tier 2,APAC,,,No confirmed attendance
-O0070,F034,Credit Strategy,2026-02-26,40000000,false,1,5,0,0,5,Committed,2026-04-30,2026-04-30,2026-04-30,,Committed,63,true,false,false,Investor Firm 34,Family Office,Tier 2,APAC,,,"Attendee, outside window"
-O0071,F031,Fund Beta,2026-06-14,100000000,false,1,4,0,0,4,IC / Documentation,2026-08-29,2026-08-04,,,Open,,true,false,false,Investor Firm 31,Foundation,Tier 1,EMEA,,,"Attendee, outside window"
-O0072,F051,Credit Strategy,2026-07-28,40000000,false,1,4,2,1,2,Follow-up / VDR,2026-09-17,,,,Open,,false,false,false,Investor Firm 51,Sovereign Wealth,Tier 2,Americas,,,"Attendee, outside window"
-O0073,F023,Fund Gamma,2026-07-20,10000000,false,1,4,1,0,3,Due Diligence,2026-09-15,2026-09-15,,,Open,,true,false,false,Investor Firm 23,Family Office,Tier 2,APAC,,,"Attendee, outside window"
+O0070,F034,Credit Strategy,2026-02-26,40000000,false,1,5,0,0,5,Committed,2026-04-30,2026-04-30,2026-04-30,,Committed,63,true,false,false,Investor Firm 34,Family Office,Tier 2,APAC,,,"Attendee, not in window"
+O0071,F031,Fund Beta,2026-06-14,100000000,false,1,4,0,0,4,IC / Documentation,2026-08-29,2026-08-04,,,Open,,true,false,false,Investor Firm 31,Foundation,Tier 1,EMEA,,,"Attendee, not in window"
+O0072,F051,Credit Strategy,2026-07-28,40000000,false,1,4,2,1,2,Follow-up / VDR,2026-09-17,,,,Open,,false,false,false,Investor Firm 51,Sovereign Wealth,Tier 2,Americas,,,"Attendee, not in window"
+O0073,F023,Fund Gamma,2026-07-20,10000000,false,1,4,1,0,3,Due Diligence,2026-09-15,2026-09-15,,,Open,,true,false,false,Investor Firm 23,Family Office,Tier 2,APAC,,,"Attendee, not in window"
 O0074,F001,Fund Gamma,2026-07-26,15000000,false,1,2,0,0,2,Follow-up / VDR,2026-08-24,,,,Open,,false,false,false,Investor Firm 01,Family Office,Tier 3,APAC,E003,40,Event-associated (90d)
 O0075,F028,Fund Gamma,2026-06-09,2500000,true,1,2,0,0,2,Declined,2026-08-02,,,2026-08-02,Declined,,false,false,false,Investor Firm 08 Holdings,Foundation,Tier 2,Americas,,,No confirmed attendance
-O0076,F051,Fund Gamma,2026-02-05,100000000,false,1,4,0,0,4,IC / Documentation,2026-03-24,2026-03-13,,,Open,,true,false,false,Investor Firm 51,Sovereign Wealth,Tier 2,Americas,,,"Attendee, outside window"
-O0077,F042,Secondaries Strategy,2026-03-17,15000000,false,1,2,0,0,2,Follow-up / VDR,2026-04-07,,,,Open,,false,false,false,Investor Firm 42,Asset Manager,Tier 2,EMEA,,,"Attendee, outside window"
+O0076,F051,Fund Gamma,2026-02-05,100000000,false,1,4,0,0,4,IC / Documentation,2026-03-24,2026-03-13,,,Open,,true,false,false,Investor Firm 51,Sovereign Wealth,Tier 2,Americas,,,"Attendee, not in window"
+O0077,F042,Secondaries Strategy,2026-03-17,15000000,false,1,2,0,0,2,Follow-up / VDR,2026-04-07,,,,Open,,false,false,false,Investor Firm 42,Asset Manager,Tier 2,EMEA,,,"Attendee, not in window"
 O0078,F029,Fund Beta,2026-03-30,5000000,false,1,4,0,1,4,IC / Documentation,2026-06-24,2026-05-31,,,Open,,true,false,false,Investor Firm 29,Sovereign Wealth,Tier 2,Americas,E001,18,Event-associated (90d)
-O0079,F051,Fund Gamma,2026-01-24,100000000,false,1,2,0,0,2,Follow-up / VDR,2026-03-03,,,,Open,,false,false,false,Investor Firm 51,Sovereign Wealth,Tier 2,Americas,,,"Attendee, outside window"
+O0079,F051,Fund Gamma,2026-01-24,100000000,false,1,2,0,0,2,Follow-up / VDR,2026-03-03,,,,Open,,false,false,false,Investor Firm 51,Sovereign Wealth,Tier 2,Americas,,,"Attendee, not in window"
 O0080,F048,Fund Alpha,2026-08-03,75000000,false,1,3,0,0,3,Due Diligence,2026-09-15,2026-09-15,,,Open,,true,false,false,Investor Firm 48,Pension,Tier 3,EMEA,E003,48,Event-associated (90d)
 O0081,F031,Fund Alpha,2026-05-07,100000000,false,1,3,0,0,3,Due Diligence,2026-07-02,2026-07-02,,,Open,,true,false,false,Investor Firm 31,Foundation,Tier 1,EMEA,E001,56,Event-associated (90d)
 O0082,F011,Fund Alpha,2026-05-19,150000000,false,1,2,0,0,2,Follow-up / VDR,2026-06-22,,,,Open,,false,false,false,Investor Firm 11,Asset Manager,Tier 3,Americas,,,No confirmed attendance
 O0083,F032,Credit Strategy,2026-06-20,15000000,false,1,3,0,0,3,Due Diligence,2026-08-10,2026-08-10,,,Open,,true,false,false,Investor Firm 32,Pension,Tier 1,APAC,,,No confirmed attendance
 O0084,F024,Fund Alpha,2026-06-12,1500000,true,1,4,0,0,4,IC / Documentation,2026-09-19,2026-08-20,,,Open,,true,false,false,Investor Firm 24,Sovereign Wealth,Tier 2,Americas,E002,22,Event-associated (90d)
-O0085,F033,Fund Beta,2026-05-04,75000000,false,1,2,0,0,2,Follow-up / VDR,2026-06-18,,,,Open,,false,false,false,Investor Firm 33,Family Office,Tier 3,APAC,,,"Attendee, outside window"
-O0086,F022,Fund Gamma,2026-01-25,25000000,false,1,3,0,0,3,Due Diligence,2026-04-07,2026-04-07,,,Open,,true,false,false,Investor Firm 22,Foundation,Tier 1,APAC,,,"Attendee, outside window"
-O0087,F019,Credit Strategy,2026-04-22,25000000,false,1,3,0,0,3,Due Diligence,2026-05-26,2026-05-26,,,Open,,true,false,false,Investor Firm 19,Foundation,Tier 2,Americas,,,"Attendee, outside window"
+O0085,F033,Fund Beta,2026-05-04,75000000,false,1,2,0,0,2,Follow-up / VDR,2026-06-18,,,,Open,,false,false,false,Investor Firm 33,Family Office,Tier 3,APAC,,,"Attendee, not in window"
+O0086,F022,Fund Gamma,2026-01-25,25000000,false,1,3,0,0,3,Due Diligence,2026-04-07,2026-04-07,,,Open,,true,false,false,Investor Firm 22,Foundation,Tier 1,APAC,,,"Attendee, not in window"
+O0087,F019,Credit Strategy,2026-04-22,25000000,false,1,3,0,0,3,Due Diligence,2026-05-26,2026-05-26,,,Open,,true,false,false,Investor Firm 19,Foundation,Tier 2,Americas,,,"Attendee, not in window"
 O0088,F032,Secondaries Strategy,2026-04-14,25000000,false,1,4,0,1,4,IC / Documentation,2026-06-26,2026-06-01,,,Open,,true,false,false,Investor Firm 32,Pension,Tier 1,APAC,,,No confirmed attendance
-O0089,F022,Fund Gamma,2026-02-19,25000000,false,1,2,0,0,2,Follow-up / VDR,2026-03-23,,,,Open,,false,false,false,Investor Firm 22,Foundation,Tier 1,APAC,,,"Attendee, outside window"
-O0090,F003,Credit Strategy,2026-04-13,100000000,false,1,5,0,0,5,Committed,2026-05-26,2026-05-20,2026-05-26,,Committed,43,true,false,false,Investor Firm 03,Family Office,Tier 2,Americas,,,"Attendee, outside window"
+O0089,F022,Fund Gamma,2026-02-19,25000000,false,1,2,0,0,2,Follow-up / VDR,2026-03-23,,,,Open,,false,false,false,Investor Firm 22,Foundation,Tier 1,APAC,,,"Attendee, not in window"
+O0090,F003,Credit Strategy,2026-04-13,100000000,false,1,5,0,0,5,Committed,2026-05-26,2026-05-20,2026-05-26,,Committed,43,true,false,false,Investor Firm 03,Family Office,Tier 2,Americas,,,"Attendee, not in window"
 O0091,F053,Fund Alpha,2026-05-02,150000000,false,1,5,0,0,5,Committed,2026-08-21,2026-07-04,2026-08-21,,Committed,111,true,false,false,Investor Firm 53,Family Office,Tier 2,APAC,E001,51,Event-associated (90d)
 O0092,F014,Fund Beta,2026-01-11,75000000,false,1,2,0,0,2,Follow-up / VDR,2026-01-27,,,,Open,,false,false,false,Investor Firm 14,Pension,Tier 2,APAC,,,No confirmed attendance
 O0093,F007,Fund Gamma,2026-06-17,1500000,true,1,4,0,1,4,IC / Documentation,2026-08-31,2026-08-09,,,Open,,true,false,false,Investor Firm 07,Foundation,Tier 2,APAC,E002,27,Event-associated (90d)
 O0094,F020,Fund Alpha,2026-02-17,40000000,false,1,3,0,0,3,Due Diligence,2026-04-24,2026-04-24,,,Open,,true,false,false,Investor Firm 20,Pension,Tier 2,EMEA,,,No confirmed attendance
-O0095,F059,Secondaries Strategy,2026-01-14,75000000,false,1,3,0,0,3,Due Diligence,2026-03-22,2026-03-22,,,Open,,true,false,false,Investor Firm 59,Foundation,Tier 1,Americas,,,"Attendee, outside window"
+O0095,F059,Secondaries Strategy,2026-01-14,75000000,false,1,3,0,0,3,Due Diligence,2026-03-22,2026-03-22,,,Open,,true,false,false,Investor Firm 59,Foundation,Tier 1,Americas,,,"Attendee, not in window"
 O0096,F045,Fund Alpha,2026-04-14,75000000,false,1,2,0,0,2,Follow-up / VDR,2026-05-25,,,,Open,,false,false,false,Investor Firm 45,Insurance,Tier 1,Americas,E001,33,Event-associated (90d)
-O0097,F043,Credit Strategy,2026-02-09,75000000,false,1,3,0,0,3,Due Diligence,2026-04-02,2026-04-02,,,Open,,true,false,false,Investor Firm 43,Pension,Tier 2,Americas,,,"Attendee, outside window"
-O0098,F010,Credit Strategy,2026-06-10,1500000,true,1,5,0,0,5,Committed,2026-08-08,2026-08-08,2026-08-08,,Committed,59,true,false,false,Investor Firm 10,Insurance,Tier 2,EMEA,,,"Attendee, outside window"
-O0099,F056,Credit Strategy,2026-02-01,5000000,false,1,2,0,0,2,Follow-up / VDR,2026-03-24,,,,Open,,false,false,false,Investor Firm 56,Family Office,Tier 3,APAC,,,"Attendee, outside window"
+O0097,F043,Credit Strategy,2026-02-09,75000000,false,1,3,0,0,3,Due Diligence,2026-04-02,2026-04-02,,,Open,,true,false,false,Investor Firm 43,Pension,Tier 2,Americas,,,"Attendee, not in window"
+O0098,F010,Credit Strategy,2026-06-10,1500000,true,1,5,0,0,5,Committed,2026-08-08,2026-08-08,2026-08-08,,Committed,59,true,false,false,Investor Firm 10,Insurance,Tier 2,EMEA,,,"Attendee, not in window"
+O0099,F056,Credit Strategy,2026-02-01,5000000,false,1,2,0,0,2,Follow-up / VDR,2026-03-24,,,,Open,,false,false,false,Investor Firm 56,Family Office,Tier 3,APAC,,,"Attendee, not in window"
 O0100,F047,Fund Alpha,2026-07-10,5000000,false,1,3,1,0,2,Follow-up / VDR,2026-09-03,,,,Open,,false,false,false,Investor Firm 47,Pension,Tier 3,Americas,E002,50,Event-associated (90d)
 O0101,F047,Fund Gamma,2026-07-14,2500000,true,1,4,1,0,3,Due Diligence,2026-09-18,2026-09-18,,,Open,,true,false,false,Investor Firm 47,Pension,Tier 3,Americas,E002,54,Event-associated (90d)
-O0102,F017,Fund Alpha,2026-01-14,1500000,true,1,2,0,0,2,Follow-up / VDR,2026-03-06,,,,Open,,false,false,false,Investor Firm 17,Insurance,Tier 3,Americas,,,"Attendee, outside window"
+O0102,F017,Fund Alpha,2026-01-14,1500000,true,1,2,0,0,2,Follow-up / VDR,2026-03-06,,,,Open,,false,false,false,Investor Firm 17,Insurance,Tier 3,Americas,,,"Attendee, not in window"
 O0103,F006,Fund Gamma,2026-04-10,15000000,false,1,4,0,0,4,IC / Documentation,2026-06-09,2026-06-03,,,Open,,true,false,false,Investor Firm 06,Asset Manager,Tier 1,APAC,E001,29,Event-associated (90d)
 O0104,F037,Credit Strategy,2026-07-06,75000000,false,1,4,0,0,4,IC / Documentation,2026-09-07,2026-08-22,,,Open,,true,false,false,Investor Firm 37,Sovereign Wealth,Tier 3,EMEA,,,No confirmed attendance
 O0105,F011,Credit Strategy,2026-06-11,40000000,false,1,3,0,0,3,Due Diligence,2026-08-12,2026-08-12,,,Open,,true,false,false,Investor Firm 11,Asset Manager,Tier 3,Americas,,,No confirmed attendance
