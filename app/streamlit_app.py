@@ -58,8 +58,8 @@ div[data-testid="stMetric"] {{ background: #f2f5f7; border: 1px solid #e1e7eb; b
 [data-testid="stMetricLabel"] > span {{ position: absolute; right: 8px; top: 8px; }}
 [data-testid="stMetricLabel"] > div {{ width: auto !important; justify-content: center; }}
 [data-testid="stMetricLabel"] p, [data-testid="stMetricLabel"] div {{ white-space: normal !important; overflow: visible !important; text-overflow: clip !important; text-align: center; }}
-div[data-testid="stMetricValue"] {{ color: {NAVY}; font-weight: 700; justify-content: center; text-align: center; font-size: 1.9rem; }}
-div[data-testid="stMetricValue"] > div {{ text-align: center; width: 100%; }}
+div[data-testid="stMetricValue"] {{ color: {NAVY}; font-weight: 700; justify-content: center; text-align: center; font-size: clamp(1.25rem, 2.1vw, 1.9rem); }}
+div[data-testid="stMetricValue"] > div {{ text-align: center; width: 100%; overflow: visible !important; text-overflow: clip !important; }}
 div[data-testid="stAlert"] p, div[data-testid="stAlert"] li {{ font-size: 14px; line-height: 1.45; margin-bottom: 2px; }}
 div[data-testid="stElementContainer"]:has(> div > div[data-testid="stAlert"]) {{ margin-bottom: -6px; }}
 .stTabs [data-baseweb="tab-list"] {{ gap: 6px; border-bottom: 1px solid #e1e7eb; }}
