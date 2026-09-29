@@ -506,7 +506,7 @@ with tab_x:
         st.markdown(f"**{info.firm_name}** · {info.tier} · {info.segment} · {info.region} · historical commitments {fm(info.historical_commitments_usd)}")
         t = tl[tl.firm_id == pick].copy()
         t["detail"] = t.detail + t.is_projected.map({True: " (projected, after as-of date)", False: ""})
-        st.dataframe(t[["dt", "kind", "detail"]], width="stretch", hide_index=True)
+        st.dataframe(t[["dt", "kind", "detail"]].rename(columns={"dt": "Date", "kind": "Event, Meeting, or Opportunity", "detail": "Description"}), width="stretch", hide_index=True)
         hc = st.columns([3, 1])
         chart_head(hc[0], f"Pipeline dollars by stage, by month: {info.firm_name}", "Month-end snapshot of the selected firm's pipeline dollars, stacked by the stage each opportunity was in. September is as of 09-23; later months (marked *) use projected stages. Event months are marked above the bars.")
         stage_names = {1: "Initial Conversation", 2: "Follow-up / VDR", 3: "Due Diligence", 4: "IC / Documentation", 5: "Committed", 0: "Declined"}
